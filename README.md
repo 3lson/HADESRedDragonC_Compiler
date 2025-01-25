@@ -9,13 +9,17 @@ The dependencies are listed in the [Dockerfile](https://github.com/3lson/HADESRe
 
 ### Usage
 To make the compiler, run the following command:
-`make`
+```bash
+make
+```
 To run the compiler, run the followign commmand, replacing the flags:
 - `-S` for the input file path
 - `-o` for the output file path
 
 So to compile an example program we can:
-`bin/c_compiler -S "./compiler_tests/_example/example.c" -o "./example.s"`
+``bash
+bin/c_compiler -S "./compiler_tests/_example/example.c" -o "./example.s"
+```
 
 ## Credits 
 - [Elson Tho]
