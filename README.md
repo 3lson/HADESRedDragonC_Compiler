@@ -17,7 +17,7 @@ To run the compiler, run the followign commmand, replacing the flags:
 - `-o` for the output file path
 
 So to compile an example program we can:
-``bash
+```bash
 bin/c_compiler -S "./compiler_tests/_example/example.c" -o "./example.s"
 ```
 
