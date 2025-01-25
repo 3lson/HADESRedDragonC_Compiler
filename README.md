@@ -5,7 +5,7 @@ The source language is pre-processed C90, and the target language is RISC-V asse
 ## Getting Started
 
 ### Dependencies
-The dependencies are listed in the ![Dockerfile](https://github.com/3lson/HADESRedDragonC_Compiler/blob/main/Dockerfile)
+The dependencies are listed in the [Dockerfile](https://github.com/3lson/HADESRedDragonC_Compiler/blob/main/Dockerfile)
 
 ### Usage
 To make the compiler, run the following command:
