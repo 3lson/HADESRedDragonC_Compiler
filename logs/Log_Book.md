@@ -3,8 +3,8 @@
 ## Team members
 ||Elson Tho|Ahmed Ali Hamid|
 |---|---|---|
-|**CID:**||02427719|
-|**Github username:**||Avalors|
+|**CID:**|02381489|02427719|
+|**Github username:**|3lson|Avalors|
 
 ## purpose
 - The puropse of this log-book is to document our teams progress on this Compilers project, demonstrating our commitment, effort and time-spent and also providing an accurate reflection of our time-management skills.
