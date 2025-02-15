@@ -6,7 +6,7 @@
 |**CID:**|02381489|02427719|
 |**Github username:**|3lson|Avalors|
 
-## purpose
+## Purpose
 - The puropse of this log-book is to document our teams progress on this Compilers project, demonstrating our commitment, effort and time-spent and also providing an accurate reflection of our time-management skills.
 - Each day's efforts will be briefly described under the corresponding date with associated commits referenced, followed by gantt charts documenting our overall progress at the end of each week.
 - We will embed images demonstrating our team-work and cooperation throughout the project as well demonstrating our unbridled commitment to creating this compiler.
