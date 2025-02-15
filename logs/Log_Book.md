@@ -18,7 +18,7 @@
 
 ### 31/01/2025
   - Began dissection requirements and specification of project by reading the repo documents
-  - Organised the project features in [monday.com](monday.com) seperated by basic, intermediate and advanced features.
+  - Organised the project features in [Jira](https://www.atlassian.com/software/jira?campaign=22164754770&adgroup=172507794645&targetid=kwd-855725830&matchtype=e&network=g&device=c&device_model=&creative=642044761145&keyword=jira&placement=&target=&ds_eid=700000001558501&ds_e1=GOOGLE&gad_source=1&gclid=CjwKCAiAk8G9BhA0EiwAOQxmfqMJyZ9nSJDKApTWyEVDu_iEnuYc3nuD4ZbWXnNVnPoVkTjY2Pn47RoCB9oQAvD_BwE) seperated by basic, intermediate and advanced features.
   - Began setting up repo, creating logs folder and log book page.
   - Running initial test script
 
