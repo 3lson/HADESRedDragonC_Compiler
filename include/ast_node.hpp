@@ -20,7 +20,7 @@ public:
 // as a raw pointer instead here and your project should still compile, although you'll need
 // to add destructors to avoid leaking memory
 // (and get rid of the now unnecessary std::move-s)
-using NodePtr = std::unique_ptr<const Node>;
+using NodePtr = std::unique_ptr<const Node>; //a smart pointer to a node
 
 class NodeList : public Node
 {

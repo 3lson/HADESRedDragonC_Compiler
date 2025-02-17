@@ -39,6 +39,8 @@
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement
 
+%type <node> init_statement selection_statement
+
 %type <node_list> statement_list
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
@@ -77,22 +79,22 @@ type_specifier
 	}
 	;
 
+init_statement
+    : type_specifier IDENTIFIER {
+        $$ = new VariableDefinition($1, NodePtr(new Identifier(std::move(*$2))));
+        delete $2;
+    }
+    ;
+
 declarator
 	: direct_declarator { $$ = $1; }
 	;
 
 direct_declarator
-	: IDENTIFIER {
-		$$ = new Identifier(std::move(*$1));
-		delete $1;
+    : IDENTIFIER '(' ')' {
+		$$ = new DirectDeclarator(NodePtr(new Identifier(std::move(*$1))));
+        delete $1;
 	}
-	| direct_declarator '(' ')' {
-		$$ = new DirectDeclarator(NodePtr($1));
-	}
-	;
-
-statement
-	: jump_statement { $$ = $1; }
 	;
 
 compound_statement
@@ -104,6 +106,13 @@ statement_list
 	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
+statement
+	: jump_statement { $$ = $1; }
+    | init_statement ';' { $$ = $1; }
+    | expression ';' { $$ = $1; }
+	| selection_statement
+	;
+
 jump_statement
 	: RETURN ';' {
 		$$ = new ReturnStatement(nullptr);
@@ -113,8 +122,22 @@ jump_statement
 	}
 	;
 
+selection_statement
+    : IF '(' expression ')' compound_statement {
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr);
+    }
+    | IF '(' expression ')' compound_statement ELSE compound_statement {
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7));
+    }
+    ;
+
+
 primary_expression
-	: INT_CONSTANT {
+    : IDENTIFIER {
+        $$ = new Identifier(std::move(*$1));
+        delete $1;
+	}
+	| INT_CONSTANT {
 		$$ = new IntConstant($1);
 	}
 	;
@@ -177,6 +200,10 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression
+    | IDENTIFIER '=' INT_CONSTANT {
+        $$ = new AssignmentOperator(NodePtr(new IntConstant($3)),NodePtr(new Identifier(std::move(*$1))));
+        delete $1;
+    }
 	;
 
 expression

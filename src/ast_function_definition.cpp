@@ -10,7 +10,7 @@ void FunctionDefinition::EmitRISC(std::ostream& stream, Context& context) const
     stream << ".text" << std::endl;
     stream << ".globl f" << std::endl;
 
-    declarator_->EmitRISC(stream, context);
+    declarator_->EmitRISC(stream, context); //traverses associated branch of tree
 
     if (compound_statement_ != nullptr)
     {

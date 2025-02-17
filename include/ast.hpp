@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ast_direct_declarator.hpp"
 #include "ast_function_definition.hpp"
@@ -12,5 +13,9 @@
 #include "ast_type_specifier.hpp"
 #include "ast_constant.hpp"
 #include "ast_context.hpp"
+#include "ast_assignment_operator.hpp"
+#include "ast_variable_definition.hpp"
+#include "ast_ifelse.hpp"
+
 
 ast::NodePtr ParseAST(std::string file_name);

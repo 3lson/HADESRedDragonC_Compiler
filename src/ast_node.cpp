@@ -9,7 +9,7 @@ void NodeList::PushBack(NodePtr item)
 
 void NodeList::EmitRISC(std::ostream& stream, Context& context) const
 {
-    for (const auto& node : nodes_)
+    for (const auto& node : nodes_) //iterates over nodes
     {
         if (node == nullptr)
         {
