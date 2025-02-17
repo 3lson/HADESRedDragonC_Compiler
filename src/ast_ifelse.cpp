@@ -1,0 +1,39 @@
+#include "ast_ifelse.hpp"
+#include <iostream>
+
+namespace ast {
+
+void IfStatement::EmitRISC(std::ostream& stream, Context& context) const {
+    condition_->EmitRISC(stream, context);
+
+    std::string else_label = "else_" + std::to_string(context.GetifelseLabelCounter());
+    context.IncrementifelseLabelCounter();
+    std::string end_label = "end_if_" + std::to_string(context.GetifelseLabelCounter());
+    context.IncrementifelseLabelCounter();
+
+    stream << "beqz a0, " << else_label << std::endl;
+
+    then_branch_->EmitRISC(stream, context);
+
+    stream << "j " << end_label << std::endl;
+
+    stream << else_label << ":" << std::endl;
+    if (else_branch_) {
+        else_branch_->EmitRISC(stream, context);
+    }
+
+    stream << end_label << ":" << std::endl;
+}
+
+void IfStatement::Print(std::ostream& stream) const {
+    stream << "if (";
+    condition_->Print(stream);
+    stream << ") ";
+    then_branch_->Print(stream);
+    if (else_branch_) {
+        stream << " else ";
+        else_branch_->Print(stream);
+    }
+}
+
+}
