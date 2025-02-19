@@ -16,6 +16,8 @@
 #include "ast_assignment_operator.hpp"
 #include "ast_variable_definition.hpp"
 #include "ast_ifelse.hpp"
+#include "ast_arithmetic_operator.hpp"
+#include "ast_unary.hpp"
 
 
 ast::NodePtr ParseAST(std::string file_name);
