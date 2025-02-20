@@ -47,3 +47,11 @@
 |*img: progress so far on jira project backlog*|
 
 </div>
+
+### 18/02/2025 (2 hours)
+  - Completed most of the arithmetic, bitwise, and logical implementation
+  - Added extra folder `arith_no_params` to test fundamental operations with of functions without parameters (at this stage local vars not implemented yet) (extra 20 test cases)
+
+### 19/02/2025 (2 hours)
+  - Implemented the unary operations
+  - Added extra folder `unary` to test the unary operations (extra 6 test cases)

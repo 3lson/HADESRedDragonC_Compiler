@@ -24,6 +24,7 @@
   std::string*		string;
   TypeSpecifier 	type_specifier;
   yytokentype  		token;
+  ast::UnaryOp      unary_op;
 }
 
 %token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL
@@ -42,6 +43,8 @@
 %type <node> init_statement selection_statement parameter_declarator
 
 %type <node_list> statement_list parameter_list
+
+%type <unary_op> unary_operator
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
@@ -154,10 +157,22 @@ primary_expression
 
 postfix_expression
 	: primary_expression
+    | postfix_expression INC_OP { $$ = new UnaryExpression(ast::UnaryOp::INCREMENT, NodePtr($1)); }
+    | postfix_expression DEC_OP { $$ = new UnaryExpression(ast::UnaryOp::DECREMENT, NodePtr($1)); }
 	;
 
 unary_expression
 	: postfix_expression
+    | INC_OP unary_expression { $$ = new UnaryExpression(ast::UnaryOp::INCREMENT, NodePtr($2)); }
+    | DEC_OP unary_expression { $$ = new UnaryExpression(ast::UnaryOp::DECREMENT, NodePtr($2)); }
+    | unary_operator cast_expression { $$ = new UnaryExpression($1, NodePtr($2)); }
+	;
+
+unary_operator
+	: '+' { $$ = ast::UnaryOp::PLUS; }
+	| '-' { $$ = ast::UnaryOp::MINUS; }
+	| '~' { $$ = ast::UnaryOp::BITWISE_NOT; }
+	| '!' { $$ = ast::UnaryOp::LOGICAL_NOT; }
 	;
 
 cast_expression
@@ -165,44 +180,63 @@ cast_expression
 	;
 
 multiplicative_expression
-	: cast_expression
-	;
+    : cast_expression
+    | multiplicative_expression '*' cast_expression { $$ = new ArithExpression(ArithOp::MUL, NodePtr($1), NodePtr($3)); }
+    | multiplicative_expression '/' cast_expression { $$ = new ArithExpression(ArithOp::DIV, NodePtr($1), NodePtr($3)); }
+    | multiplicative_expression '%' cast_expression { $$ = new ArithExpression(ArithOp::MODULO, NodePtr($1), NodePtr($3)); }
+    ;
 
 additive_expression
-	: multiplicative_expression
-	;
+    : multiplicative_expression
+    | additive_expression '+' multiplicative_expression { $$ = new ArithExpression(ArithOp::ADD, NodePtr($1), NodePtr($3)); }
+    | additive_expression '-' multiplicative_expression { $$ = new ArithExpression(ArithOp::SUB, NodePtr($1), NodePtr($3)); }
+    ;
 
 shift_expression
 	: additive_expression
+    | shift_expression LEFT_OP additive_expression { $$ = new ArithExpression(ArithOp::LEFT_SHIFT, NodePtr($1), NodePtr($3)); }
+	| shift_expression RIGHT_OP additive_expression { $$ = new ArithExpression(ArithOp::RIGHT_SHIFT, NodePtr($1), NodePtr($3)); }
 	;
 
 relational_expression
-	: shift_expression
-	;
+    : additive_expression
+    | relational_expression '<' additive_expression { $$ = new ArithExpression(ArithOp::LESS_THAN, NodePtr($1), NodePtr($3)); }
+    | relational_expression '>' shift_expression { $$ = new ArithExpression(ArithOp::GREATER_THAN, NodePtr($1), NodePtr($3)); }
+    | relational_expression LE_OP shift_expression { $$ = new ArithExpression(ArithOp::LESS_THAN_OR_EQUAL, NodePtr($1), NodePtr($3)); }
+	| relational_expression GE_OP shift_expression { $$ = new ArithExpression(ArithOp::GREATER_THAN_OR_EQUAL, NodePtr($1), NodePtr($3)); }
+
+    ;
 
 equality_expression
-	: relational_expression
-	;
+    : relational_expression
+    | equality_expression EQ_OP relational_expression { $$ = new ArithExpression(ArithOp::EQUAL, NodePtr($1), NodePtr($3)); }
+    | equality_expression NE_OP relational_expression { $$ = new ArithExpression(ArithOp::NOT_EQUAL, NodePtr($1), NodePtr($3)); }
+    ;
 
 and_expression
-	: equality_expression
-	;
+    : equality_expression
+    | and_expression '&' equality_expression { $$ = new ArithExpression(ArithOp::BITWISE_AND, NodePtr($1), NodePtr($3)); }
+    ;
 
 exclusive_or_expression
-	: and_expression
-	;
+    : and_expression
+    | exclusive_or_expression '^' and_expression { $$ = new ArithExpression(ArithOp::BITWISE_XOR, NodePtr($1), NodePtr($3)); }
+    ;
 
 inclusive_or_expression
-	: exclusive_or_expression
-	;
+    : exclusive_or_expression
+    | inclusive_or_expression '|' exclusive_or_expression { $$ = new ArithExpression(ArithOp::BITWISE_OR, NodePtr($1), NodePtr($3)); }
+    ;
 
 logical_and_expression
-	: inclusive_or_expression
-	;
+    : inclusive_or_expression
+    | logical_and_expression AND_OP inclusive_or_expression { $$ = new ArithExpression(ArithOp::LOGICAL_AND, NodePtr($1), NodePtr($3)); }
+    ;
 
 logical_or_expression
-	: logical_and_expression
-	;
+    : logical_and_expression
+    | logical_or_expression OR_OP logical_and_expression { $$ = new ArithExpression(ArithOp::LOGICAL_OR, NodePtr($1), NodePtr($3)); }
+    ;
 
 conditional_expression
 	: logical_or_expression
