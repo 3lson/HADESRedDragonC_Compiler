@@ -11,6 +11,7 @@ void DirectDeclarator::EmitRISC(std::ostream& stream, Context& context) const
 void DirectDeclarator::Print(std::ostream& stream) const
 {
     identifier_->Print(stream);
+    stream << " ( )" ;
 }
 
 } // namespace ast

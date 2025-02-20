@@ -39,9 +39,9 @@
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement
 
-%type <node> init_statement selection_statement
+%type <node> init_statement selection_statement parameter_declarator
 
-%type <node_list> statement_list
+%type <node_list> statement_list parameter_list
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
@@ -86,9 +86,15 @@ init_statement
     }
     ;
 
+parameter_list
+    : init_statement  { $$ = new NodeList(NodePtr($1)); }
+    | parameter_list ',' init_statement { $1->PushBack(NodePtr($3)); $$ = $1; }
+    ;
+
 declarator
 	: direct_declarator { $$ = $1; }
-	;
+	| parameter_declarator { $$ = $1; }
+    ;
 
 direct_declarator
     : IDENTIFIER '(' ')' {
@@ -96,6 +102,10 @@ direct_declarator
         delete $1;
 	}
 	;
+
+parameter_declarator
+    : IDENTIFIER '(' parameter_list ')' { $$ = new ParameterDeclarator(NodePtr(new Identifier(std::move(*$1))), NodePtr($3)); delete $1; }
+    ;
 
 compound_statement
 	: '{' statement_list '}' { $$ = $2; }

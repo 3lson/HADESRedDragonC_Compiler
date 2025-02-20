@@ -14,7 +14,7 @@ void VariableDefinition::Print(std::ostream& stream) const
 {
     stream << declaration_specifiers_ << " ";
     identifier_->Print(stream);
-    stream << std::endl;
+    
 }
 
 } // namespace ast
