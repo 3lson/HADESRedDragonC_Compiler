@@ -3,75 +3,207 @@
 namespace ast{
 
 void ArithExpression::EmitRISC(std::ostream& stream, Context& context) const {
-    left_->EmitRISC(stream, context);  // Compute left operand
-    stream << "mv t1, a0" << std::endl; // Move left result to t1
+    context.SetarithFlag();
 
-    right_->EmitRISC(stream, context); // Compute right operand
-    stream << "mv t2, a0" << std::endl; // Move right result to t2
+    if(context.GetretFlag() == true){
+        context.ResetretFlag();
+        context.SetarithconstinitFlag();
 
-    switch (op_) {
-        case ArithOp::ADD:
-            stream << "add a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::SUB:
-            stream << "sub a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::MUL:
-            stream << "mul a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::DIV:
-            stream << "div a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::MODULO:
-            stream << "rem a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::BITWISE_AND:
-            stream << "and a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::BITWISE_OR:
-            stream << "or a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::BITWISE_XOR:
-            stream << "xor a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::EQUAL:
-            stream << "xor t3, t1, t2" << std::endl;
-            stream << "seqz a0, t3" << std::endl;
-            break;
-        case ArithOp::NOT_EQUAL:
-            stream << "xor t3, t1, t2" << std::endl; // XOR to check inequality
-            stream << "snez a0, t3" << std::endl; // Set a0 to 1 if not equal, else 0
-            break;
-        case ArithOp::LESS_THAN:
-            stream << "slt a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::GREATER_THAN:
-            stream << "sgt a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::LESS_THAN_OR_EQUAL:
-            stream << "slt t3, t2, t1" << std::endl; // t3 = (t2 < t1) -> opposite of t1 <= t2
-            stream << "seqz a0, t3" << std::endl;   // a0 = !(t3)
-            break;
-        case ArithOp::GREATER_THAN_OR_EQUAL:
-            stream << "slt t3, t1, t2" << std::endl; // t3 = (t1 < t2)
-            stream << "seqz a0, t3" << std::endl;   // a0 = !(t3)
-            break;
-        case ArithOp::LOGICAL_AND:
-            stream << "snez t1, t1" << std::endl;
-            stream << "snez t2, t2" << std::endl;
-            stream << "and a0, t1, t2" << std::endl;
-            break;
-        case ArithOp::LOGICAL_OR:
-            stream << "or a0, t1, t2" << std::endl;
-            stream << "snez a0, a0" << std::endl;
-            break;
-        case ArithOp::LEFT_SHIFT:
-            stream << "sll a0, t1, t2" << std::endl;     // Shift Left Logical
-            break;
-        case ArithOp::RIGHT_SHIFT:
-            stream << "srl a0, t1, t2" << std::endl;     // Shift Right Logical
-            break;
+        left_->EmitRISC(stream,context);
+        right_->EmitRISC(stream,context);
+
+        context.ResetarithconstinitFlag();
+        context.SetretFlag();
+
     }
+    else{
+        context.SetarithconstinitFlag();
+
+        left_->EmitRISC(stream,context);
+        right_->EmitRISC(stream,context);
+
+        context.ResetarithconstinitFlag();
+    }
+
+
+    if(context.GetretFlag() == true){
+        std::string retreg;
+        std::string tempreg;
+
+        /*if(context.GetparamFlag() == true){
+            retreg = "a1";
+        }
+        else{
+            retreg = "a0";
+        }*/
+
+        retreg = "a0";
+
+        for(int i = 0; i < 7; i++){
+            if(context.RegisterInUse(std::string("t") + std::to_string(i)) == false){
+                tempreg = std::string("t") + std::to_string(i);
+                break;
+            }
+        }
+
+        context.MapRegister("   ",tempreg);
+
+        switch (op_) {
+            case ArithOp::ADD:
+                stream << "add " << retreg << ", ";
+                break;
+            case ArithOp::SUB:
+                stream << "sub " << retreg << ", ";
+                break;
+            case ArithOp::MUL:
+                stream << "mul" << retreg << ", ";
+                break;
+            case ArithOp::DIV:
+                stream << "div " << retreg << ", ";
+                break;
+            case ArithOp::MODULO:
+                stream << "rem " << retreg <<", ";
+                break;
+            case ArithOp::BITWISE_AND:
+                stream << "and " << retreg << ", ";
+                break;
+            case ArithOp::BITWISE_OR:
+                stream << "or "<< retreg << ", ";
+                break;
+            case ArithOp::BITWISE_XOR:
+                stream << "xor " << retreg << ",";
+                break;
+            case ArithOp::EQUAL:
+                stream << "xor "<< tempreg << ", ";
+                break;
+            case ArithOp::NOT_EQUAL:
+                stream << "xor " << tempreg << ", "; // XOR to check inequality
+                break;
+            case ArithOp::LESS_THAN:
+                stream << "slt " << retreg << ", ";
+                break;
+            case ArithOp::GREATER_THAN:
+                stream << "sgt " << retreg << ", ";
+                break;
+            case ArithOp::LESS_THAN_OR_EQUAL:
+                stream << "slt " << tempreg << ", " << std::endl; // t3 = (t2 < t1) -> opposite of t1 <= t2
+                break;
+            case ArithOp::GREATER_THAN_OR_EQUAL:
+                stream << "slt " << tempreg << ", " << std::endl; // t3 = (t1 < t2)
+                break;
+            case ArithOp::LOGICAL_AND:
+                stream << "snez ";
+                left_->EmitRISC(stream,context);
+                stream << ", ";
+                left_->EmitRISC(stream,context);
+                stream << "snez ";
+                right_->EmitRISC(stream,context);
+                stream << ", ";
+                right_->EmitRISC(stream,context);
+                stream << "and "<< retreg <<", ";
+                break;
+            case ArithOp::LOGICAL_OR:
+                stream << "or "<< retreg <<", ";
+                break;
+            case ArithOp::LEFT_SHIFT:
+                stream << "sll "<< retreg <<", ";   // Shift Left Logical
+                break;
+            case ArithOp::RIGHT_SHIFT:
+                stream << "srl "<< retreg <<", ";    // Shift Right Logical
+                break;
+        }
+
+        switch(op_){
+            case ArithOp::ADD:
+            case ArithOp::SUB:
+            case ArithOp::MUL:
+            case ArithOp::DIV:
+            case ArithOp::MODULO:
+            case ArithOp::BITWISE_AND:
+            case ArithOp::BITWISE_OR:
+            case ArithOp::BITWISE_XOR:
+            case ArithOp::EQUAL:
+            case ArithOp::NOT_EQUAL:
+            case ArithOp::LESS_THAN_OR_EQUAL:
+            case ArithOp::GREATER_THAN_OR_EQUAL:
+            case ArithOp::LESS_THAN:
+            case ArithOp::GREATER_THAN:
+            case ArithOp::LOGICAL_AND:
+            case ArithOp::LOGICAL_OR:
+                left_->EmitRISC(stream, context);  // Compute left operand
+                stream << ", ";
+                right_->EmitRISC(stream, context); // Computer right operand
+                break;
+            case ArithOp::RIGHT_SHIFT:
+            case ArithOp::LEFT_SHIFT:
+                left_->EmitRISC(stream, context);  // Compute left operand
+                break;
+
+
+        }
+
+
+        switch (op_) {
+            case ArithOp::ADD:
+                stream << std::endl;
+                break;
+            case ArithOp::SUB:
+                stream << std::endl;
+                break;
+            case ArithOp::MUL:
+                stream << std::endl;
+                break;
+            case ArithOp::DIV:
+                stream << std::endl;
+                break;
+            case ArithOp::MODULO:
+                stream << std::endl;
+                break;
+            case ArithOp::BITWISE_AND:
+                stream << std::endl;
+                break;
+            case ArithOp::BITWISE_OR:
+                stream << std::endl;
+                break;
+            case ArithOp::BITWISE_XOR:
+                stream << std::endl;
+                break;
+            case ArithOp::LOGICAL_AND:
+                stream << std::endl;
+                break;
+            case ArithOp::LEFT_SHIFT:
+                stream << std::endl;
+                break;
+            case ArithOp::RIGHT_SHIFT:
+                stream << std::endl;
+                break;
+            case ArithOp::LESS_THAN:
+                stream << std::endl;
+                break;
+            case ArithOp::GREATER_THAN:
+                stream << std::endl;
+                break;
+            case ArithOp::EQUAL:
+                stream << "seqz " << retreg << ", " << tempreg <<  std::endl;
+                break;
+            case ArithOp::NOT_EQUAL:
+                stream << "snez "<< retreg << ", " << tempreg << std::endl; // Set a0 to 1 if not equal, else 0
+                break;
+            case ArithOp::LESS_THAN_OR_EQUAL:
+                stream << "seqz " << retreg << ", " << tempreg << std::endl;   // a0 = !(t3)
+                break;
+            case ArithOp::GREATER_THAN_OR_EQUAL:
+                stream << "seqz " << retreg << ", " << tempreg << std::endl;   // a0 = !(t3)
+                break;
+            case ArithOp::LOGICAL_OR:
+                stream << "snez "<< retreg <<", "<< retreg << std::endl;
+                break;
+        }
+
+
+    }
+
+    context.ResetarithFlag();
 }
 
 void ArithExpression::Print(std::ostream& stream) const {

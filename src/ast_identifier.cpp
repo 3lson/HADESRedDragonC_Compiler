@@ -7,13 +7,19 @@ namespace ast {
 void Identifier::EmitRISC(std::ostream& stream, Context& context) const
 {
     if(context.GetretFlag() == true){
+
         std::string reg = context.GetRegister(identifier_);
 
-        if(context.GetparamFlag() == true){
-            stream << "addi a1, " << reg << ", 0" << std::endl;
+        if(context.GetarithFlag() == true){
+            stream << reg;
         }
         else{
-            stream << "addi a0, " << reg << ", 0" << std::endl;
+            if(context.GetparamFlag() == true){
+                stream << "addi a1, " << reg << ", 0" << std::endl;
+            }
+            else{
+                stream << "addi a0, " << reg << ", 0" << std::endl;
+            }
         }
 
     }
@@ -57,6 +63,10 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
     else if(context.GetassignFlag() == true){
         std::string reg = context.GetRegister(identifier_);
         stream << "li " << reg << ", ";
+    }
+    else if(context.GetarithFlag() == true){
+        if(context.GetarithconstinitFlag() == true){
+        }
     }
     else{
         stream << identifier_;

@@ -13,11 +13,24 @@ private:
     bool paramFlag; // parameter flag to know when initializing a parameter
     std::map<std::string,std::string> VarMap; //variable mapper from C to ASM registers
     int ifelseLabelCounter; // counts which branch of if-else you are in
+    bool arithFlag; // arithmetic expression flag
+    bool arithconstinitFlag; // constant arithmatic initialization flag
 
 public:
  //implement private attribute with getter methods instead
 
-    Context() : retFlag(false), initFlag(false), assignFlag(false), funcFlag(false), paramFlag(false), ifelseLabelCounter(0){}
+    Context() : retFlag(false), initFlag(false), assignFlag(false), funcFlag(false),
+    paramFlag(false), ifelseLabelCounter(0), arithFlag(0), arithconstinitFlag(false){}
+
+    //arithmetic const expressions methods
+    bool GetarithconstinitFlag() const { return arithconstinitFlag; }
+    void SetarithconstinitFlag(){ arithconstinitFlag = true; }
+    void ResetarithconstinitFlag(){ if(arithconstinitFlag == true){ arithconstinitFlag = false; } }
+
+    //arithmetic expressions methods
+    bool GetarithFlag() const { return arithFlag; }
+    void SetarithFlag(){ arithFlag = true; }
+    void ResetarithFlag(){ if(arithFlag == true){ arithFlag = false; } }
 
     //ifelseLabelCounter methods
     int GetifelseLabelCounter() const { return ifelseLabelCounter; }
