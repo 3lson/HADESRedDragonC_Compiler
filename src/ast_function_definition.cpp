@@ -15,15 +15,16 @@ void FunctionDefinition::EmitRISC(std::ostream& stream, Context& context) const
 
     declarator_->EmitRISC(stream, context); //traverses associated branch of tree
 
+    if(context.GetparamFlag() == true){
+        context.ResetparamFlag();
+    }
+
     if (compound_statement_ != nullptr)
     {
         compound_statement_->EmitRISC(stream, context);
     }
     context.ResetfuncFlag();
 
-    if(context.GetparamFlag() == true){
-        context.ResetparamFlag();
-    }
 }
 
 void FunctionDefinition::Print(std::ostream& stream) const

@@ -19,6 +19,7 @@
 %union{
   Node*				node;
   NodeList*			node_list;
+  ParamList*        param_list;
   int          		number_int;
   double       		number_float;
   std::string*		string;
@@ -42,7 +43,9 @@
 
 %type <node> init_statement selection_statement parameter_declarator
 
-%type <node_list> statement_list parameter_list
+%type <node_list> statement_list
+
+%type <param_list> parameter_list
 
 %type <unary_op> unary_operator
 
@@ -90,7 +93,7 @@ init_statement
     ;
 
 parameter_list
-    : init_statement  { $$ = new NodeList(NodePtr($1)); }
+    : init_statement  { $$ = new ParamList(NodePtr($1)); }
     | parameter_list ',' init_statement { $1->PushBack(NodePtr($3)); $$ = $1; }
     ;
 
@@ -111,7 +114,7 @@ parameter_declarator
     ;
 
 compound_statement
-	: '{' statement_list '}' { $$ = $2; }
+	: '{' statement_list '}' { $$ = new CompoundStatements(NodePtr($2)); }
 	;
 
 statement_list
@@ -124,6 +127,7 @@ statement
     | init_statement ';' { $$ = $1; }
     | expression ';' { $$ = $1; }
 	| selection_statement
+    | compound_statement
 	;
 
 jump_statement
@@ -247,6 +251,24 @@ assignment_expression
     | IDENTIFIER '=' INT_CONSTANT {
         $$ = new AssignmentOperator(NodePtr(new IntConstant($3)),NodePtr(new Identifier(std::move(*$1))));
         delete $1;
+    }
+    | IDENTIFIER '=' IDENTIFIER {
+        $$ = new AssignmentOperator(NodePtr(new Identifier(std::move(*$3))),NodePtr(new Identifier(std::move(*$1))));
+        delete $1;
+        delete $3;
+    }
+    | IDENTIFIER '=' logical_or_expression {
+        $$ = new AssignmentOperator(NodePtr(NodePtr($3)),NodePtr(new Identifier(std::move(*$1))));
+        delete $1;
+    }
+    | init_statement '=' INT_CONSTANT {
+        $$ = new AssignmentOperator(NodePtr(new IntConstant($3)), NodePtr($1));
+    }
+    | init_statement '=' IDENTIFIER {
+        $$ = new AssignmentOperator(NodePtr(new Identifier(std::move(*$3))), NodePtr($1)); delete $3;
+    }
+    | init_statement '=' logical_or_expression {
+        $$ = new AssignmentOperator(NodePtr(NodePtr($3)),NodePtr($1));
     }
 	;
 

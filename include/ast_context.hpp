@@ -15,12 +15,50 @@ private:
     int ifelseLabelCounter; // counts which branch of if-else you are in
     bool arithFlag; // arithmetic expression flag
     bool arithconstinitFlag; // constant arithmatic initialization flag
+    bool equatingvarFlag; // used such that variables values can be assigned to each other.
+    bool identifierassignFlag; //secondary flag to equatingvarFlag that is set inside identifier.
+    bool expressionassignFlag; //flag that identifies that we are assigning an expression
+    bool secondcallFlag; //flag that used in assignment operator to indiacte value has been called a second time
+    int scopeLevel; //flag that tracks the scope level
+    int param_num; //keeps track of function argument number
 
 public:
  //implement private attribute with getter methods instead
 
     Context() : retFlag(false), initFlag(false), assignFlag(false), funcFlag(false),
-    paramFlag(false), ifelseLabelCounter(0), arithFlag(0), arithconstinitFlag(false){}
+    paramFlag(false), ifelseLabelCounter(0), arithFlag(0), arithconstinitFlag(false),
+    equatingvarFlag(false), identifierassignFlag(false), expressionassignFlag(false),
+    secondcallFlag(false),scopeLevel(0), param_num(-1){}
+
+    //increment param_num for handling one or more parameters in a function
+    int Getparam_num() const { return param_num; }
+    void Incrementparam_num() { param_num++; }
+    void Resetparam_num() { param_num = -1; }
+
+    //scope level methods
+    int GetscopeLevel() const { return scopeLevel; }
+    void IncrementscopeLevel() { scopeLevel++; }
+    void DecrementscopeLevel() { scopeLevel--; }
+
+    //expression assignment boolean flag methods
+    bool GetsecondcallFlag() const { return secondcallFlag; }
+    void SetsecondcallFlag(){ secondcallFlag = true; }
+    void ResetsecondcallFlag(){ if(secondcallFlag == true){ secondcallFlag = false; } }
+
+    //expression assignment boolean flag methods
+    bool GetexpressionassignFlag() const { return expressionassignFlag; }
+    void SetexpressionassignFlag(){ expressionassignFlag = true; }
+    void ResetexpressionassignFlag(){ if(expressionassignFlag == true){ expressionassignFlag = false; } }
+
+    //identifer assign boolean methods
+    bool GetidentifierassignFlag() const { return identifierassignFlag; }
+    void SetidentifierassignFlag(){ identifierassignFlag = true; }
+    void ResetidentifierassignFlag(){ if(identifierassignFlag == true){ identifierassignFlag = false; } }
+
+    //equating variables boolean methods
+    bool GetequatingvarFlag() const { return equatingvarFlag; }
+    void SetequatingvarFlag(){ equatingvarFlag = true; }
+    void ResetequatingvarFlag(){ if(equatingvarFlag == true){ equatingvarFlag = false; } }
 
     //arithmetic const expressions methods
     bool GetarithconstinitFlag() const { return arithconstinitFlag; }
@@ -64,10 +102,17 @@ public:
 
     //register management methods
     std::string GetRegister(const std::string& var) const{
-        return VarMap.at(var);
+        auto it = VarMap.find(var);
+        if (it != VarMap.end()) {
+            return it->second; // Key exists, return mapped value
+        }
+        return ""; // Return an empty string or a default value
     }
     void MapRegister(const std::string& var, const std::string& Reg) {
         VarMap[var] = Reg;
+    }
+    void FreeRegister(const std::string& var){
+        VarMap.erase(var);
     }
     bool RegisterInUse(const std::string& Reg) const {
 

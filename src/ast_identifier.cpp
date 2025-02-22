@@ -6,20 +6,17 @@ namespace ast {
 
 void Identifier::EmitRISC(std::ostream& stream, Context& context) const
 {
+
+    std::string scopelevel = std::to_string(context.GetscopeLevel());
     if(context.GetretFlag() == true){
 
-        std::string reg = context.GetRegister(identifier_);
+        std::string reg = context.GetRegister(identifier_ + scopelevel);
 
         if(context.GetarithFlag() == true){
             stream << reg;
         }
         else{
-            if(context.GetparamFlag() == true){
-                stream << "addi a1, " << reg << ", 0" << std::endl;
-            }
-            else{
-                stream << "addi a0, " << reg << ", 0" << std::endl;
-            }
+            stream << "addi a0, " << reg << ", 0" << std::endl;
         }
 
     }
@@ -37,6 +34,10 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
                     }
                 }
 
+                context.MapRegister(identifier_ + scopelevel,initreg);
+                stream << "addi " << initreg << ", " << "a" << context.Getparam_num() << ", 0" << std::endl; //uses temporary register (t0 assumes local scope)
+
+
             }
             //local temporaries assignment (t0 - t6)
             else{
@@ -46,6 +47,9 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
                         break;
                     }
                 }
+
+                context.MapRegister(identifier_ + scopelevel,initreg);
+                stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
             }
         }
         //global assignment (s1 - s11)
@@ -56,19 +60,61 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
                     break;
                 }
             }
+
+            context.MapRegister(identifier_ + scopelevel,initreg);
+            stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
         }
-        context.MapRegister(identifier_,initreg);
-        stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
+
+
+        if(context.GetassignFlag() == true){
+            std::string assignreg = context.GetRegister(identifier_ + scopelevel);
+
+            if(context.GetidentifierassignFlag()&& !(context.GetequatingvarFlag())){
+                stream << "addi " << assignreg << ", ";
+            }
+            else if((context.GetequatingvarFlag()) && (context.GetidentifierassignFlag()) ){
+                stream << assignreg << ", 0";
+            }
+            else if(context.GetexpressionassignFlag()){
+                stream << "mv "  << assignreg << ", ";
+            }
+            else{
+                stream << "li " << assignreg << ", ";
+            }
+        }
     }
-    else if(context.GetassignFlag() == true){
-        std::string reg = context.GetRegister(identifier_);
-        stream << "li " << reg << ", ";
+    else if((context.GetequatingvarFlag()) && !(context.GetidentifierassignFlag())){
+        context.SetidentifierassignFlag();
     }
-    else if(context.GetarithFlag() == true){
+    else if((context.GetassignFlag()) && !(context.GetinitFlag()) && !(context.GetarithFlag())){
+        std::string reg = context.GetRegister(identifier_ + scopelevel);
+
+        if((context.GetidentifierassignFlag()) && !(context.GetequatingvarFlag())){
+            stream << "addi " << reg << ", ";
+        }
+        else if((context.GetequatingvarFlag()) && (context.GetidentifierassignFlag()) ){
+            stream << reg << ", 0";
+        }
+        else if(context.GetexpressionassignFlag()){
+            stream << "mv "  << reg << ", ";
+        }
+        else{
+            stream << "li " << reg << ", ";
+        }
+
+    }
+    else if(context.GetarithFlag()){
+
         if(context.GetarithconstinitFlag() == true){
+            //nothing happens here as varialbe is already initialized
+        }
+        else if(context.GetassignFlag()){
+            std::string reg = context.GetRegister(identifier_ + scopelevel);
+            stream << reg;
         }
     }
     else{
+        //function declarator
         stream << identifier_;
     }
 }

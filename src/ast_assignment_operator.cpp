@@ -4,9 +4,20 @@ namespace ast {
 
 void AssignmentOperator::EmitRISC(std::ostream& stream, Context& context) const
 {
+    //sets identifierassign Flag high indicating that the other operand is a variable as well
     context.SetassignFlag();
-    identifier_->EmitRISC(stream, context);
+    context.SetequatingvarFlag();
     value_->EmitRISC(stream, context);
+    context.ResetequatingvarFlag();
+
+    identifier_->EmitRISC(stream, context);
+    context.ResetexpressionassignFlag();
+    context.SetequatingvarFlag();
+    context.SetsecondcallFlag();
+    value_->EmitRISC(stream, context);
+    context.ResetsecondcallFlag();
+    context.ResetequatingvarFlag();
+    context.ResetidentifierassignFlag();
     stream << std::endl;
     context.ResetassignFlag();
 
