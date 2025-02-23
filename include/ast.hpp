@@ -21,5 +21,6 @@
 #include "ast_unary.hpp"
 #include "ast_compound_statements.hpp"
 #include "ast_param_list.hpp"
+#include "ast_while.hpp"
 
 ast::NodePtr ParseAST(std::string file_name);

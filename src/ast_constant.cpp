@@ -28,9 +28,12 @@ void IntConstant::EmitRISC(std::ostream& stream, Context& context) const
     else if(context.GetequatingvarFlag()){
         //do nothing in this case
     }
-    else if((context.GetarithFlag()) && (context.GetarithconstinitFlag()))
+    else if((context.GetarithFlag()) && (context.GetwhileFlag()) && !(context.GetarithconstinitFlag())){
+        std::string reg = context.GetRegister(std::to_string(value_));
+        stream << reg;
+    }
+    else if(((context.GetarithFlag()) && (context.GetarithconstinitFlag())) || (context.GetwhileFlag())) // or for singular constant condition (shortcut causes issues but fixed)
     {
-
         std::string initreg;
 
         for(int i = 0; i < 7; i++){
@@ -44,7 +47,10 @@ void IntConstant::EmitRISC(std::ostream& stream, Context& context) const
 
         stream << "li " << initreg << ", " << value_ << std::endl;
 
-
+        if((context.GetwhileFlag()) && !(context.GetarithFlag())){
+            std::string condreg =  context.GetRegister(" Conditional ");
+            stream << "mv " << condreg << ", " << initreg << std::endl;
+        }
     }
     else{
         stream << "li a0, " << value_ << std::endl;

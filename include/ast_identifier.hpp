@@ -8,7 +8,7 @@ class Identifier : public Node
 {
 private:
     std::string identifier_;
-
+    std::string GetResolvedRegister(const Context& context) const;
 public:
     Identifier(std::string identifier) : identifier_(std::move(identifier)){};
 

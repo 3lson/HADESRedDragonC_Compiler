@@ -18,9 +18,12 @@ private:
     bool equatingvarFlag; // used such that variables values can be assigned to each other.
     bool identifierassignFlag; //secondary flag to equatingvarFlag that is set inside identifier.
     bool expressionassignFlag; //flag that identifies that we are assigning an expression
-    bool secondcallFlag; //flag that used in assignment operator to indiacte value has been called a second time
+    bool secondcallFlag; //flag that used in assignment operator to indicate value has been called a second time
     int scopeLevel; //flag that tracks the scope level
     int param_num; //keeps track of function argument number
+    int whileLabelCounter; // counts which branch of while you are in
+    bool whileIdentifierFlag; //This overwrites compounds and identifier cases in while loop condition cases
+    bool lowerscopelevelFlag; // used in while and if statements to allow for variable access in lower and same scope levels
 
 public:
  //implement private attribute with getter methods instead
@@ -28,7 +31,18 @@ public:
     Context() : retFlag(false), initFlag(false), assignFlag(false), funcFlag(false),
     paramFlag(false), ifelseLabelCounter(0), arithFlag(0), arithconstinitFlag(false),
     equatingvarFlag(false), identifierassignFlag(false), expressionassignFlag(false),
-    secondcallFlag(false),scopeLevel(0), param_num(-1){}
+    secondcallFlag(false),scopeLevel(0), param_num(-1), whileLabelCounter(0),
+    whileIdentifierFlag(false), lowerscopelevelFlag(false){}
+
+    //while condition for condition evaluation
+    bool GetlowerscopelevelFlag() const { return lowerscopelevelFlag; }
+    void SetlowerscopelevelFlag(){ lowerscopelevelFlag = true; }
+    void ResetlowerscopelevelFlag(){ if(lowerscopelevelFlag == true){ lowerscopelevelFlag = false; } }
+
+    //while identifer for condition evaluation
+    bool GetwhileFlag() const { return whileIdentifierFlag; }
+    void SetwhileFlag(){ whileIdentifierFlag = true; }
+    void ResetwhileFlag(){ if(whileIdentifierFlag == true){ whileIdentifierFlag = false; } }
 
     //increment param_num for handling one or more parameters in a function
     int Getparam_num() const { return param_num; }
@@ -73,6 +87,12 @@ public:
     //ifelseLabelCounter methods
     int GetifelseLabelCounter() const { return ifelseLabelCounter; }
     void IncrementifelseLabelCounter() { ifelseLabelCounter++; }
+    //To check: reset for ifelse counter needed?
+
+    //whileLabelCounter methods
+    int GetwhileLabelCounter() const { return whileLabelCounter; }
+    void IncrementwhileLabelCounter() { whileLabelCounter++; }
+    //To check: reset for while counter needed?
 
     //function flag methods
     bool GetfuncFlag() const { return funcFlag; }

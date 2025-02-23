@@ -28,6 +28,8 @@ private:
     std::vector<NodePtr> nodes_;
 
 public:
+    //Add empty nodelist constructor for empty compound statement
+    NodeList() {}
     NodeList(NodePtr first_node) { nodes_.push_back(std::move(first_node)); }
 
     void PushBack(NodePtr item);

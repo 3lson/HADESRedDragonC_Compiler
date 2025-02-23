@@ -41,7 +41,7 @@
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
 %type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement
 
-%type <node> init_statement selection_statement parameter_declarator
+%type <node> init_statement selection_statement parameter_declarator iteration_statement
 
 %type <node_list> statement_list
 
@@ -80,9 +80,7 @@ declaration_specifiers
 	;
 
 type_specifier
-	: INT {
-		$$ = TypeSpecifier::INT;
-	}
+	: INT { $$ = TypeSpecifier::INT; }
 	;
 
 init_statement
@@ -115,6 +113,7 @@ parameter_declarator
 
 compound_statement
 	: '{' statement_list '}' { $$ = new CompoundStatements(NodePtr($2)); }
+    | '{' '}' { $$ = new NodeList(); }
 	;
 
 statement_list
@@ -128,6 +127,7 @@ statement
     | expression ';' { $$ = $1; }
 	| selection_statement
     | compound_statement
+    | iteration_statement
 	;
 
 jump_statement
@@ -148,15 +148,17 @@ selection_statement
     }
     ;
 
+iteration_statement
+    : WHILE '(' expression ')' compound_statement { $$ = new WhileStatement(NodePtr($3), NodePtr($5)); }
+
+
 
 primary_expression
     : IDENTIFIER {
         $$ = new Identifier(std::move(*$1));
         delete $1;
 	}
-	| INT_CONSTANT {
-		$$ = new IntConstant($1);
-	}
+	| INT_CONSTANT { $$ = new IntConstant($1); }
 	;
 
 postfix_expression
