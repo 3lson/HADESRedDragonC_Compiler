@@ -12,7 +12,6 @@ private:
     bool funcFlag; // function flag to know when executing inside a function
     bool paramFlag; // parameter flag to know when initializing a parameter
     std::map<std::string,std::string> VarMap; //variable mapper from C to ASM registers
-    int ifelseLabelCounter; // counts which branch of if-else you are in
     bool arithFlag; // arithmetic expression flag
     bool arithconstinitFlag; // constant arithmatic initialization flag
     bool equatingvarFlag; // used such that variables values can be assigned to each other.
@@ -21,18 +20,39 @@ private:
     bool secondcallFlag; //flag that used in assignment operator to indicate value has been called a second time
     int scopeLevel; //flag that tracks the scope level
     int param_num; //keeps track of function argument number
-    int whileLabelCounter; // counts which branch of while you are in
     bool whileIdentifierFlag; //This overwrites compounds and identifier cases in while loop condition cases
     bool lowerscopelevelFlag; // used in while and if statements to allow for variable access in lower and same scope levels
+    bool arithoperandFlag; // indicates that our arithmatic expression is part of a greater arithmatic expression
+    std::map<std::string, int> nameCount; //keeps track of variable names used multiple times like in arithmatic operations#
+    //!!!check if map is allowed instead of unordered map!!!
+    bool arithoperandreturn; //indicates that the arithoperand must return is output register to the upper arithexpressoin in the next call
+    static int label_counter;
 
 public:
  //implement private attribute with getter methods instead
 
     Context() : retFlag(false), initFlag(false), assignFlag(false), funcFlag(false),
-    paramFlag(false), ifelseLabelCounter(0), arithFlag(0), arithconstinitFlag(false),
+    paramFlag(false), arithFlag(0), arithconstinitFlag(false),
     equatingvarFlag(false), identifierassignFlag(false), expressionassignFlag(false),
-    secondcallFlag(false),scopeLevel(0), param_num(-1), whileLabelCounter(0),
-    whileIdentifierFlag(false), lowerscopelevelFlag(false){}
+    secondcallFlag(false),scopeLevel(0), param_num(-1),
+    whileIdentifierFlag(false), lowerscopelevelFlag(false), arithoperandFlag(false),
+    arithoperandreturn(false){}
+
+    // ---------- Control Flow Management ----------
+
+
+    // Creates unique labels for all control flow operations
+    static std::string new_label(std::string id);
+
+    //sets flags for arith operands result
+    bool Getarithoperandreturn() const { return arithoperandreturn; }
+    void Setarithoperandreturn(){ arithoperandreturn = true; }
+    void Resetarithoperandreturn(){ if(arithoperandreturn == true){ arithoperandreturn = false; } }
+
+    //sets flags for arith operands
+    bool GetarithoperandFlag() const { return arithoperandFlag; }
+    void SetarithoperandFlag(){ arithoperandFlag = true; }
+    void ResetarithoperandFlag(){ if(arithoperandFlag == true){ arithoperandFlag = false; } }
 
     //while condition for condition evaluation
     bool GetlowerscopelevelFlag() const { return lowerscopelevelFlag; }
@@ -84,16 +104,6 @@ public:
     void SetarithFlag(){ arithFlag = true; }
     void ResetarithFlag(){ if(arithFlag == true){ arithFlag = false; } }
 
-    //ifelseLabelCounter methods
-    int GetifelseLabelCounter() const { return ifelseLabelCounter; }
-    void IncrementifelseLabelCounter() { ifelseLabelCounter++; }
-    //To check: reset for ifelse counter needed?
-
-    //whileLabelCounter methods
-    int GetwhileLabelCounter() const { return whileLabelCounter; }
-    void IncrementwhileLabelCounter() { whileLabelCounter++; }
-    //To check: reset for while counter needed?
-
     //function flag methods
     bool GetfuncFlag() const { return funcFlag; }
     void SetfuncFlag(){ funcFlag = true; }
@@ -142,6 +152,25 @@ public:
             }
         }
         return false;
+    }
+    //used to find the next in-order free register
+    std::string GetFreeRegister(const std::string& Regprefix, const int& begin, const int& end){
+        std::string reg;
+
+        for(int i = begin; i < end; i++){
+            if(!(RegisterInUse(Regprefix + std::to_string(i)))){
+                reg = Regprefix + std::to_string(i);
+                break;
+            }
+        }
+
+        return reg;
+    }
+
+    //generates unique variable name (for internal temporary registers like in arithoperator )
+    std::string getUniqueName(const std::string& baseName) {
+        int count = ++nameCount[baseName];
+        return baseName + std::to_string(count);
     }
 };
 

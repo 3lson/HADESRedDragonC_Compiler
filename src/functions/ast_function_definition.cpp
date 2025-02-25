@@ -1,4 +1,4 @@
-#include "ast_function_definition.hpp"
+#include "../../include/functions/ast_function_definition.hpp"
 
 namespace ast {
 

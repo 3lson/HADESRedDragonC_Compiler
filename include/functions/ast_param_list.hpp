@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast_node.hpp"
-#include "ast_context.hpp"
+#include "../context/ast_context.hpp"
 
 namespace ast {
 

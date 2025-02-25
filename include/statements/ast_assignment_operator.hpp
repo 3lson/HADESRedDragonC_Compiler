@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ast_node.hpp"
-#include "ast_type_specifier.hpp"
+#include "../types/ast_type_specifier.hpp"
 
 namespace ast {
 

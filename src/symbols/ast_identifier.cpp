@@ -1,4 +1,4 @@
-#include "ast_identifier.hpp"
+#include "../../include/symbols/ast_identifier.hpp"
 
 namespace ast {
 
@@ -27,20 +27,10 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
 {
 
     std::string scopelevel = std::to_string(context.GetscopeLevel());
-    if(context.GetretFlag() == true){
-
+    if(context.GetretFlag()){
         std::string reg;
-        //reg = context.GetRegister(identifier_ + scopelevel);
-
         reg = GetResolvedRegister(context);
-
-        if(context.GetarithFlag() == true){
-            stream << reg;
-        }
-        else{
-            stream << "addi a0, " << reg << ", 0" << std::endl;
-        }
-
+        stream << "addi a0, " << reg << ", 0" << std::endl;
     }
     else if(context.GetinitFlag() == true){
         std::string initreg; //stores the correct initialization register
@@ -49,49 +39,28 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
         if(context.GetfuncFlag() == true){
             //parameter assignment (a0 - a7)
             if(context.GetparamFlag() == true){
-
-                for(int i = 0;  i < 8; i++){
-                    if(context.RegisterInUse(std::string("a") + std::to_string(i)) == false){
-                        initreg = std::string("a") + std::to_string(i);
-                    }
-                }
-
+                initreg = context.GetFreeRegister("a",0,7);
                 context.MapRegister(identifier_ + scopelevel,initreg);
                 stream << "addi " << initreg << ", " << "a" << context.Getparam_num() << ", 0" << std::endl; //uses temporary register (t0 assumes local scope)
-
 
             }
             //local temporaries assignment (t0 - t6)
             else{
-                for(int i = 0; i < 7; i++){
-                    if(context.RegisterInUse(std::string("t") + std::to_string(i)) == false){
-                        initreg = std::string("t") + std::to_string(i);
-                        break;
-                    }
-                }
-
+                initreg = context.GetFreeRegister("t",0,6);
                 context.MapRegister(identifier_ + scopelevel,initreg);
                 stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
             }
         }
         //global assignment (s1 - s11)
         else {
-            for(int i = 1; i < 12; i++){
-                if(context.RegisterInUse(std::string("s") + std::to_string(i)) == false){
-                    initreg = std::string("s") + std::to_string(i);
-                    break;
-                }
-            }
-
+            initreg = context.GetFreeRegister("t",1,11);
             context.MapRegister(identifier_ + scopelevel,initreg);
             stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
         }
 
 
-        if(context.GetassignFlag() == true){
-
+        if(context.GetassignFlag()){
             std::string assignreg = GetResolvedRegister(context);
-
             if(context.GetidentifierassignFlag()&& !(context.GetequatingvarFlag())){
                 stream << "addi " << assignreg << ", ";
             }
@@ -126,25 +95,18 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
         }
 
     }
-    else if(context.GetarithFlag()){
+    else if((context.GetarithFlag()) && !(context.GetarithconstinitFlag())){
+        std::string reg = GetResolvedRegister(context);
+        stream << reg;
+    }
+    else if(context.GetarithconstinitFlag()){
 
-        if(context.GetarithconstinitFlag() == true){
-            //nothing happens here as variable is already initialized
-        }
-        else if(context.GetassignFlag()){
-            std::string reg = GetResolvedRegister(context);
-            stream << reg;
-        }
-        else if(context.GetwhileFlag()){
-            std::string reg = GetResolvedRegister(context);
-            stream << reg;
-        }
     }
     else{
         //function declarator
         if (context.GetwhileFlag() == true){
             std::string reg = GetResolvedRegister(context);
-            std::string condreg =  context.GetRegister(" Conditional ");
+            std::string condreg =  context.GetRegister(" Conditional " + scopelevel);
             stream << "mv " << condreg <<", "<< reg << std::endl;
         } else{
             stream << identifier_;

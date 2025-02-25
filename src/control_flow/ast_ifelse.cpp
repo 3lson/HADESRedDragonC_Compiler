@@ -1,4 +1,4 @@
-#include "ast_ifelse.hpp"
+#include "../../include/control_flow/ast_ifelse.hpp"
 #include <iostream>
 
 namespace ast {
@@ -6,10 +6,8 @@ namespace ast {
 void IfStatement::EmitRISC(std::ostream& stream, Context& context) const {
     condition_->EmitRISC(stream, context);
 
-    std::string else_label = "else_" + std::to_string(context.GetifelseLabelCounter());
-    context.IncrementifelseLabelCounter();
-    std::string end_label = "end_if_" + std::to_string(context.GetifelseLabelCounter());
-    context.IncrementifelseLabelCounter();
+    std::string else_label = context.new_label("else");
+    std::string end_label = context.new_label("end_if");
 
     stream << "beqz a0, " << else_label << std::endl;
 

@@ -159,6 +159,7 @@ primary_expression
         delete $1;
 	}
 	| INT_CONSTANT { $$ = new IntConstant($1); }
+    | '(' expression ')' { $$ = $2; }
 	;
 
 postfix_expression

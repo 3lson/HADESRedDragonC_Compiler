@@ -1,31 +1,25 @@
-#include "ast_while.hpp"
+#include "../../include/control_flow/ast_while.hpp"
 #include <iostream>
 
 namespace ast {
 
     void WhileStatement::EmitRISC(std::ostream& stream, Context& context) const {
         // Generate labels for the loop
+
+        std::string scopelevel = std::to_string(context.GetscopeLevel());
+
         context.SetwhileFlag();
-        int while_label = context.GetwhileLabelCounter();
-        context.IncrementwhileLabelCounter();
-        std::string start_label = "start_loop_" + std::to_string(while_label);
-        std::string end_label = "loop_end_" + std::to_string(while_label);
+        std::string start_label = context.new_label("loop_start_");
+        std::string end_label = context.new_label("loop_end_");
 
         // Emit the start label
         stream << start_label << ":" << std::endl;
 
 
-        std::string condreg; //stores register upon which conditional statement is run
-
-        for(int i = 0; i < 7; i++){
-            if(context.RegisterInUse(std::string("t") + std::to_string(i)) == false){
-                condreg = std::string("t") + std::to_string(i);
-                break;
-            }
-        }
+        std::string condreg = context.GetFreeRegister("t",0,6); //stores register upon which conditional statement is run
 
         //might consider using a higher scope level (we'll see ;) )
-        context.MapRegister(" Conditional ", condreg);
+        context.MapRegister(" Conditional " + scopelevel, condreg);
 
         condition_->EmitRISC(stream, context);
 
@@ -33,7 +27,6 @@ namespace ast {
         stream << "beqz " << condreg;
         // Emit the condition expression RISC code
         stream << ", " << end_label << std::endl; // Correct instruction
-
 
         context.SetlowerscopelevelFlag();
         // Emit the body of the while loop
@@ -47,6 +40,9 @@ namespace ast {
         // Emit the end label for the while loop
         stream << end_label << ":" << std::endl;
         context.ResetwhileFlag();
+
+        context.FreeRegister(" Conditional " + scopelevel);
+
     }
 
 

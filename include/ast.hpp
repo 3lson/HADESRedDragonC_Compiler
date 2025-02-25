@@ -6,21 +6,28 @@
 #include <map>
 
 #include "ast_direct_declarator.hpp"
-#include "ast_function_definition.hpp"
-#include "ast_identifier.hpp"
-#include "ast_jump_statement.hpp"
 #include "ast_node.hpp"
-#include "ast_type_specifier.hpp"
-#include "ast_constant.hpp"
-#include "ast_context.hpp"
-#include "ast_assignment_operator.hpp"
-#include "ast_variable_definition.hpp"
-#include "ast_ifelse.hpp"
-#include "ast_parameter_declarator.hpp"
-#include "ast_arithmetic_operator.hpp"
-#include "ast_unary.hpp"
-#include "ast_compound_statements.hpp"
-#include "ast_param_list.hpp"
-#include "ast_while.hpp"
+
+#include "context/ast_context.hpp"
+
+#include "control_flow/ast_ifelse.hpp"
+#include "control_flow/ast_while.hpp"
+
+#include "functions/ast_function_definition.hpp"
+#include "functions/ast_jump_statement.hpp"
+#include "functions/ast_parameter_declarator.hpp"
+#include "functions/ast_param_list.hpp"
+
+#include "operations/ast_arithmetic_operator.hpp"
+#include "operations/ast_unary.hpp"
+
+#include "statements/ast_assignment_operator.hpp"
+#include "statements/ast_variable_definition.hpp"
+#include "statements/ast_compound_statements.hpp"
+
+#include "symbols/ast_identifier.hpp"
+#include "symbols/ast_constant.hpp"
+
+#include "types/ast_type_specifier.hpp"
 
 ast::NodePtr ParseAST(std::string file_name);

@@ -1,4 +1,4 @@
-#include "ast_compound_statements.hpp"
+#include "../../include/statements/ast_compound_statements.hpp"
 
 namespace ast {
 

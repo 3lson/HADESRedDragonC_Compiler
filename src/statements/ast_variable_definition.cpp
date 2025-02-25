@@ -1,4 +1,4 @@
-#include "ast_variable_definition.hpp"
+#include "../../include/statements/ast_variable_definition.hpp"
 
 namespace ast {
 
@@ -14,7 +14,7 @@ void VariableDefinition::Print(std::ostream& stream) const
 {
     stream << declaration_specifiers_ << " ";
     identifier_->Print(stream);
-    
+
 }
 
 } // namespace ast

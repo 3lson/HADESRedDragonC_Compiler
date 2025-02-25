@@ -1,4 +1,4 @@
-#include "ast_parameter_declarator.hpp"
+#include "../../include/functions/ast_parameter_declarator.hpp"
 
 namespace ast {
 
