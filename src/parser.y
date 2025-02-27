@@ -7,7 +7,7 @@
 %code requires{
     #include "ast.hpp"
 
-	using namespace ast;
+		using namespace ast;
 
     extern Node* g_root;
     extern FILE* yyin;
@@ -16,14 +16,14 @@
 	int yylex_destroy(void);
 }
 
+// Represents the value associated with any kind of AST node.
 %union{
-  Node*				node;
-  NodeList*			node_list;
-  int          		number_int;
-  double       		number_float;
-  std::string*		string;
-  TypeSpecifier 	type_specifier;
-  yytokentype  		token;
+	Node*         node;
+	NodeList*     node_list;
+	int          number_int;
+	double       number_float;
+	std::string* string;
+	yytokentype  token;
 }
 
 %token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL
@@ -34,17 +34,22 @@
 %token STRUCT UNION ENUM ELLIPSIS
 %token CASE DEFAULT IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN
 
-%type <node> translation_unit external_declaration function_definition primary_expression postfix_expression
+%type <node> translation_unit external_declaration function_definition primary_expression postfix_expression argument_expression_list
 %type <node> unary_expression cast_expression multiplicative_expression additive_expression shift_expression relational_expression
 %type <node> equality_expression and_expression exclusive_or_expression inclusive_or_expression logical_and_expression logical_or_expression
-%type <node> conditional_expression assignment_expression expression declarator direct_declarator statement compound_statement jump_statement
+%type <node> conditional_expression assignment_expression expression constant_expression declaration declaration_specifiers init_declarator_list
+%type <node> init_declarator type_specifier struct_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
+%type <node> struct_declarator enum_specifier enumerator_list enumerator declarator direct_declarator pointer parameter_list parameter_declaration
+%type <node> identifier_list type_name abstract_declarator direct_abstract_declarator initializer initializer_list statement labeled_statement
+%type <node> compound_statement declaration_list expression_statement selection_statement iteration_statement jump_statement
 
 %type <node_list> statement_list
+
+%type <string> unary_operator assignment_operator storage_class_specifier
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
 %type <string> IDENTIFIER
-%type <type_specifier> type_specifier declaration_specifiers
 
 
 %start ROOT
@@ -62,9 +67,7 @@ external_declaration
 	;
 
 function_definition
-	: declaration_specifiers declarator compound_statement {
-		$$ = new FunctionDefinition($1, NodePtr($2), NodePtr($3));
-	}
+	: declaration_specifiers declarator compound_statement { $$ = new FunctionDefinition(NodePtr($1), NodePtr($2), NodePtr($3)); }
 	;
 
 declaration_specifiers
@@ -72,9 +75,7 @@ declaration_specifiers
 	;
 
 type_specifier
-	: INT {
-		$$ = TypeSpecifier::INT;
-	}
+	: INT { $$ = new TypeSpecifier(Type::_INT); }
 	;
 
 declarator
@@ -82,45 +83,64 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER {
-		$$ = new Identifier(std::move(*$1));
-		delete $1;
-	}
-	| direct_declarator '(' ')' {
-		$$ = new DirectDeclarator(NodePtr($1));
-	}
+	: IDENTIFIER                { $$ = new Identifier(*$1); }
+	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
 	;
 
 statement
-	: jump_statement { $$ = $1; }
+	: compound_statement 	{ $$ = new CompoundStatement(NodePtr($1)); }
+	| expression_statement 	{ $$ = $1; }
+	| jump_statement 		{ $$ = $1; }
+	| selection_statement	{ $$ = $1; }
 	;
 
 compound_statement
-	: '{' statement_list '}' { $$ = $2; }
+	: '{' declaration_list '}' 					{ $$ = new CompoundStatement(NodePtr($2)); }
+	| '{' declaration_list statement_list '}' 	{
+		CompoundStatement *compound_statement = new CompoundStatement(NodePtr($2));
+		compound_statement->PushBack(NodePtr($3));
+		$$ = compound_statement;
+		}
+	| '{' statement_list '}' 					{ $$ = new CompoundStatement(NodePtr($2)); }
 	;
 
 statement_list
-	: statement { $$ = new NodeList(NodePtr($1)); }
-	| statement_list statement { $1->PushBack(NodePtr($2)); $$=$1; }
+	: statement                 { $$ = new StatementList(NodePtr($1)); }
+	| statement_list statement  { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
 jump_statement
-	: RETURN ';' {
-		$$ = new ReturnStatement(nullptr);
-	}
-	| RETURN expression ';' {
-		$$ = new ReturnStatement(NodePtr($2));
-	}
+	: RETURN ';'            { $$ = new ReturnStatement(nullptr); }
+	| RETURN expression ';' { $$ = new ReturnStatement(NodePtr($2)); }
 	;
 
+
+selection_statement
+    : IF '(' expression ')' compound_statement {
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr);
+    }
+    | IF '(' expression ')' compound_statement ELSE compound_statement {
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7));
+    }
+    ;
+
+
 primary_expression
-	: INT_CONSTANT {
-		$$ = new IntConstant($1);
-	}
+	: INT_CONSTANT 	{ $$ = new IntConstant($1); }
+	| IDENTIFIER	{ $$ = new Identifier(*$1); }
+	;
+
+expression_statement
+	: ';'
+	| expression ';' { $$ = $1; }
 	;
 
 postfix_expression
 	: primary_expression
+	;
+
+argument_expression_list
+	: assignment_expression
 	;
 
 unary_expression
@@ -177,10 +197,39 @@ conditional_expression
 
 assignment_expression
 	: conditional_expression
+	| unary_expression '=' assignment_expression	{ $$ = new Assignment(NodePtr($1), NodePtr($3)); }
 	;
 
 expression
 	: assignment_expression
+	;
+
+declaration
+	: declaration_specifiers init_declarator_list ';'	{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	;
+
+init_declarator_list
+	: init_declarator							{ $$ = new NodeList(NodePtr($1)); }
+	| init_declarator_list ',' init_declarator	{ NodeList *declarator_list = dynamic_cast<NodeList *>($1); declarator_list->PushBack(NodePtr($3)); $$ = declarator_list; }
+	;
+
+init_declarator
+	: declarator
+	| declarator '=' initializer	{ $$ = new Assignment(NodePtr($1), NodePtr($3)); }
+	;
+
+initializer
+	: assignment_expression
+	;
+
+initializer_list
+	: initializer						{ $$ = new NodeList(NodePtr($1)); }
+	| initializer_list ',' initializer	{ $1->PushBack(NodePtr($3)); $$ = $1; }
+	;
+
+declaration_list
+	: declaration					{ $$ = new NodeList(NodePtr($1)); }
+	| declaration_list declaration	{ NodeList *declaration_list = dynamic_cast<NodeList *>($1); declaration_list->PushBack(NodePtr($2)); $$ = declaration_list; }
 	;
 
 %%

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ast_node.hpp"
-#include "symbols/ast_identifier.hpp"
+#include "../ast_node.hpp"
+#include <memory>
 
-namespace ast{
+namespace ast {
 
-class DirectDeclarator : public Node
+class Identifier : public Node
 {
 private:
-    NodePtr identifier_;
+    std::string identifier_;
 
 public:
-    DirectDeclarator(NodePtr identifier) : identifier_(std::move(identifier)){};
+    Identifier(std::string identifier) : identifier_(std::move(identifier)){};
 
     void EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const override;
     void Print(std::ostream &stream) const override;

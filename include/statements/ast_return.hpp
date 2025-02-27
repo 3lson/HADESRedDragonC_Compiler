@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ast_node.hpp"
+#include "../ast_node.hpp"
 
 namespace ast {
 
@@ -12,8 +12,9 @@ private:
 public:
     ReturnStatement(NodePtr expression) : expression_(std::move(expression)) {}
 
-    void EmitRISC(std::ostream& stream, Context& context) const override;
-    void Print(std::ostream& stream) const override;
+
+    void EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const override;
+    void Print(std::ostream &stream) const override;
 };
 
-} // namespace ast
+}//namespace ast
