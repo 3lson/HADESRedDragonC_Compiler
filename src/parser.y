@@ -90,7 +90,10 @@ direct_declarator
 
 parameter_list
 	: parameter_declaration            { $$ = new ParameterList(NodePtr($1)); }
-	| parameter_list ',' parameter_declaration  { ParameterList *parameter_list = dynamic_cast<ParameterList *>($1); parameter_list->PushBack(NodePtr($3)); $$ = parameter_list;}
+	| parameter_list ',' parameter_declaration  {
+		ParameterList *parameter_list = dynamic_cast<ParameterList *>($1);
+		parameter_list->PushBack(NodePtr($3));
+		$$ = $1;}
 	;
 
 parameter_declaration
@@ -238,7 +241,7 @@ initializer_list
 	;
 
 declaration_list
-	: declaration					{ $$ = new NodeList(NodePtr($1)); }
+	: declaration					{ $$ = new DeclarationList(NodePtr($1)); }
 	| declaration_list declaration	{
 		DeclarationList *declaration_list = dynamic_cast<DeclarationList *>($1);
 		declaration_list->PushBack(NodePtr($2));

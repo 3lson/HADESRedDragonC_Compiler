@@ -29,7 +29,7 @@ private:
 
 public:
     //Add empty nodelist constructor for empty compound statement
-    NodeList() : nodes_() {}
+    NodeList() {}
     NodeList(NodePtr first_node) {
         if(first_node){
             nodes_.push_back(std::move(first_node));
