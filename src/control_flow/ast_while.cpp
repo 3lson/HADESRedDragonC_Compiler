@@ -21,6 +21,7 @@ namespace ast {
         //might consider using a higher scope level (we'll see ;) )
         context.MapRegister(" Conditional " + scopelevel, condreg);
 
+        
         condition_->EmitRISC(stream, context);
 
         // Emit the branch if the condition is false (i.e., break out of the loop)

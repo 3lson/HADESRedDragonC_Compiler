@@ -1,5 +1,5 @@
 int f(){
-    int x = 3;
-    int y = 5;
-    return x * (4 + y) * 2;
+    int z;
+    z = 3 * 4 + 5 * 2;
+    return z;
 }

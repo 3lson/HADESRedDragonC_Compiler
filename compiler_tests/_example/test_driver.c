@@ -2,5 +2,5 @@ int f();
 
 int main()
 {
-    return !(f() == 54);
+    return !(f() == 22);
 }

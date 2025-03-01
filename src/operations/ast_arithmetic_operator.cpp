@@ -181,7 +181,6 @@ void ArithExpression::EmitRISC(std::ostream& stream, Context& context) const {
     }
 
     context.SetarithFlag();
-
     context.ResetequatingvarFlag(); //turns this off during assignment to prevent different behaviour for identifier and const
 
     if(!context.Getarithoperandreturn()){
@@ -274,6 +273,12 @@ void ArithExpression::EmitRISC(std::ostream& stream, Context& context) const {
     }
     else if(context.GetassignFlag()){
 
+        bool Assignwashigh = false;
+        if(context.GetassignFlag()){
+            context.ResetassignFlag();
+            Assignwashigh = true;
+        }
+
         if(var_ != ""){
             stream << context.GetRegister(var_);
             context.FreeRegister(var_);
@@ -290,6 +295,10 @@ void ArithExpression::EmitRISC(std::ostream& stream, Context& context) const {
 
             OperationExecutor(stream,context,tempreg2, tempreg);
 
+        }
+
+        if(Assignwashigh){
+            context.SetassignFlag();
         }
 
         context.ResetarithFlag();

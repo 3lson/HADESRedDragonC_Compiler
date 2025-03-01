@@ -32,7 +32,7 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
         reg = GetResolvedRegister(context);
         stream << "addi a0, " << reg << ", 0" << std::endl;
     }
-    else if(context.GetinitFlag() == true){
+    else if(context.GetinitFlag()){
         std::string initreg; //stores the correct initialization register
 
         //assign variable to temporaries (t0 - t6) or function argument (a2 - a7)
@@ -42,7 +42,6 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
                 initreg = context.GetFreeRegister("a",0,7);
                 context.MapRegister(identifier_ + scopelevel,initreg);
                 stream << "addi " << initreg << ", " << "a" << context.Getparam_num() << ", 0" << std::endl; //uses temporary register (t0 assumes local scope)
-
             }
             //local temporaries assignment (t0 - t6)
             else{
@@ -53,7 +52,7 @@ void Identifier::EmitRISC(std::ostream& stream, Context& context) const
         }
         //global assignment (s1 - s11)
         else {
-            initreg = context.GetFreeRegister("t",1,11);
+            initreg = context.GetFreeRegister("s",1,11);
             context.MapRegister(identifier_ + scopelevel,initreg);
             stream << "li " << initreg << ", " << "0" << std::endl; //uses temporary register (t0 assumes local scope)
         }
