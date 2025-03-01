@@ -23,12 +23,13 @@ private:
 
     // ----- Stack Management -----
     int current_stack_offset;
+    int initial_stack_offset;
 
     // ----- Variable Management ------
-    std::vector<std::unordered_map<std::string, Variable>> variableStack;
+    std::vector<std::unordered_map<std::string, Variable>> variableMap;
 
     // ------ Function Management -------
-    std::unordered_map<std::string, Function> function_bindings;
+    std::unordered_map<std::string, Function> functionMap;
     std::string last_function_end_statement;
     std::string return_register;
 
@@ -54,6 +55,7 @@ public:
     std::string get_register_name(int reg_number) const {return reg_manager.get_register_name(reg_number); }
     void set_register_type(const std::string &reg_name, Type type) { reg_manager.set_register_type(reg_name, type); }
 
+    // Missing allocate_registers, push_registers, pop_registers
 
     // --------- Variable Management --------
 
@@ -63,9 +65,9 @@ public:
     // --------- Scope Management ---------
     void create_new_scope();
     void pop_scope();
-
     int get_stack_offset() const;
     void increase_stack_offset(int offset);
+    void set_initial_offset(int offset);
 
     // --------- Function Management ---------
     void define_function(std::string identifier, Function function);
@@ -93,6 +95,11 @@ public:
     void mode_push(Mode mode);
     void mode_pop();
     bool has_mode(Mode mode) const;
+
+    // ----- Type Management --------
+    void set_operation_type(Type type);
+    void pop_operation_type();
+    Type get_operation_type() const;
 
     // -------- Type specific properties ----------
     static const std::unordered_map<Type, int> types_size;

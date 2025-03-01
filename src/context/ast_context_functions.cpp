@@ -2,18 +2,18 @@
 namespace ast{
 void Context::define_function(std::string identifier, Function function)
 {
-    function_bindings[identifier] = function;
+    functionMap[identifier] = function;
     last_function_end_statement = identifier + "_end";
     set_return_register(function.get_return_value().get_type());
 }
 
 Function Context::get_function(std::string identifier) const
 {
-    if (function_bindings.find(identifier) == function_bindings.end())
+    if (functionMap.find(identifier) == functionMap.end())
     {
         throw std::runtime_error("Context::get_function - function " + identifier + " not found");
     }
-    return function_bindings.at(identifier);
+    return functionMap.at(identifier);
 }
 
 std::string Context::get_last_function_end_statement() const
@@ -49,4 +49,9 @@ void Context::set_return_register(Type type)
         throw std::runtime_error("Context::set_return_register: Invalid return type");
     }
 }
+
+int Parameter::GetTypeSize() const{
+    return types_size.at(type);
+}
+
 }//namespace ast

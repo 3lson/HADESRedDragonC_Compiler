@@ -1,10 +1,9 @@
 #include "../../include/functions/ast_function_definition.hpp"
 namespace ast {
 
-void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const
+void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    // Use dynamic_cast to const types to avoid casting away constness
-    auto direct_declarator_ = dynamic_cast<const DirectDeclarator *>(declarator_.get()); // Use .get() to access the raw pointer
+    auto direct_declarator_ = dynamic_cast<const DirectDeclarator *>(declarator_.get());
     if (!direct_declarator_) {
         throw std::runtime_error("Failed to cast declarator_ to DirectDeclarator");
     }
@@ -17,20 +16,50 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
     }
     Type return_type = return_type_specifier->GetType();
 
+    //Hard coding according to assembler directives
     stream << ".text" << std::endl;
     stream << ".globl " << function_name << std::endl;
     stream << ".type " << function_name << ", @function" << std::endl;
     stream << function_name << ":" << std::endl;
 
-    // TODO: Create new function in context with arguments and return value
     ReturnValue return_value(false, false, return_type);
-    std::vector<Argument> arguments = {};
-    Function function(return_value, arguments);
+    //vector for my arguments to pull the arguments out then processing then in "pameter_definition"
+    std::vector<Parameter> parameters = direct_declarator_->GetParameters(context);
+    Function function(return_value, parameters);
     context.define_function(function_name, function);
 
     if (compound_statement_ != nullptr)
     {
-        compound_statement_->EmitRISC(stream, context, passed_reg);
+        context.create_new_scope();
+        context.set_operation_type(return_type);
+
+        if (!compound_statement_) {
+            throw std::runtime_error("Error: compound_statement_ is null in FunctionDefinition::EmitRISC");
+        }
+
+        const CompoundStatement *compound_statement = dynamic_cast<const CompoundStatement*>(compound_statement_.get());
+        int initial_offset = 8 + direct_declarator_->GetOffset();
+        context.set_initial_offset(initial_offset);
+        context.increase_stack_offset(8);
+
+        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset;
+
+        stream << "addi sp, sp, -" << stack_allocated_space << std::endl;
+        stream << "sw ra, 0(sp)" <<std::endl;
+        stream << "sw s0, 4(sp)" <<std::endl;
+        direct_declarator_->StoreParameters(stream, context, dest_reg);
+        stream << "addi s0, sp, " << stack_allocated_space <<std::endl;
+
+        compound_statement_->EmitRISC(stream, context, dest_reg);
+
+        stream << context.get_last_function_end_statement() << ":" << std::endl;
+        stream << "lw s0, 4(sp)" << std::endl;
+        stream << "lw ra, 0(sp)" <<std::endl;
+        stream << "addi sp, sp, " << stack_allocated_space <<std::endl;
+        stream << "ret" << std::endl;
+
+        context.pop_operation_type();
+        context.pop_scope();
     }
 }
 

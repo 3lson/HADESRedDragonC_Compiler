@@ -12,7 +12,7 @@ class Node
 {
 public:
     virtual ~Node() {}
-    virtual void EmitRISC(std::ostream& stream, Context& context, std::string passed_reg) const = 0;
+    virtual void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const = 0;
     virtual void Print(std::ostream& stream) const = 0;
 };
 
@@ -29,11 +29,15 @@ private:
 
 public:
     //Add empty nodelist constructor for empty compound statement
-    NodeList() {}
-    NodeList(NodePtr first_node) { nodes_.push_back(std::move(first_node)); }
+    NodeList() : nodes_() {}
+    NodeList(NodePtr first_node) {
+        if(first_node){
+            nodes_.push_back(std::move(first_node));
+        }
+    }
 
     void PushBack(NodePtr item);
-    virtual void EmitRISC(std::ostream& stream, Context& context, std::string passed_reg) const override;
+    virtual void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
     virtual void Print(std::ostream& stream) const override;
     std::vector<NodePtr> const& get_nodes() const;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ast {
-
+//Flag aternative
 enum class Mode
 {
     GLOBAL,

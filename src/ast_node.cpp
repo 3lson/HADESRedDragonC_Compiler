@@ -4,10 +4,15 @@ namespace ast {
 
 void NodeList::PushBack(NodePtr item)
 {
-    nodes_.push_back(std::move(item));
+    if (item) {
+        nodes_.push_back(std::move(item));
+    }
+    else{
+
+    }
 }
 
-void NodeList::EmitRISC(std::ostream& stream, Context& context, std::string passed_reg) const
+void NodeList::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const
 {
     for (const auto& node : nodes_) //iterates over nodes
     {
@@ -15,7 +20,7 @@ void NodeList::EmitRISC(std::ostream& stream, Context& context, std::string pass
         {
             continue;
         }
-        node->EmitRISC(stream, context, passed_reg);
+        node->EmitRISC(stream, context, dest_reg);
     }
 }
 

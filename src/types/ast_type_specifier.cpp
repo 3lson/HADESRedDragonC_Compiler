@@ -1,9 +1,9 @@
 #include "../../include/types/ast_type_specifier.hpp"
 namespace ast{
-void TypeSpecifier::EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const {
+void TypeSpecifier::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const {
     (void)stream;
     (void)context;
-    (void)passed_reg;
+    (void)dest_reg;
 }
 
 void TypeSpecifier::Print(std::ostream &stream) const

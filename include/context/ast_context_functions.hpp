@@ -9,15 +9,13 @@ namespace ast {
 class ReturnValue
 {
 private:
-    bool is_pointer_;  // Renamed to avoid conflict
-    bool is_array_;    // Renamed to avoid conflict
+    bool is_pointer_;
+    bool is_array_;
     Type type;
 
 public:
-    // Default constructor initializes to default values
     ReturnValue() : is_pointer_(false), is_array_(false), type(Type::_INT) {}
 
-    // Parameterized constructor
     ReturnValue(bool is_pointer, bool is_array, Type type)
         : is_pointer_(is_pointer), is_array_(is_array), type(type) {}
 
@@ -32,21 +30,21 @@ public:
     void set_type(Type t) { type = t; }
 };
 
-class Argument
+class Parameter
 {
 private:
     std::string name;
-    bool is_pointer_;  // Renamed to avoid conflict
-    bool is_array_;    // Renamed to avoid conflict
+    bool is_pointer_;
+    bool is_array_;
     Type type;
     int offset;
 
 public:
     // Default constructor initializes to default values
-    Argument() : name(" random "), is_pointer_(false), is_array_(false), type(Type::_INT), offset(0) {}
+    Parameter() : name(" whatever "), is_pointer_(false), is_array_(false), type(Type::_INT), offset(0) {}
 
     // Parameterized constructor
-    Argument(std::string name, bool is_pointer, bool is_array, Type type, int offset)
+    Parameter(std::string name, bool is_pointer, bool is_array, Type type, int offset)
         : name(name), is_pointer_(is_pointer), is_array_(is_array), type(type), offset(offset) {}
 
     // Getters
@@ -55,6 +53,8 @@ public:
     bool is_array() const { return is_array_; }
     Type get_type() const { return type; }
     int get_offset() const { return offset; }
+
+    int GetTypeSize() const;
 
     // Setters
     void set_name(const std::string &n) { name = n; }
@@ -68,23 +68,23 @@ class Function
 {
 private:
     ReturnValue return_value;
-    std::vector<Argument> arguments;
+    std::vector<Parameter> parameters;
 
 public:
-    // Default constructor initializes the return value and arguments
-    Function() : return_value(ReturnValue()), arguments(std::vector<Argument>{}) {}
+    // Default constructor initializes the return value and parameters
+    Function() : return_value(ReturnValue()), parameters(std::vector<Parameter>{}) {}
 
     // Parameterized constructor
-    Function(ReturnValue return_value, std::vector<Argument> arguments)
-        : return_value(return_value), arguments(arguments) {}
+    Function(ReturnValue return_value, std::vector<Parameter> parameters)
+        : return_value(return_value), parameters(parameters) {}
 
     // Getters
     ReturnValue get_return_value() const { return return_value; }
-    std::vector<Argument> get_arguments() const { return arguments; }
+    std::vector<Parameter> get_parameters() const { return parameters; }
 
     // Setters
     void set_return_value(const ReturnValue &rv) { return_value = rv; }
-    void set_arguments(const std::vector<Argument> &args) { arguments = args; }
+    void set_parameters(const std::vector<Parameter> &args) { parameters = args; }
 };
 
 }//namespace ast

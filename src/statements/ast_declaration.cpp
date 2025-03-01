@@ -1,7 +1,7 @@
 #include "../../include/statements/ast_declaration.hpp"
 namespace ast {
 
-void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const
+void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     // Use dynamic_cast to a const pointer to avoid casting away constness
     const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier *>(type_specifier_.get());
@@ -11,7 +11,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string p
     }
 
     Type type = type_specifier->GetType();
-    int type_size = context.types_size.at(type);
+    int type_size = types_size.at(type);
 
     // Cast to const NodeList since declarator_list_ is a unique_ptr<const Node>
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
@@ -32,9 +32,9 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string p
         if (assignment != nullptr)
         {
             std::string variable_name = assignment->GetIdentifier();
-            assignment->EmitRISC(stream, context, passed_reg);
             Variable variable_specs(false, false, type, ScopeLevel::LOCAL, offset);
             context.define_variable(variable_name, variable_specs);
+            assignment->EmitRISC(stream, context, dest_reg);
         }
         else if (identifier != nullptr)
         {
@@ -56,6 +56,17 @@ void Declaration::Print(std::ostream &stream) const
 
     declarator_list_->Print(stream);
     stream << ";" << std::endl;
+}
+
+int Declaration::GetOffset(Context &context) const
+{
+    (void)context;
+    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier*>(type_specifier_.get());
+    Type type = type_specifier->GetType();
+    int type_size = types_size.at(type);
+
+    const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
+    return type_size * declarator_list->get_nodes().size();
 }
 
 }

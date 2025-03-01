@@ -83,8 +83,18 @@ declarator
 	;
 
 direct_declarator
-	: IDENTIFIER                { $$ = new Identifier(*$1); }
+	: IDENTIFIER                { $$ = new Identifier($1); }
 	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
+	| direct_declarator '(' parameter_list ')' { $$ = new DirectDeclarator(NodePtr($1), NodePtr($3)); }
+	;
+
+parameter_list
+	: parameter_declaration            { $$ = new ParameterList(NodePtr($1)); }
+	| parameter_list ',' parameter_declaration  { ParameterList *parameter_list = dynamic_cast<ParameterList *>($1); parameter_list->PushBack(NodePtr($3)); $$ = parameter_list;}
+	;
+
+parameter_declaration
+	: declaration_specifiers declarator         { $$ = new ParameterDefinition(NodePtr($1), NodePtr($2)); }
 	;
 
 statement
@@ -102,7 +112,7 @@ compound_statement
 		$$ = compound_statement;
 		}
 	| '{' statement_list '}' 					{ $$ = new CompoundStatement(NodePtr($2)); }
-	;
+	| '{' '}' 									{ $$ = new CompoundStatement(nullptr); }
 
 statement_list
 	: statement                 { $$ = new StatementList(NodePtr($1)); }
@@ -127,11 +137,11 @@ selection_statement
 
 primary_expression
 	: INT_CONSTANT 	{ $$ = new IntConstant($1); }
-	| IDENTIFIER	{ $$ = new Identifier(*$1); }
+	| IDENTIFIER	{ $$ = new Identifier($1); }
 	;
 
 expression_statement
-	: ';'
+	: ';'			{ $$ = new NodeList(nullptr); }
 	| expression ';' { $$ = $1; }
 	;
 
@@ -229,7 +239,11 @@ initializer_list
 
 declaration_list
 	: declaration					{ $$ = new NodeList(NodePtr($1)); }
-	| declaration_list declaration	{ NodeList *declaration_list = dynamic_cast<NodeList *>($1); declaration_list->PushBack(NodePtr($2)); $$ = declaration_list; }
+	| declaration_list declaration	{
+		DeclarationList *declaration_list = dynamic_cast<DeclarationList *>($1);
+		declaration_list->PushBack(NodePtr($2));
+		$$ = declaration_list;
+	}
 	;
 
 %%

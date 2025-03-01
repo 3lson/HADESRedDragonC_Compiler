@@ -3,21 +3,21 @@
 
 namespace ast {
 
-void IfStatement::EmitRISC(std::ostream& stream, Context& context, std::string passed_reg) const {
-    condition_->EmitRISC(stream, context, passed_reg);
+void IfStatement::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
+    condition_->EmitRISC(stream, context, dest_reg);
 
     std::string else_label = context.create_label("else");
     std::string end_label = context.create_label("end_if");
 
     stream << "beqz a0, " << else_label << std::endl;
 
-    then_branch_->EmitRISC(stream, context, passed_reg);
+    then_branch_->EmitRISC(stream, context, dest_reg);
 
     stream << "j " << end_label << std::endl;
 
     stream << else_label << ":" << std::endl;
     if (else_branch_) {
-        else_branch_->EmitRISC(stream, context, passed_reg);
+        else_branch_->EmitRISC(stream, context, dest_reg);
     }
 
     stream << end_label << ":" << std::endl;

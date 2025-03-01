@@ -1,22 +1,44 @@
 #pragma once
 
 #include "../ast_node.hpp"
+#include "ast_declaration.hpp"
 
 namespace ast{
 
-class CompoundStatement : public NodeList
+class Statement : public NodeList
 {
 public:
     using NodeList::NodeList;
-    ~CompoundStatement() = default;
-    void EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const override;
+    virtual ~Statement() = default;
+
+    virtual int GetOffset(Context &context) const = 0;
 };
 
-class StatementList : public NodeList
+class CompoundStatement : public Statement
 {
 public:
-    using NodeList::NodeList;
-    ~StatementList() = default;
+    using Statement::Statement;
+    ~CompoundStatement() override = default;
+    int GetOffset(Context &context) const;
+    void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
+};
+
+class StatementList : public Statement
+{
+public:
+    using Statement::Statement;
+    ~StatementList() override = default;
+
+    int GetOffset(Context &context) const;
+};
+
+class DeclarationList : public Statement
+{
+public:
+    using Statement::Statement;
+    ~DeclarationList() override = default;
+
+    int GetOffset(Context &context) const;
 };
 
 }
