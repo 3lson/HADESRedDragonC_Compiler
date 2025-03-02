@@ -8,6 +8,14 @@
 #include "functions/ast_function_definition.hpp"
 #include "functions/ast_parameter_definition.hpp"
 
+#include "operations/ast_arithmetic_operation.hpp"
+#include "operations/ast_relational_operation.hpp"
+#include "operations/ast_equality.hpp"
+#include "operations/ast_bitwise_operation.hpp"
+#include "operations/ast_logical_operation.hpp"
+#include "operations/ast_unary_operation.hpp"
+#include "operations/ast_operand.hpp"
+
 #include "statements/ast_return.hpp"
 #include "statements/ast_statements.hpp"
 #include "statements/ast_declaration.hpp"

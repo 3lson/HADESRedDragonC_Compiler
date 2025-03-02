@@ -12,4 +12,10 @@ void IntConstant::Print(std::ostream &stream) const
     stream << value_;
 }
 
+Type IntConstant::GetType(Context &context) const
+{
+    (void)context;
+    return Type::_INT;
+}
+
 }

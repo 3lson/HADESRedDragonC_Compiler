@@ -3,5 +3,5 @@ int f();
 
 int main()
 {
-    return !(f(42)==42);
+    return !(f()==6);
 }
