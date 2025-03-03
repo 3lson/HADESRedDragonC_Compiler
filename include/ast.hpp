@@ -25,6 +25,7 @@
 #include "symbols/ast_constant.hpp"
 
 #include "control_flow/ast_ifelse.hpp"
+#include "control_flow/ast_while.hpp"
 
 #include "types/ast_type_specifier.hpp"
 

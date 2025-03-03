@@ -4,12 +4,13 @@
 namespace ast {
 
 void IfStatement::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
-    condition_->EmitRISC(stream, context, dest_reg);
+    std::string condition_reg = context.get_register(Type::_INT);
+    condition_->EmitRISC(stream, context, condition_reg);
 
     std::string else_label = context.create_label("else");
     std::string end_label = context.create_label("end_if");
 
-    stream << "beqz a0, " << else_label << std::endl;
+    stream << "beqz " << condition_reg << ", " << else_label << std::endl;
 
     then_branch_->EmitRISC(stream, context, dest_reg);
 
@@ -21,6 +22,7 @@ void IfStatement::EmitRISC(std::ostream& stream, Context& context, std::string d
     }
 
     stream << end_label << ":" << std::endl;
+    context.deallocate_register(condition_reg);  // Release register
 }
 
 void IfStatement::Print(std::ostream& stream) const {

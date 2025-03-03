@@ -22,15 +22,30 @@ void ParameterDefinition::Print(std::ostream &stream) const{
 
 void ParameterList::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const{
     int register_num;
-    int start_register = 10; //parameter register a0 start
+    int int_register = 10; //parameter register a0 start
+    int float_register = 42;
     std::string register_name;
 
     for (const auto& node : get_nodes())
     {
         const ParameterDefinition* parameter = dynamic_cast< const ParameterDefinition*>(node.get());
 
-        //for integers - maybe used switch like for operations here?
-        register_num = start_register++;
+        switch(parameter->GetType(context)){
+            case Type::_CHAR:
+            case Type::_SHORT:
+            case Type::_INT:
+            case Type::_UNSIGNED_INT:
+            case Type::_LONG:
+                register_num = int_register++;
+                break;
+            case Type::_FLOAT:
+            case Type::_DOUBLE:
+                register_num = float_register++;
+                break;
+            default:
+                throw std::runtime_error("ParameterDefinition::EmitRISC - Invalid type");
+        }
+
         register_name = context.get_register_name(register_num);
         parameter->EmitRISC(stream, context, register_name);
     }

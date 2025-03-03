@@ -45,7 +45,6 @@ public:
     ~ContextRegister();
 
     std::string get_register(Type type);
-    std::string get_return_register() const;
     void deallocate_register(const std::string &reg_name);
     std::string get_register_name(int reg_number) const;
     void set_register_type(const std::string &reg_name, Type type);

@@ -1,7 +1,6 @@
-
-int f();
+double f();
 
 int main()
 {
-    return !(f()==6);
+    return !(f() == 5.0l);
 }

@@ -12,6 +12,7 @@
 #include "ast_context_functions.hpp"
 #include "ast_context_variables.hpp"
 #include "ast_context_mode.hpp"
+#include "ast_context_constant.hpp"
 
 namespace ast {
 
@@ -23,7 +24,7 @@ private:
 
     // ----- Stack Management -----
     int current_stack_offset;
-    int initial_stack_offset;
+    int initial_stack_offset = 0;
 
     // ----- Variable Management ------
     std::vector<std::unordered_map<std::string, Variable>> variableMap;
@@ -44,13 +45,19 @@ private:
     // ------ Type tracking -------
     std::stack<Type> operation_type_stack;
 
+    // --------- Constant management -----------
+    int constantIndex = 0;
+    std::vector<ContextConstant> constants;
+
+
 public:
     Context();
     ~Context();
 
     // ---------- Register Management --------------
     std::string get_register(Type type) { return reg_manager.get_register(type); }
-    std::string get_return_register() const { return reg_manager.get_return_register(); }
+    //Moved return register method to top-level context stage
+    std::string get_return_register() const { return return_register; }
     void deallocate_register(const std::string &reg_name) { reg_manager.deallocate_register(reg_name); }
     std::string get_register_name(int reg_number) const {return reg_manager.get_register_name(reg_number); }
     void set_register_type(const std::string &reg_name, Type type) { reg_manager.set_register_type(reg_name, type); }
@@ -104,6 +111,11 @@ public:
     // -------- Type specific properties ----------
     static const std::unordered_map<Type, int> types_size;
     static const std::unordered_map<Type, std::string> assembler_directives;
+
+    // --------- Constant Management ---------
+    int registerConstant(float value);
+    int registerConstant(double value);
+    void outputConstantDeclaration(std::ostream &stream) const;
 
 };
 

@@ -21,12 +21,13 @@
 	Node*         node;
 	NodeList*     node_list;
 	int          number_int;
-	double       number_float;
+	float       number_float;
+	double 		number_double;
 	std::string* string;
 	yytokentype  token;
 }
 
-%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL
+%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL DOUBLE_CONSTANT
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP AND_OP OR_OP
 %token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %token TYPE_NAME TYPEDEF EXTERN STATIC AUTO REGISTER SIZEOF
@@ -49,6 +50,7 @@
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
+%type <number_double> DOUBLE_CONSTANT
 %type <string> IDENTIFIER
 
 
@@ -76,6 +78,11 @@ declaration_specifiers
 
 type_specifier
 	: INT { $$ = new TypeSpecifier(Type::_INT); }
+    | DOUBLE { $$ = new TypeSpecifier(Type::_DOUBLE); }
+    | FLOAT { $$ = new TypeSpecifier(Type::_FLOAT); }
+	| CHAR 		{ $$ = new TypeSpecifier(Type::_CHAR); }
+	| UNSIGNED 	{ $$ = new TypeSpecifier(Type::_UNSIGNED_INT); }
+	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
 	;
 
 declarator
@@ -105,6 +112,7 @@ statement
 	| expression_statement 	{ $$ = $1; }
 	| jump_statement 		{ $$ = $1; }
 	| selection_statement	{ $$ = $1; }
+	| iteration_statement   { $$ = $1; }
 	;
 
 compound_statement
@@ -137,9 +145,14 @@ selection_statement
     }
     ;
 
+iteration_statement
+    : WHILE '(' expression ')' compound_statement { $$ = new WhileStatement(NodePtr($3), NodePtr($5)); }
+	;
 
 primary_expression
 	: INT_CONSTANT 	{ $$ = new IntConstant($1); }
+    | FLOAT_CONSTANT 	{ $$ = new FloatConstant($1); }
+    | DOUBLE_CONSTANT 	{ $$ = new DoubleConstant($1); }
 	| IDENTIFIER	{ $$ = new Identifier($1); }
 	;
 
