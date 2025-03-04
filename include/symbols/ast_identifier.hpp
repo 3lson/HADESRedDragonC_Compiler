@@ -1,11 +1,12 @@
 #pragma once
 
 #include "../ast_node.hpp"
+#include "../operations/ast_operand.hpp"
 #include <memory>
 
 namespace ast {
 
-class Identifier : public Node
+class Identifier : public Operand
 {
 private:
     std::string identifier_;
@@ -18,7 +19,7 @@ public:
 
     std::string GetIdentifier() const;
 
-    Type GetType(Context &context) const;
+    Type GetType(Context &context) const override;
 };
 
 }//namespace ast

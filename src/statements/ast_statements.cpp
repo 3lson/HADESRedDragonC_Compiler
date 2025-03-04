@@ -3,6 +3,7 @@ namespace ast {
 
 void CompoundStatement::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
+    context.set_initial_offset(context.get_stack_offset());
     context.create_new_scope();
     for (const auto& statement : get_nodes())
     {

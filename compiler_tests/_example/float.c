@@ -1,4 +1,4 @@
-int f(int x)
+float f(float x)
 {
     return x;
 }

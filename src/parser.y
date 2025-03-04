@@ -21,12 +21,13 @@
 	Node*         node;
 	NodeList*     node_list;
 	int          number_int;
-	double       number_float;
+	float       number_float;
+	double 		number_double;
 	std::string* string;
 	yytokentype  token;
 }
 
-%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL
+%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL DOUBLE_CONSTANT
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP AND_OP OR_OP
 %token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %token TYPE_NAME TYPEDEF EXTERN STATIC AUTO REGISTER SIZEOF
@@ -45,10 +46,11 @@
 
 %type <node_list> statement_list
 
-%type <string> unary_operator assignment_operator storage_class_specifier
+%type <string> assignment_operator storage_class_specifier
 
 %type <number_int> INT_CONSTANT STRING_LITERAL
 %type <number_float> FLOAT_CONSTANT
+%type <number_double> DOUBLE_CONSTANT
 %type <string> IDENTIFIER
 
 
@@ -76,6 +78,11 @@ declaration_specifiers
 
 type_specifier
 	: INT { $$ = new TypeSpecifier(Type::_INT); }
+    | DOUBLE { $$ = new TypeSpecifier(Type::_DOUBLE); }
+    | FLOAT { $$ = new TypeSpecifier(Type::_FLOAT); }
+	| CHAR 		{ $$ = new TypeSpecifier(Type::_CHAR); }
+	| UNSIGNED 	{ $$ = new TypeSpecifier(Type::_UNSIGNED_INT); }
+	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
 	;
 
 declarator
@@ -105,6 +112,7 @@ statement
 	| expression_statement 	{ $$ = $1; }
 	| jump_statement 		{ $$ = $1; }
 	| selection_statement	{ $$ = $1; }
+	| iteration_statement   { $$ = $1; }
 	;
 
 compound_statement
@@ -137,9 +145,14 @@ selection_statement
     }
     ;
 
+iteration_statement
+    : WHILE '(' expression ')' compound_statement { $$ = new WhileStatement(NodePtr($3), NodePtr($5)); }
+	;
 
 primary_expression
 	: INT_CONSTANT 	{ $$ = new IntConstant($1); }
+    | FLOAT_CONSTANT 	{ $$ = new FloatConstant($1); }
+    | DOUBLE_CONSTANT 	{ $$ = new DoubleConstant($1); }
 	| IDENTIFIER	{ $$ = new Identifier($1); }
 	;
 
@@ -150,6 +163,8 @@ expression_statement
 
 postfix_expression
 	: primary_expression
+	| postfix_expression INC_OP { $$ = new UnaryExpression(UnaryOp::INC, NodePtr($1)); }
+    | postfix_expression DEC_OP { $$ = new UnaryExpression(UnaryOp::DEC, NodePtr($1)); }
 	;
 
 argument_expression_list
@@ -158,6 +173,12 @@ argument_expression_list
 
 unary_expression
 	: postfix_expression
+	| INC_OP unary_expression { $$ = new UnaryExpression(UnaryOp::INC, NodePtr($2)); }
+    | DEC_OP unary_expression { $$ = new UnaryExpression(UnaryOp::DEC, NodePtr($2)); }
+    | '+' cast_expression { $$ = new UnaryExpression(UnaryOp::PLUS, NodePtr($2)); }
+	| '-' cast_expression { $$ = new UnaryExpression(UnaryOp::MINUS, NodePtr($2)); }
+	| '~' cast_expression { $$ = new UnaryExpression(UnaryOp::BITWISE_NOT, NodePtr($2)); }
+	| '!' cast_expression { $$ = new UnaryExpression(UnaryOp::LOGICAL_NOT, NodePtr($2)); }
 	;
 
 cast_expression
@@ -165,43 +186,61 @@ cast_expression
 	;
 
 multiplicative_expression
-	: cast_expression
-	;
+    : cast_expression
+    | multiplicative_expression '*' cast_expression { $$ = new ArithExpression(ArithOp::MUL, NodePtr($1), NodePtr($3)); }
+    | multiplicative_expression '/' cast_expression { $$ = new ArithExpression(ArithOp::DIV, NodePtr($1), NodePtr($3)); }
+	| multiplicative_expression '%' cast_expression { $$ = new ArithExpression(ArithOp::MOD, NodePtr($1), NodePtr($3)); }
+    ;
 
 additive_expression
-	: multiplicative_expression
-	;
+    : multiplicative_expression
+    | additive_expression '+' multiplicative_expression { $$ = new ArithExpression(ArithOp::ADD, NodePtr($1), NodePtr($3)); }
+    | additive_expression '-' multiplicative_expression { $$ = new ArithExpression(ArithOp::SUB, NodePtr($1), NodePtr($3)); }
+    ;
 
 shift_expression
 	: additive_expression
+	| shift_expression LEFT_OP additive_expression { $$ = new BitwiseExpression(BitwiseOp::LEFT_SHIFT, NodePtr($1), NodePtr($3)); }
+	| shift_expression RIGHT_OP additive_expression { $$ = new BitwiseExpression(BitwiseOp::RIGHT_SHIFT, NodePtr($1), NodePtr($3)); }
 	;
 
 relational_expression
 	: shift_expression
+	| relational_expression '<' shift_expression	{ $$ = new RelationExpression(RelationOp::LESS_THAN, NodePtr($1), NodePtr($3)); }
+	| relational_expression '>' shift_expression	{ $$ = new RelationExpression(RelationOp::GREATER_THAN, NodePtr($1), NodePtr($3)); }
+	| relational_expression LE_OP shift_expression	{ $$ = new RelationExpression(RelationOp::LESS_THAN_OR_EQUAL, NodePtr($1), NodePtr($3)); }
+	| relational_expression GE_OP shift_expression	{ $$ = new RelationExpression(RelationOp::GREATER_THAN_OR_EQUAL, NodePtr($1), NodePtr($3)); }
 	;
 
 equality_expression
 	: relational_expression
+	| equality_expression EQ_OP relational_expression { $$ = new EqualityExpression(EqualityOp::EQUAL, NodePtr($1), NodePtr($3)); }
+    | equality_expression NE_OP relational_expression { $$ = new EqualityExpression(EqualityOp::NOT_EQUAL, NodePtr($1), NodePtr($3)); }
 	;
 
 and_expression
 	: equality_expression
+	| and_expression '&' equality_expression { $$ = new BitwiseExpression(BitwiseOp::BITWISE_AND, NodePtr($1), NodePtr($3)); }
 	;
 
 exclusive_or_expression
 	: and_expression
+	| exclusive_or_expression '^' and_expression { $$ = new BitwiseExpression(BitwiseOp::BITWISE_XOR, NodePtr($1), NodePtr($3)); }
 	;
 
 inclusive_or_expression
 	: exclusive_or_expression
+	| inclusive_or_expression '|' exclusive_or_expression { $$ = new BitwiseExpression(BitwiseOp::BITWISE_OR, NodePtr($1), NodePtr($3)); }
 	;
 
 logical_and_expression
 	: inclusive_or_expression
+	| logical_and_expression AND_OP inclusive_or_expression { $$ = new LogicalExpression(LogicalOp::LOGICAL_AND, NodePtr($1), NodePtr($3)); }
 	;
 
 logical_or_expression
 	: logical_and_expression
+	| logical_or_expression OR_OP logical_and_expression { $$ = new LogicalExpression(LogicalOp::LOGICAL_OR, NodePtr($1), NodePtr($3)); }
 	;
 
 conditional_expression
