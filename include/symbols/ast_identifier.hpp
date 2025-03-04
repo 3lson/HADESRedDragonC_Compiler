@@ -11,7 +11,7 @@ private:
     std::string identifier_;
 
 public:
-    Identifier(std::string *identifier) : identifier_(std::move(*identifier)){ delete identifier; };
+    Identifier(std::unique_ptr<std::string> identifier) : identifier_(std::move(*identifier)){ }; //opted for smart pointer to ensure correct pointer handling e.g. pointer handling
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;

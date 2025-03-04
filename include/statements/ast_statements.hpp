@@ -8,7 +8,7 @@ namespace ast{
 class Statement : public NodeList
 {
 public:
-    using NodeList::NodeList;
+    using NodeList::NodeList; //inherits all constructors from nodelist
     virtual ~Statement() = default;
 
     virtual int GetOffset(Context &context) const = 0;
