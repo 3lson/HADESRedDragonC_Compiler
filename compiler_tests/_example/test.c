@@ -1,4 +1,4 @@
-double f()
+int f(int x)
 {
-    return 5.0l;
+    return x > 5 ? 10 : 20;
 }

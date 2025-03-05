@@ -3,14 +3,7 @@ namespace ast {
 
 void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    // Use dynamic_cast to a const pointer to avoid casting away constness
-    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier *>(type_specifier_.get());
-    if (!type_specifier)
-    {
-        throw std::runtime_error("Declaration EmitRISC: Invalid type specifier");
-    }
-
-    Type type = type_specifier->GetType();
+    Type type = GetType();
     int type_size = types_size.at(type);
 
     // Cast to const NodeList since declarator_list_ is a unique_ptr<const Node>
@@ -25,12 +18,13 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
         // Now dynamic_cast to the const types
         const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_ptr.get());
         const Identifier *identifier = dynamic_cast<const Identifier *>(declarator_ptr.get());
+        const DirectDeclarator *direct_declarator = dynamic_cast<const DirectDeclarator *>(declarator_ptr.get());
 
         int offset = context.get_stack_offset();
-        context.increase_stack_offset(type_size);
 
         if (assignment != nullptr)
         {
+            context.increase_stack_offset(type_size);
             std::string variable_name = assignment->GetIdentifier();
             Variable variable_specs(false, false, type, ScopeLevel::LOCAL, offset);
             context.define_variable(variable_name, variable_specs);
@@ -38,9 +32,20 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
         }
         else if (identifier != nullptr)
         {
+            context.increase_stack_offset(type_size);
             std::string variable_name = identifier->GetIdentifier();
             Variable variable_specs(false, false, type, ScopeLevel::LOCAL, offset);
             context.define_variable(variable_name, variable_specs);
+        }
+        else if (direct_declarator != nullptr)
+        {
+            std::string function_name = direct_declarator->GetIdentifier();
+
+            ReturnValue return_value = ReturnValue(false, false, type);
+            std::vector<Parameter> parameters = direct_declarator->GetParameters(context);
+            Function function = Function(return_value, parameters);
+
+            context.define_function(function_name, function);
         }
         else
         {
@@ -67,6 +72,16 @@ int Declaration::GetOffset(Context &context) const
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
     return type_size * declarator_list->get_nodes().size();
+}
+
+Type Declaration::GetType() const {
+    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier *>(type_specifier_.get());
+    if (!type_specifier)
+    {
+        throw std::runtime_error("Declaration EmitRISC: Invalid type specifier");
+    }
+
+    return type_specifier->GetType();
 }
 
 }

@@ -8,7 +8,7 @@ void ReturnStatement::EmitRISC(std::ostream &stream, Context &context, std::stri
     {
         expression_->EmitRISC(stream, context, return_register);
     }
-    stream << "j " << context.get_last_function_end_statement() << std::endl;
+    stream << "j " << context.get_function_end() << std::endl;
 }
 
 void ReturnStatement::Print(std::ostream &stream) const

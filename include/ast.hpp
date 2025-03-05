@@ -7,6 +7,7 @@
 
 #include "functions/ast_function_definition.hpp"
 #include "functions/ast_parameter_definition.hpp"
+#include "functions/ast_function_invocation.hpp"
 
 #include "operations/ast_arithmetic_operation.hpp"
 #include "operations/ast_relational_operation.hpp"
@@ -20,6 +21,7 @@
 #include "statements/ast_statements.hpp"
 #include "statements/ast_declaration.hpp"
 #include "statements/ast_assignment.hpp"
+#include "statements/ast_expression_list.hpp"
 
 #include "symbols/ast_identifier.hpp"
 #include "symbols/ast_constant.hpp"

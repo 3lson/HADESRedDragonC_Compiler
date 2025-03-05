@@ -61,11 +61,19 @@ ROOT
     : translation_unit { g_root = $1; }
 
 translation_unit
-	: external_declaration { $$ = $1; }
+	: external_declaration { $$ = new NodeList(NodePtr($1)); }
+	| translation_unit external_declaration {
+		NodeList *translation_unit = dynamic_cast<NodeList *>($1);
+		if ($2){
+			translation_unit->PushBack(NodePtr($2));
+		}
+		$$ = translation_unit;
+		}
 	;
 
 external_declaration
 	: function_definition { $$ = $1; }
+	| declaration { $$ = $1; }
 	;
 
 function_definition
@@ -138,10 +146,10 @@ jump_statement
 
 selection_statement
     : IF '(' expression ')' compound_statement {
-        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr);
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr, false);
     }
     | IF '(' expression ')' compound_statement ELSE compound_statement {
-        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7));
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7), false);
     }
     ;
 
@@ -165,10 +173,17 @@ postfix_expression
 	: primary_expression
 	| postfix_expression INC_OP { $$ = new UnaryExpression(UnaryOp::INC, NodePtr($1)); }
     | postfix_expression DEC_OP { $$ = new UnaryExpression(UnaryOp::DEC, NodePtr($1)); }
+	| postfix_expression '(' ')' { $$ = new FunctionInvocation(NodePtr($1)); }
+	| postfix_expression '(' argument_expression_list ')' { $$ = new FunctionInvocation(NodePtr($1), NodePtr($3)); }
 	;
 
 argument_expression_list
-	: assignment_expression
+	: assignment_expression    { $$ = new ExpressionList(NodePtr($1)); }
+	| argument_expression_list ',' assignment_expression {
+		ExpressionList *expression_list = dynamic_cast<ExpressionList*>($1);
+		expression_list->PushBack(NodePtr($3));
+		$$ = expression_list;
+	}
 	;
 
 unary_expression
@@ -245,15 +260,31 @@ logical_or_expression
 
 conditional_expression
 	: logical_or_expression
+	| logical_or_expression '?' expression ':' conditional_expression { $$ = new IfStatement(NodePtr($1), NodePtr($3), NodePtr($5), true); }
 	;
 
 assignment_expression
 	: conditional_expression
-	| unary_expression '=' assignment_expression	{ $$ = new Assignment(NodePtr($1), NodePtr($3)); }
+	| unary_expression '=' assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr($3)); }
+	| unary_expression MUL_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::MUL, NodePtr($1), NodePtr($3)))); }
+	| unary_expression DIV_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::DIV, NodePtr($1), NodePtr($3)))); }
+	| unary_expression MOD_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::MOD, NodePtr($1), NodePtr($3)))); }
+	| unary_expression ADD_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::ADD, NodePtr($1), NodePtr($3)))); }
+	| unary_expression SUB_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::SUB, NodePtr($1), NodePtr($3)))); }
+	| unary_expression LEFT_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::LEFT_SHIFT, NodePtr($1), NodePtr($3)))); }
+	| unary_expression RIGHT_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::RIGHT_SHIFT, NodePtr($1), NodePtr($3)))); }
+	| unary_expression AND_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_AND, NodePtr($1), NodePtr($3)))); }
+	| unary_expression XOR_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_XOR, NodePtr($1), NodePtr($3)))); }
+	| unary_expression OR_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_OR, NodePtr($1), NodePtr($3)))); }
 	;
 
 expression
-	: assignment_expression
+	: assignment_expression   { $$ = new NodeList(NodePtr($1)); }
+	| expression ',' assignment_expression {
+		NodeList *expression_list = dynamic_cast<NodeList*>($1);
+		expression_list->PushBack(NodePtr($3));
+		$$ = expression_list;
+	}
 	;
 
 declaration

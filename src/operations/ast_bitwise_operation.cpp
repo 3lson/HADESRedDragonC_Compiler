@@ -41,18 +41,19 @@ void BitwiseExpression::EmitRISC(std::ostream &stream, Context &context, std::st
 {
     Type type = std::max(context.get_operation_type(), GetType(context));
 
-    context.set_operation_type(type);
+    context.push_operation_type(type);
 
     std::string left_register = context.get_register(type);
-    std::string right_register = context.get_register(type);
-
     left_->EmitRISC(stream, context, left_register);
+    context.add_register_to_set(left_register);
+    std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
 
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
 
     context.deallocate_register(right_register);
     context.deallocate_register(left_register);
+    context.remove_register_from_set(left_register);
 
     context.pop_operation_type();
 }

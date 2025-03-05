@@ -2,9 +2,9 @@
 
 namespace ast {
 
-void Context::create_new_scope(){
+void Context::create_scope(){
     variableMap.push_back(std::unordered_map<std::string, Variable>());
-    current_stack_offset = initial_stack_offset;
+    current_stack_offset.push(current_stack_offset.top());
 }
 
 void Context::pop_scope(){
@@ -12,18 +12,16 @@ void Context::pop_scope(){
         throw std::runtime_error("Error: trying to pop empty scope");
     }
     variableMap.pop_back();
+    current_stack_offset.pop();
 }
 
 int Context::get_stack_offset() const {
-    return current_stack_offset;
+    return current_stack_offset.top();
 }
 
 void Context::increase_stack_offset(int offset){
-    current_stack_offset += offset;
+    current_stack_offset.top() += offset;
 }
 
-void Context::set_initial_offset(int offset){
-    initial_stack_offset = offset;
-}
 }//namespace ast
 

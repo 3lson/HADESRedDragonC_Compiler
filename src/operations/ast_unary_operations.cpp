@@ -46,7 +46,7 @@ std::string UnaryExpression::GetOperation(Type type) const {
 void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
     Type type = context.get_operation_type();
 
-    context.set_operation_type(type);
+    context.push_operation_type(type);
 
     std::string operand_register = context.get_register(type);
 

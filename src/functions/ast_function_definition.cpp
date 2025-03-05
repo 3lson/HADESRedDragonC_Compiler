@@ -30,17 +30,16 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
 
     if (compound_statement_ != nullptr)
     {
-        context.create_new_scope();
-        context.set_operation_type(return_type);
+        context.create_scope();
+        context.push_operation_type(return_type);
 
         if (!compound_statement_) {
             throw std::runtime_error("Error: compound_statement_ is null in FunctionDefinition::EmitRISC");
         }
 
         const CompoundStatement *compound_statement = dynamic_cast<const CompoundStatement*>(compound_statement_.get());
-        int initial_offset = 8 + direct_declarator_->GetOffset();
-        context.set_initial_offset(initial_offset);
         context.increase_stack_offset(8);
+        int initial_offset = 8 + direct_declarator_->GetOffset();
 
         int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset;
 
@@ -52,7 +51,7 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
 
         compound_statement_->EmitRISC(stream, context, dest_reg);
 
-        stream << context.get_last_function_end_statement() << ":" << std::endl;
+        stream << context.get_function_end() << ":" << std::endl;
         stream << "lw s0, 4(sp)" << std::endl;
         stream << "lw ra, 0(sp)" <<std::endl;
         stream << "addi sp, sp, " << stack_allocated_space <<std::endl;
@@ -61,6 +60,7 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         context.pop_operation_type();
         context.pop_scope();
     }
+    context.exit_function();
 }
 
 void FunctionDefinition::Print(std::ostream &stream) const

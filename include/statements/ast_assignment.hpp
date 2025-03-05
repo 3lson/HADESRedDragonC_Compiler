@@ -5,6 +5,14 @@
 
 namespace ast {
 
+class AssignmentList : public NodeList
+{
+public:
+    using NodeList::NodeList;
+    ~AssignmentList() {}
+
+};
+
 class Assignment : public Node
 {
 private:
@@ -17,6 +25,7 @@ public:
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
+
 };
 
 }//namespace ast

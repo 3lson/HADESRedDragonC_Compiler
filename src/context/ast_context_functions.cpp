@@ -5,6 +5,7 @@ void Context::define_function(std::string identifier, Function function)
     functionMap[identifier] = function;
     last_function_end_statement = identifier + "_end";
     set_return_register(function.get_return_value().get_type());
+    current_stack_offset.push(0);
 }
 
 Function Context::get_function(std::string identifier) const
@@ -16,11 +17,11 @@ Function Context::get_function(std::string identifier) const
     return functionMap.at(identifier);
 }
 
-std::string Context::get_last_function_end_statement() const
+std::string Context::get_function_end() const
 {
     if (last_function_end_statement.empty())
     {
-        throw std::runtime_error("Context::get_last_function_end_statement - no function defined");
+        throw std::runtime_error("Context::get_function_end - no function defined");
     }
     return last_function_end_statement;
 }
@@ -53,5 +54,31 @@ void Context::set_return_register(Type type)
 int Parameter::GetTypeSize() const{
     return types_size.at(type);
 }
+
+void Context::push_function_call(std::string function)
+{
+    function_stack.push(function);
+    allocated_registers.push(std::set<int>());
+}
+
+void Context::pop_function_call()
+{
+    function_stack.pop();
+    allocated_registers.pop();
+}
+
+Function Context::get_function_call() const{
+    if (function_stack.empty())
+    {
+        throw std::runtime_error("Context::get_function_call - no function call");
+    }
+    return get_function(function_stack.top());
+}
+
+void Context::exit_function()
+{
+    current_stack_offset.pop();
+}
+
 
 }//namespace ast

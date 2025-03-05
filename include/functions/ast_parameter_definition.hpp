@@ -30,6 +30,7 @@ private:
 
 public:
     using NodeList::NodeList;
+    ~ParameterList() {}
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     int GetOffset() const;

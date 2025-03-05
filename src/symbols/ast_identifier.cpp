@@ -6,7 +6,7 @@ void Identifier::EmitRISC(std::ostream &stream, Context &context, std::string de
     Type type = variable_specs.get_type();
     int offset = variable_specs.get_offset();
 
-    stream << context.load_instruction(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
+    stream << context.load_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
 }
 
 void Identifier::Print(std::ostream &stream) const

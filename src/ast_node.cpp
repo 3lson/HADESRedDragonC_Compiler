@@ -7,9 +7,6 @@ void NodeList::PushBack(NodePtr item)
     if (item) {
         nodes_.push_back(std::move(item));
     }
-    else{
-
-    }
 }
 
 void NodeList::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const

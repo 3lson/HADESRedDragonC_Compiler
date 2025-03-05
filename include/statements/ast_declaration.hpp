@@ -3,6 +3,7 @@
 #include "../ast_node.hpp"
 #include "../types/ast_type_specifier.hpp"
 #include "../symbols/ast_identifier.hpp"
+#include "../ast_direct_declarator.hpp"
 #include "ast_assignment.hpp"
 
 namespace ast{
@@ -18,6 +19,7 @@ public:
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
     int GetOffset(Context& context) const;
+    Type GetType() const;
 };
 
 }//namespace at

@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 
+//Implements the upper and lower bit handling for float and double data types
+
 namespace ast{
 
 class ContextConstant {

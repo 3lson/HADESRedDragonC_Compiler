@@ -24,7 +24,7 @@ void FloatConstant::EmitRISC(std::ostream &stream, Context &context, std::string
 
     std::string address_register = context.get_register(Type::_INT);
     stream << "lui " << address_register << ", %hi(.LC" << label_number << ")" << std::endl;
-    stream << context.load_instruction(Type::_FLOAT) << " " << dest_reg << ", %lo(.LC" << label_number << ")" << "(" << address_register << ")" << std::endl;
+    stream << context.load_instr(Type::_FLOAT) << " " << dest_reg << ", %lo(.LC" << label_number << ")" << "(" << address_register << ")" << std::endl;
     context.deallocate_register(address_register);
 }
 
@@ -45,7 +45,7 @@ void DoubleConstant::EmitRISC(std::ostream &stream, Context &context, std::strin
 
     std::string address_register = context.get_register(Type::_INT);
     stream << "lui " << address_register << ", %hi(.LC" << label_number << ")" << std::endl;
-    stream << context.load_instruction(Type::_DOUBLE) << " " << dest_reg << ", %lo(.LC" << label_number << ")" << "(" << address_register << ")" << std::endl;
+    stream << context.load_instr(Type::_DOUBLE) << " " << dest_reg << ", %lo(.LC" << label_number << ")" << "(" << address_register << ")" << std::endl;
     context.deallocate_register(address_register);
 }
 

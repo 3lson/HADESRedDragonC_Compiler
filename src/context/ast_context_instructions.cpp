@@ -1,6 +1,6 @@
 #include "../../include/context/ast_context.hpp"
 namespace ast{
-std::string Context::store_instruction(Type type) const
+std::string Context::store_instr(Type type) const
 {
     switch (type)
     {
@@ -17,13 +17,13 @@ std::string Context::store_instruction(Type type) const
     case Type::_DOUBLE:
         return "fsd";
     case Type::_VOID:
-        throw std::runtime_error("Context::store_instruction: VOID not supported");
+        throw std::runtime_error("Context::store_instr: VOID not supported");
     default:
-        throw std::runtime_error("Context::store_instruction: Invalid store type");
+        throw std::runtime_error("Context::store_instr: Invalid store type");
     }
 }
 
-std::string Context::load_instruction(Type type) const
+std::string Context::load_instr(Type type) const
 {
     switch (type)
     {
@@ -40,13 +40,13 @@ std::string Context::load_instruction(Type type) const
     case Type::_DOUBLE:
         return "fld";
     case Type::_VOID:
-        throw std::runtime_error("Context::load_instruction: VOID not supported");
+        throw std::runtime_error("Context::load_instr: VOID not supported");
     default:
-        throw std::runtime_error("Context::load_instruction: Invalid store type");
+        throw std::runtime_error("Context::load_instr: Invalid store type");
     }
 }
 
-std::string Context::move_instruction(Type type) const
+std::string Context::move_instr(Type type) const
 {
     switch (type)
     {
@@ -61,9 +61,9 @@ std::string Context::move_instruction(Type type) const
     case Type::_DOUBLE:
         return "fmv.d";
     case Type::_VOID:
-        throw std::runtime_error("Context::move_instruction: VOID not supported");
+        throw std::runtime_error("Context::move_instr: VOID not supported");
     default:
-        throw std::runtime_error("Context::move_instruction: Invalid store type");
+        throw std::runtime_error("Context::move_instr: Invalid store type");
     }
 }
 }//namespace ast

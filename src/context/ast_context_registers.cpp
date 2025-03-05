@@ -82,7 +82,7 @@ ContextRegister::~ContextRegister() {}
 // Get register method
 std::string ContextRegister::get_register(Type type){
     int start_register_file = 0;
-    int end_register_file = 0;
+    //int end_register_file = 0;
 
     switch(type){
         case Type::_INT:
@@ -90,22 +90,22 @@ std::string ContextRegister::get_register(Type type){
         case Type::_SHORT:
         case Type::_UNSIGNED_INT:
             start_register_file = 5;
-            end_register_file = 31;
+            //end_register_file = 31;
             break;
         case Type::_FLOAT:
         case Type::_DOUBLE:
         case Type::_LONG:
             start_register_file = 32;
-            end_register_file = 63;
+            //end_register_file = 63;
             break;
         default:
             throw std::runtime_error("ContextRegister::get_register: Invalid variable type");
     }
-    for (int i = start_register_file; i<=end_register_file; ++i){
+    for (int i = start_register_file; i<=64; i++){
         if (register_file[i].isAvailable()){
-            register_file[i].setAvailable(false);
-            register_file[i].setType(type);
-            return register_file[i].getName();
+            std::cout << "Allocating register: " << register_file[i].getName() << std::endl;
+            allocate_register(register_file[i].getName(), type);
+            return get_register_name(i);
         }
     }
     throw std::runtime_error("No available register found!");
@@ -115,8 +115,8 @@ std::string ContextRegister::get_register(Type type){
 void ContextRegister::deallocate_register(const std::string &reg_name){
     if(register_name_to_int.find(reg_name) != register_name_to_int.end()){
         int reg_num = register_name_to_int[reg_name];
+        std::cout << "Deallocating register: " << reg_name << std::endl;
         register_file[reg_num].setAvailable(true);
-        register_file[reg_num].setType(Type::_VOID);
     }
 }
 
@@ -133,6 +133,62 @@ void ContextRegister::set_register_type(const std::string &reg_name, Type type){
     if (register_name_to_int.find(reg_name)!= register_name_to_int.end()){
         int reg_num = register_name_to_int[reg_name];
         register_file[reg_num].setType(type);
+    }
+}
+
+int ContextRegister::get_register_id(const std::string& reg_name) const {
+    auto it = register_name_to_int.find(reg_name);
+    if (it != register_name_to_int.end()) {
+        return it->second;
+    }
+    throw std::runtime_error("Register name not found: " + reg_name);
+}
+
+
+void ContextRegister::allocate_register(std::string reg_name, Type type)
+{
+    int reg = register_name_to_int[reg_name];
+    register_file[reg].setAvailable(false);
+    register_file[reg].setType(type);
+}
+
+void Context::add_register_to_set(std::string reg_name){
+    int reg = reg_manager.get_register_id(reg_name);
+    allocated_registers.top().insert(reg);
+}
+
+void Context::remove_register_from_set(std::string reg_name){
+    int reg = reg_manager.get_register_id(reg_name);
+    allocated_registers.top().erase(reg);
+}
+
+//For function calls
+
+void Context::push_registers(std::ostream &stream)
+{
+    for (int reg : allocated_registers.top())
+    {
+        int offset = get_stack_offset();
+        Type type = reg_manager.get_register_by_id(reg).getType();
+        stream << store_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << offset << "(sp)" << std::endl;
+        allocated_register_offsets[reg] = offset;
+        increase_stack_offset(types_size.at(type));
+
+        reg_manager.get_register_by_id(reg).setAvailable(true);
+    }
+}
+
+void Context::pop_registers(std::ostream &stream)
+{
+    for (int reg : allocated_registers.top())
+    {
+        Type type = reg_manager.get_register_by_id(reg).getType();
+        stream << load_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << allocated_register_offsets[reg] << "(sp)" << std::endl;
+        increase_stack_offset(-types_size.at(type));
+        allocated_register_offsets.erase(reg);
+
+        reg_manager.get_register_by_id(reg).setAvailable(false);
+        reg_manager.get_register_by_id(reg).setType(type);
     }
 }
 

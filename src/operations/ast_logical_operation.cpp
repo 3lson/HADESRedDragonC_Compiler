@@ -28,12 +28,12 @@ std::string LogicalExpression::GetOperation(Type type) const {
 void LogicalExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const {
     Type type = std::max(context.get_operation_type(), GetType(context));
 
-    context.set_operation_type(type);
+    context.push_operation_type(type);
 
     std::string left_register = context.get_register(type);
-    std::string right_register = context.get_register(type);
-
     left_->EmitRISC(stream, context, left_register);
+    context.add_register_to_set(left_register);
+    std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
 
     if (op_ == LogicalOp::LOGICAL_AND) {
@@ -54,6 +54,7 @@ void LogicalExpression::EmitRISC(std::ostream &stream, Context &context, std::st
 
     context.deallocate_register(right_register);
     context.deallocate_register(left_register);
+    context.remove_register_from_set(left_register);
 
     context.pop_operation_type();
 }
