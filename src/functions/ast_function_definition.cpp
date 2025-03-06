@@ -41,7 +41,7 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         context.increase_stack_offset(8);
         int initial_offset = 8 + direct_declarator_->GetOffset();
 
-        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset;
+        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset + 8;
 
         stream << "addi sp, sp, -" << stack_allocated_space << std::endl;
         stream << "sw ra, 0(sp)" <<std::endl;

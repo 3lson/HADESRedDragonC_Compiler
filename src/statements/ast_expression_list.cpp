@@ -35,6 +35,9 @@ void ExpressionList::Print(std::ostream &stream) const
 {
     for (const auto& node : get_nodes())
     {
+        if (!node){
+            continue;
+        }
         node->Print(stream);
         stream << ", ";
     }

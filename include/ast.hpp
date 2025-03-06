@@ -28,6 +28,11 @@
 
 #include "control_flow/ast_ifelse.hpp"
 #include "control_flow/ast_while.hpp"
+#include "control_flow/ast_forloop.hpp"
+#include "control_flow/ast_dowhile.hpp"
+#include "control_flow/ast_continue.hpp"
+#include "control_flow/ast_break.hpp"
+#include "control_flow/ast_flow_management.hpp"
 
 #include "types/ast_type_specifier.hpp"
 

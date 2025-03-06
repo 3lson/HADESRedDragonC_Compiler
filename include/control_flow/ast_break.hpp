@@ -1,0 +1,16 @@
+#pragma once
+
+#include "ast_node.hpp"
+#include "ast_flow_management.hpp"
+
+namespace ast{
+
+class BreakStatement : public FlowManagement{
+public:
+    BreakStatement() {}
+
+    void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
+    void Print(std::ostream& stream) const override;
+};
+
+}//namespace ast

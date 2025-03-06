@@ -6,6 +6,8 @@ namespace ast {
 void WhileStatement::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
     std::string start_label = context.create_label("loop_start");
     std::string end_label = context.create_label("loop_end");
+    context.push_start_label(start_label);
+    context.push_end_label(end_label);
 
     stream << start_label << ":" << std::endl;
 
@@ -22,6 +24,9 @@ void WhileStatement::EmitRISC(std::ostream& stream, Context& context, std::strin
     stream << end_label << ":" << std::endl;
 
     context.deallocate_register(condition_reg);
+
+    context.pop_start_label();
+    context.pop_end_label();
 }
 
 void WhileStatement::Print(std::ostream& stream) const {

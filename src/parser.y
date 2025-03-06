@@ -141,6 +141,8 @@ statement_list
 jump_statement
 	: RETURN ';'            { $$ = new ReturnStatement(nullptr); }
 	| RETURN expression ';' { $$ = new ReturnStatement(NodePtr($2)); }
+	| CONTINUE ';'          { $$ = new ContinueStatement(); }
+	| BREAK ';'				{ $$ = new BreakStatement(); }
 	;
 
 
@@ -155,6 +157,9 @@ selection_statement
 
 iteration_statement
     : WHILE '(' expression ')' compound_statement { $$ = new WhileStatement(NodePtr($3), NodePtr($5)); }
+	| DO statement WHILE '(' expression ')' ';' { $$ = new DoWhileStatement(NodePtr($2), NodePtr($5)); }
+	| FOR '(' expression_statement expression_statement ')' statement { $$ = new ForStatement(NodePtr($3), NodePtr($4), nullptr, NodePtr($6)); }
+	| FOR '(' expression_statement expression_statement expression ')' statement { $$ = new ForStatement(NodePtr($3), NodePtr($4), NodePtr($5), NodePtr($7)); }
 	;
 
 primary_expression

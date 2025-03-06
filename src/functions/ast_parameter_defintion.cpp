@@ -28,6 +28,9 @@ void ParameterList::EmitRISC(std::ostream &stream, Context &context, std::string
 
     for (const auto& node : get_nodes())
     {
+        if (!node){
+            continue;
+        }
         const ParameterDefinition* parameter = dynamic_cast< const ParameterDefinition*>(node.get());
 
         switch(parameter->GetType(context)){
