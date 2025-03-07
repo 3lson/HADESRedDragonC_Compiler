@@ -19,6 +19,7 @@ public:
     EqualityExpression(EqualityOp op, NodePtr left, NodePtr right) : op_(op), left_(std::move(left)), right_(std::move(right)) {}
 
     Type GetType(Context& context) const;
+    std::string GetOperation(Type type) const;
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
     void Print(std::ostream& stream) const override;
 

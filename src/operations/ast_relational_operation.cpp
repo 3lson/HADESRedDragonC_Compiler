@@ -39,7 +39,11 @@ std::string RelationExpression::GetOperation(Type type) const {
 
 void RelationExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    Type type = std::max(context.get_operation_type(), GetType(context));
+    //Type type = std::max(context.get_operation_type(), GetType(context));
+
+    Type right_type = dynamic_cast<const Operand *>(right_.get())->GetType(context);
+    Type left_type = dynamic_cast<const Operand *>(left_.get())->GetType(context);
+    Type type = std::max(right_type, left_type);
 
     context.push_operation_type(type);
 

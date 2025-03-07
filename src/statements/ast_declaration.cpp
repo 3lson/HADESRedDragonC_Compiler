@@ -15,10 +15,11 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
     for (const auto &declarator_ptr : declarator_list->get_nodes()) // Use const reference
     {
-        // Now dynamic_cast to the const types
+        // Dynamic ast different declaration types
         const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_ptr.get());
         const Identifier *identifier = dynamic_cast<const Identifier *>(declarator_ptr.get());
         const DirectDeclarator *direct_declarator = dynamic_cast<const DirectDeclarator *>(declarator_ptr.get());
+        const ArrayDeclaration * array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator_ptr.get());
 
         int offset = context.get_stack_offset();
 
@@ -46,6 +47,22 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
             Function function = Function(return_value, parameters);
 
             context.define_function(function_name, function);
+        }
+        else if (array_declaration != nullptr)
+        {
+            int array_size = array_declaration->GetArraySize();
+
+            if (array_declaration->GetArraySize() == -1)
+            {
+                throw std::runtime_error("Declaration EmitRISC: Array size not specified");
+            }
+
+            context.increase_stack_offset(type_size * array_size);
+
+            std::string variable_name = array_declaration->GetIdentifier();
+
+            Variable variable_specs(false, true, type, ScopeLevel::LOCAL, offset);
+            context.define_variable(variable_name, variable_specs);
         }
         else
         {

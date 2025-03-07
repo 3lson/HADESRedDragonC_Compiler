@@ -2,6 +2,9 @@
 
 #include "../ast_node.hpp"
 #include "../symbols/ast_identifier.hpp"
+#include "../arrays/ast_array_declaration.hpp"
+#include "../arrays/ast_array_initialization.hpp"
+#include "../arrays/ast_array_index_access.hpp"
 
 namespace ast {
 
@@ -9,7 +12,6 @@ class AssignmentList : public NodeList
 {
 public:
     using NodeList::NodeList;
-    ~AssignmentList() {}
 
 };
 
@@ -21,7 +23,11 @@ private:
 
 public:
     Assignment(NodePtr unary_expression, NodePtr expression) : unary_expression_(std::move(unary_expression)), expression_(std::move(expression)) {}
+
     std::string GetIdentifier() const;
+
+    int GetArraySize() const;
+    bool isArrayInitialization() const;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;

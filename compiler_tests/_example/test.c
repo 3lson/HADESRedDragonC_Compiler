@@ -1,4 +1,7 @@
-int f(int x)
-{
-    return x > 5 ? 10 : 20;
+
+int f(){
+    int a;
+    a = 5;
+    a++;
+    return a;
 }

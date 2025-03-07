@@ -101,6 +101,8 @@ direct_declarator
 	: IDENTIFIER                { $$ = new Identifier($1); }
 	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
 	| direct_declarator '(' parameter_list ')' { $$ = new DirectDeclarator(NodePtr($1), NodePtr($3)); }
+	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
+	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
 	;
 
 parameter_list
@@ -135,7 +137,10 @@ compound_statement
 
 statement_list
 	: statement                 { $$ = new StatementList(NodePtr($1)); }
-	| statement_list statement  { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list statement  {
+		StatementList *statement_list = dynamic_cast<StatementList*>($1);
+		statement_list->PushBack(NodePtr($2));
+		$$=statement_list; }
 	;
 
 jump_statement
@@ -167,6 +172,7 @@ primary_expression
     | FLOAT_CONSTANT 	{ $$ = new FloatConstant($1); }
     | DOUBLE_CONSTANT 	{ $$ = new DoubleConstant($1); }
 	| IDENTIFIER	{ $$ = new Identifier($1); }
+	| '(' expression ')'	{ $$ = $2; }
 	;
 
 expression_statement
@@ -180,6 +186,7 @@ postfix_expression
     | postfix_expression DEC_OP { $$ = new UnaryExpression(UnaryOp::DEC, NodePtr($1)); }
 	| postfix_expression '(' ')' { $$ = new FunctionInvocation(NodePtr($1)); }
 	| postfix_expression '(' argument_expression_list ')' { $$ = new FunctionInvocation(NodePtr($1), NodePtr($3)); }
+	| postfix_expression '[' expression ']' { $$ = new ArrayIndexAccess{NodePtr($1), NodePtr($3)}; }
 	;
 
 argument_expression_list
@@ -284,12 +291,16 @@ assignment_expression
 	;
 
 expression
-	: assignment_expression   { $$ = new NodeList(NodePtr($1)); }
+	: assignment_expression   { $$ = new Expression(NodePtr($1)); }
 	| expression ',' assignment_expression {
-		NodeList *expression_list = dynamic_cast<NodeList*>($1);
+		Expression *expression_list = dynamic_cast<Expression*>($1);
 		expression_list->PushBack(NodePtr($3));
 		$$ = expression_list;
 	}
+	;
+
+constant_expression
+	: conditional_expression
 	;
 
 declaration
@@ -308,11 +319,16 @@ init_declarator
 
 initializer
 	: assignment_expression
+	| '{' initializer_list '}' { $$ = new ArrayInitialization(NodePtr($2)); }
+	| '{' initializer_list ',' '}' { $$ = new ArrayInitialization(NodePtr($2)); }
 	;
 
 initializer_list
 	: initializer						{ $$ = new NodeList(NodePtr($1)); }
-	| initializer_list ',' initializer	{ $1->PushBack(NodePtr($3)); $$ = $1; }
+	| initializer_list ',' initializer	{
+		NodeList *node_list = dynamic_cast<NodeList *>($1);
+		node_list->PushBack(NodePtr($3));
+		$$ = node_list; }
 	;
 
 declaration_list

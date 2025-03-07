@@ -64,10 +64,10 @@ ContextRegister::ContextRegister(){
         {57, Register("fs9", Type::_FLOAT, true)},
         {58, Register("fs10", Type::_FLOAT, true)},
         {59, Register("fs11", Type::_FLOAT, true)},
-        {60, Register("ft8", Type::_FLOAT, false)},
-        {61, Register("ft9", Type::_FLOAT, false)},
-        {62, Register("ft10", Type::_FLOAT, false)},
-        {63, Register("ft11", Type::_FLOAT, false)}
+        {60, Register("ft8", Type::_FLOAT, true)},
+        {61, Register("ft9", Type::_FLOAT, true)},
+        {62, Register("ft10", Type::_FLOAT, true)},
+        {63, Register("ft11", Type::_FLOAT, true)}
     };
 
     // Mapping register to unique id reference for quick look-ups
@@ -82,26 +82,26 @@ ContextRegister::~ContextRegister() {}
 // Get register method
 std::string ContextRegister::get_register(Type type){
     int start_register_file = 0;
-    //int end_register_file = 0;
+    int end_register_file = 0;
 
     switch(type){
         case Type::_INT:
         case Type::_CHAR:
         case Type::_SHORT:
         case Type::_UNSIGNED_INT:
+        case Type::_LONG:
             start_register_file = 5;
-            //end_register_file = 31;
+            end_register_file = 31;
             break;
         case Type::_FLOAT:
         case Type::_DOUBLE:
-        case Type::_LONG:
             start_register_file = 32;
-            //end_register_file = 63;
+            end_register_file = 63;
             break;
         default:
             throw std::runtime_error("ContextRegister::get_register: Invalid variable type");
     }
-    for (int i = start_register_file; i<=64; i++){
+    for (int i = start_register_file; i<=end_register_file; i++){
         if (register_file[i].isAvailable()){
             std::cout << "Allocating register: " << register_file[i].getName() << std::endl;
             allocate_register(register_file[i].getName(), type);

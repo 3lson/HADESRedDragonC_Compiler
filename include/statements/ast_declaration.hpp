@@ -4,6 +4,7 @@
 #include "../types/ast_type_specifier.hpp"
 #include "../symbols/ast_identifier.hpp"
 #include "../ast_direct_declarator.hpp"
+#include "../arrays/ast_array_declaration.hpp"
 #include "ast_assignment.hpp"
 
 namespace ast{

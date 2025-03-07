@@ -5,6 +5,23 @@
 
 namespace ast{
 
+class Expression : public Operand
+{
+protected:
+    std::vector<NodePtr> nodes_;
+public:
+    Expression(NodePtr first_node) {
+        nodes_.push_back(std::move(first_node));
+    }
+
+    Type GetType(Context &context) const;
+    void PushBack(NodePtr item);
+
+    virtual void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
+    virtual void Print(std::ostream &stream) const override;
+
+};
+
 class ExpressionList : public NodeList
 {
 public:

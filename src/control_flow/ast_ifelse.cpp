@@ -10,24 +10,29 @@ void IfStatement::EmitRISC(std::ostream& stream, Context& context, std::string d
     std::string else_label = context.create_label("else");
     std::string end_label = context.create_label("end_if");
 
-    if (!is_ternary_){
+    if (is_ternary_) {
         stream << "beqz " << condition_reg << ", " << else_label << std::endl;
-    } else{
-        stream << "blez " << condition_reg << ", " << else_label << std::endl; //for ternary
-    }
-
-    then_branch_->EmitRISC(stream, context, dest_reg);
-
-    if(!is_ternary_){
+        then_branch_->EmitRISC(stream, context, dest_reg);
         stream << "j " << end_label << std::endl;
-    }
-    stream << else_label << ":" << std::endl;
-    if (else_branch_) {
+
+        stream << else_label << ":" << std::endl;
         else_branch_->EmitRISC(stream, context, dest_reg);
-    }
-    if(!is_ternary_){
+
+        stream << end_label << ":" << std::endl;
+    } else {
+        stream << "beqz " << condition_reg << ", " << else_label << std::endl;
+        then_branch_->EmitRISC(stream, context, dest_reg);
+
+        stream << "j " << end_label << std::endl;
+        stream << else_label << ":" << std::endl;
+
+        if (else_branch_) {
+            else_branch_->EmitRISC(stream, context, dest_reg);
+        }
+
         stream << end_label << ":" << std::endl;
     }
+
     context.deallocate_register(condition_reg);
 }
 

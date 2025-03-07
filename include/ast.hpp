@@ -5,6 +5,10 @@
 #include <string>
 #include <vector>
 
+#include "arrays/ast_array_declaration.hpp"
+#include "arrays/ast_array_initialization.hpp"
+#include "arrays/ast_array_index_access.hpp"
+
 #include "functions/ast_function_definition.hpp"
 #include "functions/ast_parameter_definition.hpp"
 #include "functions/ast_function_invocation.hpp"

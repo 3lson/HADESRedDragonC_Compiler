@@ -1,6 +1,5 @@
-int f(int x);
+int f();
 
-int main()
-{
-    return !(f(6) == 10);
+int main() {
+    return !(f() == 6);
 }

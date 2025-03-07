@@ -6,11 +6,11 @@ std::string UnaryExpression::GetOperation(Type type) const {
     static const std::unordered_map<UnaryOp, std::unordered_map<Type, std::string>> opMap = {
         {UnaryOp::INC, {
             {Type::_INT, "addi"}, {Type::_UNSIGNED_INT, "addi"}, {Type::_CHAR, "addi"},
-            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"},
+            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"}, {Type::_FLOAT, "add"}, {Type::_DOUBLE, "add"}
         }},
         {UnaryOp::DEC, {
             {Type::_INT, "addi"}, {Type::_UNSIGNED_INT, "addi"}, {Type::_CHAR, "addi"},
-            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"},
+            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"}, {Type::_FLOAT, "fsub.s"}, {Type::_DOUBLE, "fsub.d"}
         }},
         {UnaryOp::PLUS, {
             {Type::_INT, "mv"}, {Type::_UNSIGNED_INT, "mv"}, {Type::_CHAR, "mv"},
@@ -40,11 +40,14 @@ std::string UnaryExpression::GetOperation(Type type) const {
         }
     }
 
+    std::cerr << "Unsupported unary operation or type: Operation = "
+    << static_cast<int>(op_) << ", Type = " << static_cast<int>(type) << std::endl;
+
     throw std::runtime_error("Unsupported unary operation or type.");
 }
 
 void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
-    Type type = context.get_operation_type();
+    Type type = GetType(context);
 
     context.push_operation_type(type);
 
