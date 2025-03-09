@@ -25,9 +25,11 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
         if (assignment != nullptr)
         {
-            context.increase_stack_offset(type_size);
+            int array_size = assignment->GetArraySize();
+            bool is_array = assignment->isArrayInitialization();
+            context.increase_stack_offset(type_size * array_size);
             std::string variable_name = assignment->GetIdentifier();
-            Variable variable_specs(false, false, type, ScopeLevel::LOCAL, offset);
+            Variable variable_specs(false, is_array, type, ScopeLevel::LOCAL, offset);
             context.define_variable(variable_name, variable_specs);
             assignment->EmitRISC(stream, context, dest_reg);
         }
@@ -84,11 +86,37 @@ int Declaration::GetOffset(Context &context) const
 {
     (void)context;
     const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier*>(type_specifier_.get());
+    if (!type_specifier) {
+        throw std::runtime_error("Declaration::GetOffset: Invalid type specifier");
+    }
     Type type = type_specifier->GetType();
     int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    return type_size * declarator_list->get_nodes().size();
+    if (!declarator_list) {
+        throw std::runtime_error("Declaration::GetOffset: Invalid declarator list");
+    }
+
+    int total_size = 0;
+
+    for (const auto &declarator : declarator_list->get_nodes()) {
+        const Assignment *assignment = dynamic_cast<const Assignment *>(declarator.get());
+        const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator.get());
+
+        if (assignment != nullptr) {
+            if (assignment->isArrayInitialization()) {
+                total_size += type_size * assignment->GetArraySize();
+            } else {
+                total_size += type_size;
+            }
+        } else if (array_declaration != nullptr) {
+            total_size += type_size * array_declaration->GetArraySize();
+        } else {
+            total_size += type_size;
+        }
+    }
+
+    return total_size;
 }
 
 Type Declaration::GetType() const {

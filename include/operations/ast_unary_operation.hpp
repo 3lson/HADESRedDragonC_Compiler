@@ -2,6 +2,7 @@
 
 #include "ast_node.hpp"
 #include "ast_operand.hpp"
+#include "../symbols/ast_identifier.hpp"
 
 namespace ast {
 

@@ -95,14 +95,14 @@ type_specifier
 
 declarator
 	: direct_declarator { $$ = $1; }
+	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
+	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
 	;
 
 direct_declarator
 	: IDENTIFIER                { $$ = new Identifier($1); }
 	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
 	| direct_declarator '(' parameter_list ')' { $$ = new DirectDeclarator(NodePtr($1), NodePtr($3)); }
-	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
-	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
 	;
 
 parameter_list

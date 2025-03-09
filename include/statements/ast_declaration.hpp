@@ -23,4 +23,4 @@ public:
     Type GetType() const;
 };
 
-}//namespace at
+}//namespace ast

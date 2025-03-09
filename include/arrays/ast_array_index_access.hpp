@@ -5,7 +5,7 @@
 #include "../symbols/ast_identifier.hpp"
 
 namespace ast{
-class ArrayIndexAccess : public Node{
+class ArrayIndexAccess : public Operand{
 private:
     NodePtr identifier_;
     NodePtr index_;

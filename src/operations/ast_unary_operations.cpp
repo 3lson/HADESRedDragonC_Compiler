@@ -57,6 +57,11 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
 
     std::string operation = GetOperation(type);
 
+    //temporary fix for zero reg issue (IMPORTANT)
+    if (dest_reg == "zero") {
+        dest_reg = context.get_register(type); // Allocate a new temporary register
+    }
+
     // Emit the RISC-V instruction for the unary operation
     if (op_ == UnaryOp::INC) {
         stream << operation << " " << dest_reg << ", " << operand_register << ", 1" << std::endl;
@@ -70,6 +75,14 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
         stream << operation << " " << dest_reg << ", " << operand_register << std::endl;
     } else if (op_ == UnaryOp::LOGICAL_NOT) {
         stream << operation << " " << dest_reg << ", " << operand_register << std::endl;
+    }
+
+    //If the operand is an identifier, store the result back to memory
+    const Identifier* identifier = dynamic_cast<const Identifier*>(operand_.get());
+    if (identifier){
+        Variable variable_specs = context.get_variable(identifier->GetIdentifier());
+        int offset = variable_specs.get_offset();
+        stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" <<std::endl;
     }
 
     context.deallocate_register(operand_register);
