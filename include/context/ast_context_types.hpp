@@ -17,7 +17,7 @@ enum class Type
 extern const std::unordered_map<Type, int> types_size;
 extern const std::unordered_map<Type, std::string> assembler_directives;
 
-const std::unordered_map<Type, int> types_shift = {
+const std::unordered_map<Type, int> types_mem_shift = {
     {Type::_VOID, 0},
     {Type::_CHAR, 0},
     {Type::_SHORT, 1},

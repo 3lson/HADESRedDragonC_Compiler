@@ -21,6 +21,7 @@ public:
     void Print(std::ostream &stream) const override;
     int GetOffset(Context& context) const;
     Type GetType() const;
+    void DeclareGlobal(std::ostream &stream, Context &context, std::string dest_reg) const;
 };
 
 }//namespace ast

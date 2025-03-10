@@ -3,9 +3,9 @@ namespace ast{
 void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     (void)dest_reg;
-    Variable variable_specs = context.get_variable(GetIdentifier());
-    Type type = variable_specs.get_type();
-    int offset = variable_specs.get_offset();
+    Variable variable = context.get_variable(GetIdentifier());
+    Type type = variable.get_type();
+    int offset = variable.get_offset();
     context.push_operation_type(type);
 
     std::string reg = context.get_register(type);
@@ -13,7 +13,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
 
     if (isArrayInitialization())
     {
-        dynamic_cast<const ArrayInitialization*>(expression_.get())->SaveValue(stream, context, offset, type);
+        dynamic_cast<const ArrayInitialization*>(expression_.get())->SaveValue(stream, context, variable, GetIdentifier());
     }
 
     else
@@ -23,7 +23,25 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
 
         if (identifier != nullptr)
         {
-            stream << context.store_instr(type) << " " << reg << ", " << offset << "(sp)" << std::endl;
+            if (variable.get_scope() == ScopeLevel::LOCAL)
+            {
+                stream << context.store_instr(type) << " " << reg << ", " << offset << "(sp)" << std::endl;
+            }
+
+            else if (variable.get_scope() == ScopeLevel::GLOBAL)
+            {
+                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_register = context.get_register(Type::_INT);
+
+                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+                context.deallocate_register(global_memory_register);
+            }
+
+            else
+            {
+                throw std::runtime_error("Assignment EmitRISC: Invalid scope in Identifier");
+            }
         }
 
         // If array access, load expression into specific element by first evaluating index
@@ -32,7 +50,32 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
             std::string index_register = context.get_register(Type::_INT);
             array_index_access->GetIndex(stream, context, index_register, type);
 
-            stream << context.store_instr(type) << " " << reg << ", " << variable_specs.get_offset() << "(" << index_register << ")" << std::endl;
+            if (variable.get_scope() == ScopeLevel::LOCAL)
+            {
+                // Add index to base pointer
+                stream << "add " << index_register << ", " << index_register << ", sp" << std::endl;
+                // Get variable offset
+                stream << context.store_instr(type) << " " << reg << ", " << variable.get_offset() << "(" << index_register << ")" << std::endl;
+            }
+
+            // If global scope, access global memory by targetting global label
+            else if (variable.get_scope() == ScopeLevel::GLOBAL)
+            {
+                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_register = context.get_register(Type::_INT);
+
+                // Access global memory by targetting global label
+                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                stream << "add " << global_memory_register << ", " << global_memory_register << ", " << index_register << std::endl;
+                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+
+                context.deallocate_register(global_memory_register);
+            }
+
+            else
+            {
+                throw std::runtime_error("Assignment EmitRISC: Invalid scope in ArrayAccess");
+            }
 
             context.deallocate_register(index_register);
         }
@@ -96,5 +139,21 @@ bool Assignment::isArrayInitialization() const
 {
     return dynamic_cast<const ArrayDeclaration *>(unary_expression_.get()) != nullptr;
 }
+
+void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
+{
+    //Type type = global.get_type();
+    //int type_size = types_size.at(type);
+    if (isArrayInitialization())
+    {
+        dynamic_cast<const ArrayInitialization *>(expression_.get())->InitializeGlobals(stream, context, global);
+    }
+
+    else
+    {
+        dynamic_cast<const Constant *>(expression_.get())->SaveValue(global);
+    }
+}
+
 
 }

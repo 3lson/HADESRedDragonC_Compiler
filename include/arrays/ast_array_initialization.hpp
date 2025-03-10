@@ -2,6 +2,7 @@
 
 #include "../ast_node.hpp"
 #include "../operations/ast_operand.hpp"
+#include "../symbols/ast_constant.hpp"
 
 namespace ast{
 
@@ -13,7 +14,8 @@ public:
 
     int GetArraySize() const;
 
-    void SaveValue(std::ostream& stream, Context& context, int initial_offset, Type type) const;
+    void SaveValue(std::ostream &stream, Context &context, Variable variable, std::string identifier) const;
+    void InitializeGlobals(std::ostream &stream, Context &context, Global &global) const;
 
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const;
     void Print(std::ostream& stream) const;

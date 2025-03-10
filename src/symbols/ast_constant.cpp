@@ -1,4 +1,5 @@
 #include "../../include/symbols/ast_constant.hpp"
+#include "../../include/context/ast_context_constant.hpp"
 namespace ast{
 
 void IntConstant::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
@@ -63,6 +64,26 @@ Type DoubleConstant::GetType(Context &context) const
 {
     (void)context;
     return Type::_DOUBLE;
+}
+
+void IntConstant::SaveValue(Global &global) const
+{
+    std::cout << "Pushing lower: " << value_ << std::endl;
+    global.push_lower(value_);
+}
+
+void FloatConstant::SaveValue(Global &global) const
+{
+    ContextConstant constant(value_);
+    global.push_lower(constant.get_low_bits());
+}
+
+void DoubleConstant::SaveValue(Global &global) const
+{
+    ContextConstant constant(value_);
+
+    global.push_lower(constant.get_low_bits());
+    global.push_upper(constant.get_high_bits());
 }
 
 

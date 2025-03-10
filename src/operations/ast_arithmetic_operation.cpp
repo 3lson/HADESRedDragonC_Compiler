@@ -54,6 +54,26 @@ void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::stri
 
     std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
+    const Operand* left_operand = dynamic_cast<const Operand*>(left_.get());
+    const Operand* right_operand = dynamic_cast<const Operand*>(right_.get());
+
+    if (!left_operand || !right_operand) {
+        throw std::runtime_error("Invalid operand type in ArithExpression.");
+    }
+
+    Type left_type = left_operand->GetType(context);
+    Type right_type = right_operand->GetType(context);
+
+    if (left_type == Type::_FLOAT && right_type != Type::_FLOAT) {
+        std::string temp_reg = context.get_register(Type::_FLOAT);
+        stream << "fcvt.s.w " << temp_reg << ", " << right_register << std::endl;
+        right_register = temp_reg;
+    } else if (right_type == Type::_FLOAT && left_type != Type::_FLOAT) {
+        std::string temp_reg = context.get_register(Type::_FLOAT);
+        stream << "fcvt.s.w " << temp_reg << ", " << left_register << std::endl;
+        left_register = temp_reg;
+    }
+
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
 
     context.deallocate_register(right_register);

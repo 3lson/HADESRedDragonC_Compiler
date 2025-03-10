@@ -9,8 +9,8 @@ void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::
     int offset = context.get_stack_offset();
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
 
-    Variable variable_specs(false, false, type, ScopeLevel::LOCAL, offset);
-    context.define_variable(GetIdentifier(), variable_specs);
+    Variable variable(false, false, type, offset);
+    context.define_variable(GetIdentifier(), variable);
     context.increase_stack_offset(types_size.at(type));
 }
 

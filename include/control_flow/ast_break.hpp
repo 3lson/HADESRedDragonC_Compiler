@@ -1,11 +1,10 @@
 #pragma once
 
 #include "ast_node.hpp"
-#include "ast_flow_management.hpp"
 
 namespace ast{
 
-class BreakStatement : public FlowManagement{
+class BreakStatement : public Node{
 public:
     BreakStatement() {}
 

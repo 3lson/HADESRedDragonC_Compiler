@@ -14,14 +14,27 @@ std::string ArrayIndexAccess::GetIdentifier() const
 
 void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    Variable variable_specs = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetIdentifier());
 
     Type type = GetType(context);
 
     std::string index_register = context.get_register(Type::_INT);
     GetIndex(stream, context, index_register, type);
 
-    stream << context.load_instr(type) << " " << dest_reg << ", " << variable_specs.get_offset() << "(" << index_register << ")" << std::endl;
+    if (variable.get_scope() ==ScopeLevel::LOCAL){
+        stream << "add " << index_register << ", " << index_register << ", sp" << std::endl;
+        stream << context.load_instr(type) << " " << dest_reg << ", " << variable.get_offset() << "(" << index_register << ")" << std::endl;
+    }
+    else if(variable.get_scope() == ScopeLevel::GLOBAL){
+        std::string global_memory_location = "global_" + GetIdentifier();
+        std::string global_memory_register = context.get_register(Type::_INT);
+
+        stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+        stream << "add " << global_memory_register << ", " << global_memory_register << ", " << index_register << std::endl;
+        stream << context.load_instr(type) << " " << dest_reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+
+        context.deallocate_register(global_memory_register);
+    }
 
     context.deallocate_register(index_register);
 }
@@ -34,9 +47,7 @@ void ArrayIndexAccess::GetIndex(std::ostream &stream, Context &context, std::str
     // Emit index to specified register
     index_->EmitRISC(stream, context, dest_reg);
 
-    stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_shift.at(type) << std::endl;
-
-    stream << "add " << dest_reg << ", " << dest_reg << ", sp" << std::endl;
+    stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(type) << std::endl;
 
     context.pop_operation_type();
 }
@@ -51,7 +62,7 @@ void ArrayIndexAccess::Print(std::ostream &stream) const
 
 Type ArrayIndexAccess::GetType(Context &context) const
 {
-    Variable variable_specs = context.get_variable(GetIdentifier());
-    return variable_specs.get_type();
+    Variable variable = context.get_variable(GetIdentifier());
+    return variable.get_type();
 }
 }//namespace ast

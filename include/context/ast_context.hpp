@@ -49,6 +49,9 @@ private:
     int constantIndex = 0;
     std::vector<ContextConstant> constants;
 
+    // ------- Global Management -------
+    std::unordered_map<std::string, Global> globalMap;
+
 public:
     Context();
     ~Context();
@@ -117,6 +120,10 @@ public:
     int registerConstant(float value);
     int registerConstant(double value);
     void outputConstantDeclaration(std::ostream &stream) const;
+
+    // -------- Global Management -------
+    void define_global(std::string name, Global &global);
+    void print_global(std::ostream &stream) const;
 
 };
 

@@ -80,8 +80,8 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
     //If the operand is an identifier, store the result back to memory
     const Identifier* identifier = dynamic_cast<const Identifier*>(operand_.get());
     if (identifier){
-        Variable variable_specs = context.get_variable(identifier->GetIdentifier());
-        int offset = variable_specs.get_offset();
+        Variable variable = context.get_variable(identifier->GetIdentifier());
+        int offset = variable.get_offset();
         stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" <<std::endl;
     }
 

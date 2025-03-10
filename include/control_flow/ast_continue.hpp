@@ -1,11 +1,10 @@
 #pragma once
 
 #include "ast_node.hpp"
-#include "ast_flow_management.hpp"
 
 namespace ast{
 
-class ContinueStatement : public FlowManagement{
+class ContinueStatement : public Node{
 public:
     ContinueStatement() {}
 

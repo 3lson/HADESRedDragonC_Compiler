@@ -61,9 +61,9 @@ ROOT
     : translation_unit { g_root = $1; }
 
 translation_unit
-	: external_declaration { $$ = new NodeList(NodePtr($1)); }
+	: external_declaration { $$ = new TranslationUnit(NodePtr($1)); }
 	| translation_unit external_declaration {
-		NodeList *translation_unit = dynamic_cast<NodeList *>($1);
+		TranslationUnit *translation_unit = dynamic_cast<TranslationUnit *>($1);
 		if ($2){
 			translation_unit->PushBack(NodePtr($2));
 		}

@@ -5,15 +5,9 @@
 #include "../arrays/ast_array_declaration.hpp"
 #include "../arrays/ast_array_initialization.hpp"
 #include "../arrays/ast_array_index_access.hpp"
+#include "../symbols/ast_constant.hpp"
 
 namespace ast {
-
-class AssignmentList : public NodeList
-{
-public:
-    using NodeList::NodeList;
-
-};
 
 class Assignment : public Node
 {
@@ -28,6 +22,8 @@ public:
 
     int GetArraySize() const;
     bool isArrayInitialization() const;
+
+    void InitializeGlobals(std::ostream &stream, Context &context, Global &global) const;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;

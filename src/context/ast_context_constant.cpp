@@ -1,6 +1,14 @@
 #include "../../include/context/ast_context.hpp"
+#include "../../include/context/ast_context_types.hpp"
 
 namespace ast{
+
+
+Type ContextConstant::GetType() const
+{
+    return type_;
+}
+
 
 void ContextConstant::PrintConst(std::ostream &stream) const {
     switch(type_){
@@ -30,7 +38,9 @@ int Context::registerConstant(double value) {
 
 void Context::outputConstantDeclaration(std::ostream &stream) const {
     int i = 0;
+    stream << "\t.section .rodata" << std::endl;
     for (const auto &constant : constants) {
+        stream << "\t.align " << types_mem_shift.at(constant.GetType()) << std::endl;
         stream << ".LC" << i++ << ":" << std::endl;
         constant.PrintConst(stream);
     }
