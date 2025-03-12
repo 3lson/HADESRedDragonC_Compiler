@@ -86,7 +86,7 @@
 
 <div align = "center" >
 
-|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/main/logs/Gantt_chart.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/Gantt_chart.png)|
 |:--:|
 |*img: Gantt Chart Progress after Week 1*|
 
@@ -94,7 +94,7 @@
 
 <div align = "center" >
 
-|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/main/logs/Intermediate_sprint.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/Intermediate_sprint.png)|
 |:--:|
 |*img: Intermediate Sprint Start*|
 
