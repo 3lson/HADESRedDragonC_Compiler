@@ -100,4 +100,24 @@
 
 </div>
 
+Above was our initial sprint start for the intermediate features. However as you will see in the image below the sprint was extended due to an agreement to restructure our implementation to minimise the use of flags and populate using stacks and more classes (especially in separate contexts to avoid crowded `context.hpp` 
+
+[Insert image here]
+
+### 27/02/2025 (8 hours)
+  - [Beginning of the restructure of the repo](https://github.com/3lson/HADESRedDragonC_Compiler/commit/3609b8b6316531dd0489d2c02d2798c5b00ac897)
+  - Moved the hpp files and code gen files into respective folders as per logical sense (reference to test case) - i.e control_flow for if statements
+
+### 28/02/2025 (6 hours)
+  - [Added functions with parameters](https://github.com/3lson/HADESRedDragonC_Compiler/commit/dd30a96133349bea22fb1b3a7046c7d4fe98bfe8)
+  - Added a parameter handling class which and new context classes for function handling (top function class having returnvalue class and parameter class)
+  - Add the concept of stack offset to store values and free registers for use efficiently
+
+### 01/03/2025 (2 hours) 
+  - Committed the function with parameters that I started on 28th
+  - [Fixed the `dual_var` test case](https://github.com/3lson/HADESRedDragonC_Compiler/commit/3c70286e96549a9b032fde7c5a1b47672f883eb4)
+
+
+
+
 
