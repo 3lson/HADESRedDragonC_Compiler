@@ -17,7 +17,7 @@ public:
     ArrayDeclaration(NodePtr identifier) : identifier_(std::move(identifier)), constant_expression_(nullptr) {}
 
     std::string GetIdentifier() const;
-    int GetArraySize() const;
+    int GetArraySize(Context &context) const;
 
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const;
     void Print(std::ostream& stream) const;

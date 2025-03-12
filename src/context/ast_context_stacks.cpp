@@ -4,15 +4,20 @@ namespace ast {
 
 void Context::create_scope(){
     variableMap.push_back(std::unordered_map<std::string, Variable>());
+    enumMap.push_back(enum_Map());
     current_stack_offset.push(current_stack_offset.top());
 }
 
 void Context::pop_scope(){
-    if (variableMap.empty()){
-        throw std::runtime_error("Error: trying to pop empty scope");
+    if (!variableMap.empty()){
+        variableMap.pop_back();
     }
-    variableMap.pop_back();
-    current_stack_offset.pop();
+    if (!enumMap.empty()){
+        enumMap.pop_back();
+    }
+    if (!current_stack_offset.empty()){
+        current_stack_offset.pop();
+    }
 }
 
 int Context::get_stack_offset() const {

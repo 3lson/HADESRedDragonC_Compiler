@@ -12,6 +12,7 @@
 #include "ast_context_functions.hpp"
 #include "ast_context_variables.hpp"
 #include "ast_context_constant.hpp"
+#include "ast_context_enums.hpp"
 
 namespace ast {
 
@@ -51,6 +52,10 @@ private:
 
     // ------- Global Management -------
     std::unordered_map<std::string, Global> globalMap;
+
+    // ------- Enums Management ---------
+    std::vector<enum_Map> enumMap;
+    std::unordered_map<std::string, std::vector<std::string>> enumsDefinitions;
 
 public:
     Context();
@@ -124,6 +129,13 @@ public:
     // -------- Global Management -------
     void define_global(std::string name, Global &global);
     void print_global(std::ostream &stream) const;
+
+    // -------- Enum Management ---------
+    bool is_enum(std::string identifier);
+    int get_enum_label(std::string label);
+    void define_enum(std::string name, std::vector<std::string> labels);
+    void define_enum_label(std::string label, int value);
+
 
 };
 

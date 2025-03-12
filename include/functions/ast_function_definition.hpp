@@ -2,7 +2,7 @@
 
 #include "../ast_node.hpp"
 #include "../ast_direct_declarator.hpp"
-#include "../types/ast_type_specifier.hpp"
+#include "../specifiers/ast_specifier.hpp"
 #include "../statements/ast_statements.hpp"
 
 namespace ast {

@@ -3,15 +3,19 @@ namespace ast {
 
 void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
+    const Specifier *specifier = dynamic_cast<const Specifier*>(type_specifier_.get());
+    specifier->DefineSpecifier(context);
+
+    if (declarator_list_ == nullptr)
+    {
+        return;
+    }
+
     Type type = GetType();
     int type_size = types_size.at(type);
 
     // Cast to const NodeList since declarator_list_ is a unique_ptr<const Node>
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    if (!declarator_list)
-    {
-        throw std::runtime_error("Declaration EmitRISC: Invalid declarator list");
-    }
 
     for (const auto &declarator_ptr : declarator_list->get_nodes()) // Use const reference
     {
@@ -25,7 +29,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
         if (assignment != nullptr)
         {
-            int array_size = assignment->GetArraySize();
+            int array_size = assignment->GetArraySize(context);
             bool is_array = assignment->isArrayInitialization();
             context.increase_stack_offset(type_size * array_size);
             std::string variable_name = assignment->GetIdentifier();
@@ -52,9 +56,9 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
         }
         else if (array_declaration != nullptr)
         {
-            int array_size = array_declaration->GetArraySize();
+            int array_size = array_declaration->GetArraySize(context);
 
-            if (array_declaration->GetArraySize() == -1)
+            if (array_declaration->GetArraySize(context) == -1)
             {
                 throw std::runtime_error("Declaration EmitRISC: Array size not specified");
             }
@@ -78,14 +82,17 @@ void Declaration::Print(std::ostream &stream) const
     type_specifier_->Print(stream);
     stream << " ";
 
-    declarator_list_->Print(stream);
+    if (declarator_list_)
+    {
+        declarator_list_->Print(stream);
+    }
     stream << ";" << std::endl;
 }
 
 int Declaration::GetOffset(Context &context) const
 {
     (void)context;
-    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier*>(type_specifier_.get());
+    const Specifier *type_specifier = dynamic_cast<const Specifier*>(type_specifier_.get());
     if (!type_specifier) {
         throw std::runtime_error("Declaration::GetOffset: Invalid type specifier");
     }
@@ -93,34 +100,34 @@ int Declaration::GetOffset(Context &context) const
     int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    if (!declarator_list) {
-        throw std::runtime_error("Declaration::GetOffset: Invalid declarator list");
-    }
 
     int total_size = 0;
 
-    for (const auto &declarator : declarator_list->get_nodes()) {
-        const Assignment *assignment = dynamic_cast<const Assignment *>(declarator.get());
-        const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator.get());
+    if (declarator_list_ != nullptr)
+    {
+        for (const auto &declarator : declarator_list->get_nodes()) {
+            const Assignment *assignment = dynamic_cast<const Assignment *>(declarator.get());
+            const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator.get());
+            const Identifier *identifier = dynamic_cast<const Identifier*>(declarator.get());
 
-        if (assignment != nullptr) {
-            if (assignment->isArrayInitialization()) {
-                total_size += type_size * assignment->GetArraySize();
-            } else {
-                total_size += type_size;
+            if (assignment != nullptr) {
+                if (assignment->isArrayInitialization()) {
+                    total_size += type_size * assignment->GetArraySize(context);
+                } else {
+                    total_size += type_size;
+                }
+            } else if (array_declaration != nullptr) {
+                total_size += type_size * array_declaration->GetArraySize(context);
+            } else if (identifier != nullptr) {
+                type_size = total_size + type_size;
             }
-        } else if (array_declaration != nullptr) {
-            total_size += type_size * array_declaration->GetArraySize();
-        } else {
-            total_size += type_size;
         }
     }
-
     return total_size;
 }
 
 Type Declaration::GetType() const {
-    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier *>(type_specifier_.get());
+    const Specifier *type_specifier = dynamic_cast<const Specifier *>(type_specifier_.get());
     if (!type_specifier)
     {
         throw std::runtime_error("Declaration EmitRISC: Invalid type specifier");
@@ -132,6 +139,14 @@ Type Declaration::GetType() const {
 void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     (void)dest_reg;
+
+    const Specifier *specifier = dynamic_cast<const Specifier *>(type_specifier_.get());
+    specifier->DefineSpecifier(context);
+
+    if (declarator_list_ == nullptr)
+    {
+        return;
+    }
     Type type = GetType();
     //int type_size = types_size.at(type);
 
@@ -147,7 +162,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
         if (assignment != nullptr)
         {
-            int array_size = assignment->GetArraySize();
+            int array_size = assignment->GetArraySize(context);
 
             bool is_array = assignment->isArrayInitialization();
 
@@ -167,9 +182,9 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
         else if (array_declaration != nullptr)
         {
-            int array_size = array_declaration->GetArraySize();
+            int array_size = array_declaration->GetArraySize(context);
 
-            if (array_declaration->GetArraySize() == -1)
+            if (array_declaration->GetArraySize(context) == -1)
             {
                 throw std::runtime_error("Declaration EmitRISC: Array size not specified");
             }

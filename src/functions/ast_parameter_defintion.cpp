@@ -4,7 +4,7 @@ namespace ast{
 
 void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    const TypeSpecifier* type_specifier_ptr = dynamic_cast<const TypeSpecifier*>(type_specifier_.get());
+    const Specifier* type_specifier_ptr = dynamic_cast<const Specifier*>(type_specifier_.get());
     Type type = type_specifier_ptr->GetType();
     int offset = context.get_stack_offset();
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
@@ -87,7 +87,7 @@ std::string ParameterDefinition::GetIdentifier() const
 
 Type ParameterDefinition::GetType(Context &context) const
 {
-    const TypeSpecifier* type_specifier_ptr = dynamic_cast<const TypeSpecifier*>(type_specifier_.get());
+    const Specifier* type_specifier_ptr = dynamic_cast<const Specifier*>(type_specifier_.get());
     (void)context;
     return type_specifier_ptr->GetType();
 }

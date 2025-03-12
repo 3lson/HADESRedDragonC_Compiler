@@ -10,9 +10,9 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
 
     std::string function_name = direct_declarator_->GetIdentifier();
 
-    auto return_type_specifier = dynamic_cast<const TypeSpecifier *>(declaration_specifiers_.get());
+    const Specifier *return_type_specifier = dynamic_cast<const Specifier *>(declaration_specifiers_.get());
     if (!return_type_specifier) {
-        throw std::runtime_error("Failed to cast declaration_specifiers_ to TypeSpecifier");
+        throw std::runtime_error("Failed to cast declaration_specifiers_ to Specifier");
     }
     Type return_type = return_type_specifier->GetType();
 

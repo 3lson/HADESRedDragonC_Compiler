@@ -6,6 +6,7 @@
 #include "../arrays/ast_array_initialization.hpp"
 #include "../arrays/ast_array_index_access.hpp"
 #include "../symbols/ast_constant.hpp"
+#include "../ast_direct_declarator.hpp"
 
 namespace ast {
 
@@ -20,7 +21,7 @@ public:
 
     std::string GetIdentifier() const;
 
-    int GetArraySize() const;
+    int GetArraySize(Context &context) const;
     bool isArrayInitialization() const;
 
     void InitializeGlobals(std::ostream &stream, Context &context, Global &global) const;

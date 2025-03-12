@@ -37,7 +37,11 @@
 #include "control_flow/ast_continue.hpp"
 #include "control_flow/ast_break.hpp"
 
-#include "types/ast_type_specifier.hpp"
+#include "specifiers/ast_specifier.hpp"
+#include "specifiers/ast_type_specifier.hpp"
+
+#include "enums/ast_enum_specifier.hpp"
+#include "enums/ast_enum.hpp"
 
 #include "ast_translation_unit.hpp"
 #include "ast_direct_declarator.hpp"

@@ -20,6 +20,8 @@ public:
     std::string GetIdentifier() const;
 
     Type GetType(Context &context) const override;
+
+    int GetValue(Context &context) const;
 };
 
 }//namespace ast

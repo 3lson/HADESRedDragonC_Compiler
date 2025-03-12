@@ -1,6 +1,11 @@
-int x;
+int f()
+{
+    enum X
+    {
+        hello,
+        its = 2,
+        me
+    };
 
-int f(){
-    x = 1;
-    return x;
+    return me;
 }

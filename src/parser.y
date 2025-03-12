@@ -91,6 +91,33 @@ type_specifier
 	| CHAR 		{ $$ = new TypeSpecifier(Type::_CHAR); }
 	| UNSIGNED 	{ $$ = new TypeSpecifier(Type::_UNSIGNED_INT); }
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
+	| enum_specifier { $$ = $1; }
+	;
+
+enum_specifier
+	: ENUM '{' enumerator_list '}' {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($3);
+		$$ = new EnumeratorSpecifier(enumerator_list);
+	}
+	| ENUM IDENTIFIER '{' enumerator_list '}' {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($4);
+		$$ = new EnumeratorSpecifier($2, enumerator_list);
+	}
+	| ENUM IDENTIFIER { $$ = new EnumeratorSpecifier($2); }
+	;
+
+enumerator_list
+	: enumerator { $$ = new NodeList(NodePtr($1)); }
+	| enumerator_list ',' enumerator {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($1);
+		enumerator_list->PushBack(NodePtr($3));
+		$$ = enumerator_list;
+	}
+	;
+
+enumerator
+	: IDENTIFIER { $$ = new Enumerator($1); }
+	| IDENTIFIER '=' constant_expression { $$ = new Enumerator($1, NodePtr($3)); }
 	;
 
 declarator
@@ -305,6 +332,7 @@ constant_expression
 
 declaration
 	: declaration_specifiers init_declarator_list ';'	{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	| declaration_specifiers ';' { $$ = new Declaration(NodePtr($1)); }
 	;
 
 init_declarator_list

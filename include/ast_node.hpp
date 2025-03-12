@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "context/ast_context.hpp"
 

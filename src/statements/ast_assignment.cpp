@@ -118,18 +118,18 @@ std::string Assignment::GetIdentifier() const
     throw std::runtime_error("Assignment GetIdentifier: Not an identifier");
 }
 
-int Assignment::GetArraySize() const
+int Assignment::GetArraySize(Context &context) const
 {
     const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(unary_expression_.get());
 
     if (array_declaration != nullptr)
     {
 
-        if (array_declaration->GetArraySize() == -1)
+        if (array_declaration->GetArraySize(context) == -1)
         {
             return dynamic_cast<const ArrayInitialization *>(expression_.get())->GetArraySize();
         }
-        return array_declaration->GetArraySize();
+        return array_declaration->GetArraySize(context);
     }
 
     return 1;
@@ -142,8 +142,6 @@ bool Assignment::isArrayInitialization() const
 
 void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
 {
-    //Type type = global.get_type();
-    //int type_size = types_size.at(type);
     if (isArrayInitialization())
     {
         dynamic_cast<const ArrayInitialization *>(expression_.get())->InitializeGlobals(stream, context, global);
