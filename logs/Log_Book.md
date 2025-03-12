@@ -86,7 +86,7 @@
 
 <div align = "center" >
 
-|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/Gantt_chart.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Gantt_chart.png)|
 |:--:|
 |*img: Gantt Chart Progress after Week 1*|
 
