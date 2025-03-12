@@ -42,7 +42,7 @@
 
 <div align = "center" >
 
-|![alt text](image-2.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/image-2.png)|
 |:--:|
 |*img: progress so far on jira project backlog*|
 
