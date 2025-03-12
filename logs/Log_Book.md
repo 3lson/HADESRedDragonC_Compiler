@@ -94,7 +94,7 @@
 
 <div align = "center" >
 
-|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/Intermediate_sprint.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Intermediate_sprint.png)|
 |:--:|
 |*img: Intermediate Sprint Start*|
 
