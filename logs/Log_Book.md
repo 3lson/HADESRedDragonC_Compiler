@@ -24,7 +24,7 @@
 
 <div align="center">
 
-|![alt text](<Screenshot 2025-02-15 164326.png>)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Screenshot%202025-02-15%20164326.png)|
 |:--:|
 |*img: Day 1 working on time management on jira.com on teams*|
 
