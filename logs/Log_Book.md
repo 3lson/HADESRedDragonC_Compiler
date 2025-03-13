@@ -102,7 +102,13 @@
 
 Above was our initial sprint start for the intermediate features. However as you will see in the image below the sprint was extended due to an agreement to restructure our implementation to minimise the use of flags and populate using stacks and more classes (especially in separate contexts to avoid crowded `context.hpp` 
 
-[Insert image here]
+<div align = "center" >
+
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Intermediate_sprint.png)|
+|:--:|
+|*img: New Intermediate Sprint*|
+
+</div>
 
 ### 27/02/2025 (8 hours)
   - [Beginning of the restructure of the repo](https://github.com/3lson/HADESRedDragonC_Compiler/commit/3609b8b6316531dd0489d2c02d2798c5b00ac897)
@@ -117,7 +123,69 @@ Above was our initial sprint start for the intermediate features. However as you
   - Committed the function with parameters that I started on 28th
   - [Fixed the `dual_var` test case](https://github.com/3lson/HADESRedDragonC_Compiler/commit/3c70286e96549a9b032fde7c5a1b47672f883eb4)
 
+### 02/03/2025 (6 hours)
+  - [Implemented Arithmetic Operations](https://github.com/3lson/HADESRedDragonC_Compiler/commit/6e606f8f2654c1b13dab6d3bcd78987ead4b4fad)
+  - [Implement Unary Operations](https://github.com/3lson/HADESRedDragonC_Compiler/commit/6e606f8f2654c1b13dab6d3bcd78987ead4b4fad)
+  - [Added custom test cases for arithmetic of those not provided in seen](https://github.com/3lson/HADESRedDragonC_Compiler/commit/6e606f8f2654c1b13dab6d3bcd78987ead4b4fad)
 
+### 03/03/2025 (8 hours)
+  - [Refactor basic features and some intermediate started](https://github.com/3lson/HADESRedDragonC_Compiler/commit/feef033985529ee6563c9b5135ff90353913d610)
+  - Fixed ifelse issue with condition evaluation
+  - Implement while loops from the prev branch
+  - Implemented double, float, unsigned declaration and operations
+
+### 04/03/2025 (6 hours)
+  - [Implemented function calls with and without parameters and also internal and external calls](https://github.com/3lson/HADESRedDragonC_Compiler/commit/28b81501b7b7aa8fa70a424d6562de3bbdb2397f)
+  - Add some test cases for different assignment types (`+=`, `*=`)
+  - Tried to implement ternary operations (Not working yet)
+
+### 05/03/2025 (4 hours)
+  - [Tried to implement ternary operations (Not working yet)]((https://github.com/3lson/HADESRedDragonC_Compiler/commit/28b81501b7b7aa8fa70a424d6562de3bbdb2397f))
+  - Completed function calls
+
+### 06/03/2025 (8 hours)
+  - [Tried to implement break and continue(needs fixing)](https://github.com/3lson/HADESRedDragonC_Compiler/commit/fc01e5044f55f22d99574250560fa7e076ab106d)
+  - Implemented for loops
+  - Implemented do while loops
+  - recursive test case for functions fixed
+  - character literal in lexer added
+
+### 07/03/2025 (8 hours)
+  - [Implemented array initialisation, access, and declaration](https://github.com/3lson/HADESRedDragonC_Compiler/commit/48d8a6ba9858b3233756b0825fd378f909c32d6c)
+  - Fixed ternary operator
+  - Implement bracket precedence on arithmetics
+  - Implemented and added new test cases for binary, floats, arithmetic operations
+
+### 08/03/2025 (4 hours)
+  - Tried to fix increment and decrement (not working)
+  - Found out increment issue was not store the change of the identifier back onto the stack and therefore not increment properly hence the root problem to **for loops**, **break and continue**
+  - Implemented functions that take up to 8 parameters
+
+### 09/03/2025 (6 hours)
+  - [Fixed increment, decrement](https://github.com/3lson/HADESRedDragonC_Compiler/commit/11c57d6344aaaf1d2b6cd37aa25aa9a7fc759b4f)
+  - break and continue statements fixed
+  - reading and writing of an array
+  - multiple functions calling each other fixed
+
+### 10/03/2025 (10 hours)
+  - [Implement global scopes](https://github.com/3lson/HADESRedDragonC_Compiler/commit/f240cdb9513e473375f8d15f303cd53b4f694a03)
+
+### 11/03/2025 (2 hours)
+  - Clean up unnecessary functions implemented in earlier stages that are now redundant
+
+### 12/03/2025 (4 hours)
+  - Tried to implement enums (not working yet)
+
+### 13/03/2025 (6 hours) 
+  - [Implemented enums](https://github.com/3lson/HADESRedDragonC_Compiler/commit/442c074d168f4c105e2dadc7185bec7c31b8f0ef)
+  - Updated logbook
+
+---
+<div align = "center" >
+<b>Intermediate Features complete</b>
+</div>
+
+---
 
 
 
