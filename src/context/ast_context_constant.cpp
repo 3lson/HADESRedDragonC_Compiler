@@ -13,11 +13,11 @@ Type ContextConstant::GetType() const
 void ContextConstant::PrintConst(std::ostream &stream) const {
     switch(type_){
         case Type::_FLOAT:
-            stream << assembler_directives.at(Type::_FLOAT) << " " << low_bits << std::endl;
+            stream << "\t" << assembler_directives.at(Type::_FLOAT) << " " << low_bits << std::endl;
             break;
             case Type::_DOUBLE:
-            stream << assembler_directives.at(Type::_DOUBLE) << " " << low_bits << std::endl;
-            stream << assembler_directives.at(Type::_DOUBLE) << " " << high_bits << std::endl;
+            stream << "\t" << assembler_directives.at(Type::_DOUBLE) << " " << low_bits << std::endl;
+            stream << "\t" << assembler_directives.at(Type::_DOUBLE) << " " << high_bits << std::endl;
             break;
         default:
             throw std::runtime_error("ContextConstant::PrintConst: Unsupported type");

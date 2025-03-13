@@ -11,6 +11,7 @@ enum class Type
     _LONG,
     _FLOAT,
     _DOUBLE,
+    _STRUCT,
 };
 
 //Defined in context.cpp now for universal use

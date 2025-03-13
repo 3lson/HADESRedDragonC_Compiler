@@ -13,6 +13,7 @@
 #include "ast_context_variables.hpp"
 #include "ast_context_constant.hpp"
 #include "ast_context_enums.hpp"
+#include "ast_context_typedef.hpp"
 
 namespace ast {
 
@@ -26,6 +27,8 @@ private:
 
     // ----- Stack Management -----
     std::stack<int> current_stack_offset;
+
+    int total_offset =0;
 
     // ----- Variable Management ------
     std::vector<std::unordered_map<std::string, Variable>> variableMap;
@@ -57,6 +60,9 @@ private:
     std::vector<enum_Map> enumMap;
     std::unordered_map<std::string, std::vector<std::string>> enumsDefinitions;
 
+    // ------ Typedef Management ------
+    std::vector<std::unordered_map<std::string, TypedefSpec>> typedefMap;
+
 public:
     Context();
     ~Context();
@@ -86,6 +92,7 @@ public:
     void pop_scope();
     int get_stack_offset() const;
     void increase_stack_offset(int offset);
+    void set_stack_offset(int offset);
 
     // --------- Function Management ---------
     void define_function(std::string identifier, Function function);
@@ -136,7 +143,15 @@ public:
     void define_enum(std::string name, std::vector<std::string> labels);
     void define_enum_label(std::string label, int value);
 
+    // ----- Typedef Management -------
+    void define_typedef(const std::string& name, const TypedefSpec& spec);
+    TypedefSpec get_typedef(const std::string& name) const;
+    bool is_typedef(const std::string& name) const;
+    int get_typedef_base_pointers(std::string alias);
+    Type get_typedef_base_type(std::string alias);
 
 };
+
+extern Context context;
 
 }//namespace ast

@@ -20,6 +20,7 @@
 #include "operations/ast_logical_operation.hpp"
 #include "operations/ast_unary_operation.hpp"
 #include "operations/ast_operand.hpp"
+#include "operations/ast_sizeof.hpp"
 
 #include "statements/ast_return.hpp"
 #include "statements/ast_statements.hpp"
@@ -42,6 +43,8 @@
 
 #include "enums/ast_enum_specifier.hpp"
 #include "enums/ast_enum.hpp"
+
+#include "typedef/ast_typedef.hpp"
 
 #include "ast_translation_unit.hpp"
 #include "ast_direct_declarator.hpp"

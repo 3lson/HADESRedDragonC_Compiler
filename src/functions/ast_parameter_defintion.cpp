@@ -11,7 +11,7 @@ void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::
 
     Variable variable(false, false, type, offset);
     context.define_variable(GetIdentifier(), variable);
-    context.increase_stack_offset(types_size.at(type));
+    context.increase_stack_offset(GetTypeSize(context));
 }
 
 void ParameterDefinition::Print(std::ostream &stream) const{

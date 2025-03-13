@@ -21,11 +21,15 @@ void Context::pop_scope(){
 }
 
 int Context::get_stack_offset() const {
-    return current_stack_offset.top();
+    return current_stack_offset.top() - total_offset;
 }
 
 void Context::increase_stack_offset(int offset){
     current_stack_offset.top() += offset;
+}
+
+void Context::set_stack_offset(int offset){
+    total_offset = offset;
 }
 
 }//namespace ast

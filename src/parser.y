@@ -82,6 +82,7 @@ function_definition
 
 declaration_specifiers
 	: type_specifier { $$ = $1; }
+	| TYPEDEF declaration_specifiers { $$ = new Typedef(NodePtr($2)); }
 	;
 
 type_specifier
@@ -233,6 +234,8 @@ unary_expression
 	| '-' cast_expression { $$ = new UnaryExpression(UnaryOp::MINUS, NodePtr($2)); }
 	| '~' cast_expression { $$ = new UnaryExpression(UnaryOp::BITWISE_NOT, NodePtr($2)); }
 	| '!' cast_expression { $$ = new UnaryExpression(UnaryOp::LOGICAL_NOT, NodePtr($2)); }
+	| SIZEOF unary_expression { $$ = new SizeOf(NodePtr($2)); }
+	| SIZEOF '(' type_specifier ')' { $$ = new SizeOf(NodePtr($3)); }
 	;
 
 cast_expression
@@ -331,7 +334,16 @@ constant_expression
 	;
 
 declaration
-	: declaration_specifiers init_declarator_list ';'	{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	: declaration_specifiers init_declarator_list ';'	{
+		const Typedef *typedef_definition = dynamic_cast<const Typedef *>($1);
+		if (typedef_definition != nullptr) {
+    		NodeList *alias_list = dynamic_cast<NodeList *>($2); // Extract raw pointer
+    		if (alias_list) {
+        		const_cast<Typedef *>(typedef_definition)->DefineTypedef(alias_list);
+    		}
+		}
+		$$ = new Declaration(NodePtr($1), NodePtr($2));
+		}
 	| declaration_specifiers ';' { $$ = new Declaration(NodePtr($1)); }
 	;
 

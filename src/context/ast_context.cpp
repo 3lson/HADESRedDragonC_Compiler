@@ -2,6 +2,8 @@
 
 namespace ast{
 
+//extern Context context; //Global context object for the lexer hack in typedef
+
 const std::unordered_map<Type, int> types_size = {
     {Type::_VOID, 0},
     {Type::_CHAR, 1},
@@ -31,6 +33,7 @@ Context::Context()
     allocated_registers.push(std::set<int>());
 
     enumMap.push_back(enum_Map());
+    typedefMap.push_back(std::unordered_map<std::string, TypedefSpec>());
 }
 
 Context::~Context()
@@ -38,3 +41,5 @@ Context::~Context()
 }
 
 }//namespace ast
+
+ast::Context ast::context;

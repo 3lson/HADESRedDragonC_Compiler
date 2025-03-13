@@ -1,11 +1,7 @@
-int f()
+double doubleAssign()
 {
-    enum X
-    {
-        hello,
-        its = 2,
-        me
-    };
-
-    return me;
+    double x, y;
+    x = 2.5;
+    y = 1.5;
+    return x + y;
 }

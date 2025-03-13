@@ -1,6 +1,7 @@
-int f();
+double doubleAssign();
 
 int main()
 {
-    return !(f() == 3);
+    return !(doubleAssign()==4.0);
 }
+
