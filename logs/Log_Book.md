@@ -104,7 +104,7 @@ Above was our initial sprint start for the intermediate features. However as you
 
 <div align = "center" >
 
-|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Intermediate_sprint.png)|
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/Intermediate_Revised.png)|
 |:--:|
 |*img: New Intermediate Sprint*|
 
