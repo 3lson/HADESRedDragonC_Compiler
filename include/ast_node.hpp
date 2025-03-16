@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <optional>
 
 #include "context/ast_context.hpp"
 
@@ -11,7 +12,7 @@ namespace ast {
 class Node
 {
 public:
-    virtual ~Node() {}
+    virtual ~Node() = default;
     virtual void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const = 0;
     virtual void Print(std::ostream& stream) const = 0;
 };
@@ -35,6 +36,7 @@ public:
             nodes_.push_back(std::move(first_node));
         }
     }
+    virtual ~NodeList();
 
     void PushBack(NodePtr item);
     virtual void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;

@@ -22,11 +22,14 @@ void DirectDeclarator::Print(std::ostream &stream) const
 std::string DirectDeclarator::GetIdentifier() const
 {
     const Identifier *id = dynamic_cast<const Identifier *>(identifier_.get());
-    if (id) {
+    const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
+    if (id != nullptr) {
         return id->GetIdentifier();
+    } else if (declarator != nullptr){
+        return declarator->GetIdentifier();
     }
+    throw std::runtime_error("DirectDeclarator::GetIdentifier() - identifier_ is not an Identifier");
 
-    return "";
 }
 
 std::vector<Parameter> DirectDeclarator::GetParameters(Context &context) const
@@ -56,13 +59,29 @@ int DirectDeclarator::GetOffset() const
 }
 
 
-void DirectDeclarator::StoreParameters(std::ostream &stream, Context &context, std::string passed_reg) const
+void DirectDeclarator::StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     if (parameter_list_ != nullptr)
     {
         const ParameterList *parameter_list = dynamic_cast<const ParameterList*>(parameter_list_.get());
-        parameter_list->EmitRISC(stream, context, passed_reg);
+        parameter_list->EmitRISC(stream, context, dest_reg);
     }
+}
+
+bool DirectDeclarator::isPointer() const
+{
+    return false;
+}
+
+int DirectDeclarator::GetDereference() const
+{
+    const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
+    if (declarator != nullptr)
+    {
+        return declarator->GetDereference();
+    }
+
+    return 0;
 }
 
 }//namespace ast

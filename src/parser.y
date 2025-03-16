@@ -61,11 +61,19 @@ ROOT
     : translation_unit { g_root = $1; }
 
 translation_unit
-	: external_declaration { $$ = $1; }
+	: external_declaration { $$ = new TranslationUnit(NodePtr($1)); }
+	| translation_unit external_declaration {
+		TranslationUnit *translation_unit = dynamic_cast<TranslationUnit *>($1);
+		if ($2){
+			translation_unit->PushBack(NodePtr($2));
+		}
+		$$ = translation_unit;
+		}
 	;
 
 external_declaration
 	: function_definition { $$ = $1; }
+	| declaration { $$ = $1; }
 	;
 
 function_definition
@@ -74,6 +82,7 @@ function_definition
 
 declaration_specifiers
 	: type_specifier { $$ = $1; }
+	| TYPEDEF declaration_specifiers { $$ = new Typedef(NodePtr($2)); }
 	;
 
 type_specifier
@@ -83,16 +92,58 @@ type_specifier
 	| CHAR 		{ $$ = new TypeSpecifier(Type::_CHAR); }
 	| UNSIGNED 	{ $$ = new TypeSpecifier(Type::_UNSIGNED_INT); }
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
+    | VOID      { $$ = new TypeSpecifier(Type::_VOID); }
+	| enum_specifier { $$ = $1; }
+	;
+
+enum_specifier
+	: ENUM '{' enumerator_list '}' {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($3);
+		$$ = new EnumeratorSpecifier(enumerator_list);
+	}
+	| ENUM IDENTIFIER '{' enumerator_list '}' {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($4);
+		$$ = new EnumeratorSpecifier($2, enumerator_list);
+	}
+	| ENUM INT	{ $$ = new TypeSpecifier(Type::_INT); }
+	;
+
+enumerator_list
+	: enumerator { $$ = new NodeList(NodePtr($1)); }
+	| enumerator_list ',' enumerator {
+		NodeList* enumerator_list = dynamic_cast<NodeList*>($1);
+		enumerator_list->PushBack(NodePtr($3));
+		$$ = enumerator_list;
+	}
+	;
+
+enumerator
+	: IDENTIFIER { $$ = new Enumerator($1); }
+	| IDENTIFIER '=' constant_expression { $$ = new Enumerator($1, NodePtr($3)); }
 	;
 
 declarator
 	: direct_declarator { $$ = $1; }
+	| pointer direct_declarator {
+		PointerDeclaration* _ptr = new PointerDeclaration(NodePtr($2));
+		for (int i = 1; i< dynamic_cast<const IntConstant*>($1)->GetValue(); i++){
+			_ptr = new PointerDeclaration(NodePtr(_ptr));
+		}
+		$$ = _ptr;
+		delete $1;
+		}
 	;
+
+pointer
+	: '*' { $$ = new IntConstant(1); }
+	| '*' pointer { $$ = new IntConstant(dynamic_cast<const IntConstant *>($2)->GetValue() +1); delete $2; }
 
 direct_declarator
 	: IDENTIFIER                { $$ = new Identifier($1); }
 	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
 	| direct_declarator '(' parameter_list ')' { $$ = new DirectDeclarator(NodePtr($1), NodePtr($3)); }
+	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
+	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
 	;
 
 parameter_list
@@ -120,7 +171,10 @@ compound_statement
 
 statement_list
 	: statement                 { $$ = new StatementList(NodePtr($1)); }
-	| statement_list statement  { $1->PushBack(NodePtr($2)); $$=$1; }
+	| statement_list statement  {
+		StatementList *statement_list = dynamic_cast<StatementList*>($1);
+		statement_list->PushBack(NodePtr($2));
+		$$=statement_list; }
 	;
 
 statement
@@ -136,6 +190,8 @@ statement
 jump_statement
 	: RETURN ';'            { $$ = new ReturnStatement(nullptr); }
 	| RETURN expression ';' { $$ = new ReturnStatement(NodePtr($2)); }
+	| CONTINUE ';'          { $$ = new ContinueStatement(); }
+	| BREAK ';'				{ $$ = new BreakStatement(); }
 	;
 
 switch_statement
@@ -149,15 +205,18 @@ case_statement
 	;
 selection_statement
     : IF '(' expression ')' compound_statement {
-        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr);
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr, false);
     }
     | IF '(' expression ')' compound_statement ELSE compound_statement {
-        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7));
+        $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7), false);
     }
     ;
 
 iteration_statement
     : WHILE '(' expression ')' compound_statement { $$ = new WhileStatement(NodePtr($3), NodePtr($5)); }
+	| DO statement WHILE '(' expression ')' ';' { $$ = new DoWhileStatement(NodePtr($2), NodePtr($5)); }
+	| FOR '(' expression_statement expression_statement ')' statement { $$ = new ForStatement(NodePtr($3), NodePtr($4), nullptr, NodePtr($6)); }
+	| FOR '(' expression_statement expression_statement expression ')' statement { $$ = new ForStatement(NodePtr($3), NodePtr($4), NodePtr($5), NodePtr($7)); }
 	;
 
 primary_expression
@@ -165,6 +224,7 @@ primary_expression
     | FLOAT_CONSTANT 	{ $$ = new FloatConstant($1); }
     | DOUBLE_CONSTANT 	{ $$ = new DoubleConstant($1); }
 	| IDENTIFIER	{ $$ = new Identifier($1); }
+	| '(' expression ')'	{ $$ = $2; }
 	;
 
 expression_statement
@@ -176,10 +236,18 @@ postfix_expression
 	: primary_expression
 	| postfix_expression INC_OP { $$ = new UnaryExpression(UnaryOp::INC, NodePtr($1)); }
     | postfix_expression DEC_OP { $$ = new UnaryExpression(UnaryOp::DEC, NodePtr($1)); }
+	| postfix_expression '(' ')' { $$ = new FunctionInvocation(NodePtr($1)); }
+	| postfix_expression '(' argument_expression_list ')' { $$ = new FunctionInvocation(NodePtr($1), NodePtr($3)); }
+	| postfix_expression '[' expression ']' { $$ = new ArrayIndexAccess{NodePtr($1), NodePtr($3)}; }
 	;
 
 argument_expression_list
-	: assignment_expression
+	: assignment_expression    { $$ = new ExpressionList(NodePtr($1)); }
+	| argument_expression_list ',' assignment_expression {
+		ExpressionList *expression_list = dynamic_cast<ExpressionList*>($1);
+		expression_list->PushBack(NodePtr($3));
+		$$ = expression_list;
+	}
 	;
 
 unary_expression
@@ -190,6 +258,10 @@ unary_expression
 	| '-' cast_expression { $$ = new UnaryExpression(UnaryOp::MINUS, NodePtr($2)); }
 	| '~' cast_expression { $$ = new UnaryExpression(UnaryOp::BITWISE_NOT, NodePtr($2)); }
 	| '!' cast_expression { $$ = new UnaryExpression(UnaryOp::LOGICAL_NOT, NodePtr($2)); }
+	| '&' cast_expression	{ $$ = new AddressOf(NodePtr($2)); }
+	| '*' cast_expression	{ $$ = new Dereference(NodePtr($2)); }
+	| SIZEOF unary_expression { $$ = new SizeOf(NodePtr($2)); }
+	| SIZEOF '(' type_specifier ')' { $$ = new SizeOf(NodePtr($3)); }
 	;
 
 cast_expression
@@ -256,19 +328,49 @@ logical_or_expression
 
 conditional_expression
 	: logical_or_expression
+	| logical_or_expression '?' expression ':' conditional_expression { $$ = new IfStatement(NodePtr($1), NodePtr($3), NodePtr($5), true); }
 	;
 
 assignment_expression
 	: conditional_expression
-	| unary_expression '=' assignment_expression	{ $$ = new Assignment(NodePtr($1), NodePtr($3)); }
+	| unary_expression '=' assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr($3)); }
+	| unary_expression MUL_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::MUL, NodePtr($1), NodePtr($3)))); }
+	| unary_expression DIV_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::DIV, NodePtr($1), NodePtr($3)))); }
+	| unary_expression MOD_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::MOD, NodePtr($1), NodePtr($3)))); }
+	| unary_expression ADD_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::ADD, NodePtr($1), NodePtr($3)))); }
+	| unary_expression SUB_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new ArithExpression(ArithOp::SUB, NodePtr($1), NodePtr($3)))); }
+	| unary_expression LEFT_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::LEFT_SHIFT, NodePtr($1), NodePtr($3)))); }
+	| unary_expression RIGHT_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::RIGHT_SHIFT, NodePtr($1), NodePtr($3)))); }
+	| unary_expression AND_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_AND, NodePtr($1), NodePtr($3)))); }
+	| unary_expression XOR_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_XOR, NodePtr($1), NodePtr($3)))); }
+	| unary_expression OR_ASSIGN assignment_expression { $$ = new Assignment(NodePtr($1), NodePtr(new BitwiseExpression(BitwiseOp::BITWISE_OR, NodePtr($1), NodePtr($3)))); }
 	;
 
 expression
-	: assignment_expression
+	: assignment_expression   { $$ = new Expression(NodePtr($1)); }
+	| expression ',' assignment_expression {
+		Expression *expression_list = dynamic_cast<Expression*>($1);
+		expression_list->PushBack(NodePtr($3));
+		$$ = expression_list;
+	}
+	;
+
+constant_expression
+	: conditional_expression
 	;
 
 declaration
-	: declaration_specifiers init_declarator_list ';'	{ $$ = new Declaration(NodePtr($1), NodePtr($2)); }
+	: declaration_specifiers init_declarator_list ';'	{
+		const Typedef *typedef_definition = dynamic_cast<const Typedef *>($1);
+		if (typedef_definition != nullptr) {
+    		NodeList *alias_list = dynamic_cast<NodeList *>($2); // Extract raw pointer
+    		if (alias_list) {
+        		const_cast<Typedef *>(typedef_definition)->DefineTypedef(alias_list);
+    		}
+		}
+		$$ = new Declaration(NodePtr($1), NodePtr($2));
+		}
+	| declaration_specifiers ';' { $$ = new Declaration(NodePtr($1)); }
 	;
 
 init_declarator_list
@@ -283,11 +385,16 @@ init_declarator
 
 initializer
 	: assignment_expression
+	| '{' initializer_list '}' { $$ = new ArrayInitialization(NodePtr($2)); }
+	| '{' initializer_list ',' '}' { $$ = new ArrayInitialization(NodePtr($2)); }
 	;
 
 initializer_list
 	: initializer						{ $$ = new NodeList(NodePtr($1)); }
-	| initializer_list ',' initializer	{ $1->PushBack(NodePtr($3)); $$ = $1; }
+	| initializer_list ',' initializer	{
+		NodeList *node_list = dynamic_cast<NodeList *>($1);
+		node_list->PushBack(NodePtr($3));
+		$$ = node_list; }
 	;
 
 declaration_list

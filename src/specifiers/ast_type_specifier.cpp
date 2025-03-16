@@ -1,4 +1,4 @@
-#include "../../include/types/ast_type_specifier.hpp"
+#include "../../include/specifiers/ast_type_specifier.hpp"
 namespace ast{
 void TypeSpecifier::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const {
     (void)stream;
@@ -43,4 +43,8 @@ Type TypeSpecifier::GetType() const
 {
     return type_;
 }
+
+void TypeSpecifier::DefineSpecifier(Context &context) const{
+    (void)context;
 }
+}//namespace ast

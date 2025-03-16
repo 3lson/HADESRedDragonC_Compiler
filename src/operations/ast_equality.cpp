@@ -2,32 +2,63 @@
 
 namespace ast {
 
-    void EqualityExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
+std::string EqualityExpression::GetOperation(Type type) const {
+    static const std::unordered_map<EqualityOp, std::unordered_map<Type, std::string>> opMap = {
+        {EqualityOp::EQUAL, {
+            {Type::_INT, "seqz"}, {Type::_UNSIGNED_INT, "seqz"}, {Type::_CHAR, "seqz"},
+            {Type::_SHORT, "seqz"}, {Type::_LONG, "seqz"},
+            {Type::_FLOAT, "feq.s"}, {Type::_DOUBLE, "feq.d"}
+        }},
+        {EqualityOp::NOT_EQUAL, {
+            {Type::_INT, "snez"}, {Type::_UNSIGNED_INT, "snez"}, {Type::_CHAR, "snez"},
+            {Type::_SHORT, "snez"}, {Type::_LONG, "snez"},
+            {Type::_FLOAT, "feq.s"}, {Type::_DOUBLE, "feq.d"}  // feq.s needs inversion for !=
+        }}
+    };
+
+    auto it = opMap.find(op_);
+    if (it != opMap.end()) {
+        auto typeIt = it->second.find(type);
+        if (typeIt != it->second.end()) {
+            return typeIt->second;
+        }
+    }
+
+    throw std::runtime_error("Unsupported equality operation or type.");
+}
+
+void EqualityExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     Type type = std::max(context.get_operation_type(), GetType(context));
-
-    context.set_operation_type(type);
-
+    type = isPointerOp(context) ? Type::_INT : type;
+    context.push_operation_type(type);
+    bool is_float = (type == Type::_FLOAT || type == Type::_DOUBLE);
     std::string left_register = context.get_register(type);
-    std::string right_register = context.get_register(type);
-
     left_->EmitRISC(stream, context, left_register);
-    right_->EmitRISC(stream, context, right_register);
+    ShiftPointerOp(stream, context, left_register, left_);
+    context.add_register_to_set(left_register);
 
-    if (op_ == EqualityOp::EQUAL) {
-        stream << "xor " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
-        stream << "seqz " << dest_reg << ", " << dest_reg << std::endl;
-    }
-    else if (op_ == EqualityOp::NOT_EQUAL) {
-        stream << "xor " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
-        stream << "snez " << dest_reg << ", " << dest_reg << std::endl;
+    std::string right_register = context.get_register(type);
+    right_->EmitRISC(stream, context, right_register);
+    ShiftPointerOp(stream, context, right_register, right_);
+
+    std::string operation = GetOperation(type);
+
+    if(is_float){
+        stream << operation << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
+
+        if (op_ == EqualityOp::NOT_EQUAL){
+            stream << "xori " << dest_reg << ", " <<dest_reg << ", 1" <<std::endl;
+        }
     }
     else {
-        throw std::runtime_error("Unknown equality operation.");
+        stream << "xor " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
+        stream << operation << " " << dest_reg << ", " << dest_reg << std::endl;
     }
 
     context.deallocate_register(right_register);
     context.deallocate_register(left_register);
+    context.remove_register_from_set(left_register);
 
     context.pop_operation_type();
 }
@@ -62,6 +93,28 @@ Type EqualityExpression::GetType(Context &context) const
     Type rightType = rightOperand->GetType(context);
 
     return std::max(leftType, rightType);
+}
+
+bool EqualityExpression::isPointerOp(Context &context) const
+{
+    // Attempt to cast left_ and right_ to Operand
+    const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
+    const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
+
+    // Return true if either operand is a pointer
+    return left_operand->isPointerOp(context) || right_operand->isPointerOp(context);
+}
+
+void EqualityExpression::ShiftPointerOp(std::ostream &stream, Context &context, std::string dest_reg, const NodePtr& node) const
+{
+    if (isPointerOp(context))
+    {
+        const Operand* operand = dynamic_cast<const Operand*>(node.get());
+        if (operand && !operand->isPointerOp(context))
+        {
+            stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(GetType(context)) << std::endl;
+        }
+    }
 }
 
 } // namespace ast

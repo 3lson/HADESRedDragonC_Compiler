@@ -2,6 +2,7 @@
 
 #include "ast_node.hpp"
 #include "ast_operand.hpp"
+#include "../symbols/ast_identifier.hpp"
 
 namespace ast {
 
@@ -22,6 +23,7 @@ public:
     std::string GetOperation(Type type) const;
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
     void Print(std::ostream& stream) const override;
+    bool isPointerOp(Context &context) const override;
 };
 
 } // namespace ast

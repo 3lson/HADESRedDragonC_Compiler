@@ -5,12 +5,12 @@ std::string Context::create_label(std::string label)
     return label + std::to_string(label_counter++);
 }
 
-void Context::save_start_label(std::string label)
+void Context::push_start_label(std::string label)
 {
     start_labels.push(label);
 }
 
-void Context::save_end_label(std::string label)
+void Context::push_end_label(std::string label)
 {
     end_labels.push(label);
 }

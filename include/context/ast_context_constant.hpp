@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <cstring>
 
+//Implements the upper and lower bit handling for float and double data types
+
 namespace ast{
 
 class ContextConstant {
@@ -34,6 +36,12 @@ public:
         : type_(Type::_DOUBLE) {
         DoubleToBits(value, low_bits, high_bits);
     }
+    //Add getters
+    uint32_t get_low_bits() const { return low_bits; }
+    uint32_t get_high_bits() const { return high_bits; }
+
     void PrintConst(std::ostream &stream) const;
+
+    Type GetType() const;
 };
 }//namespace ast

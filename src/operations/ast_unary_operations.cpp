@@ -6,11 +6,11 @@ std::string UnaryExpression::GetOperation(Type type) const {
     static const std::unordered_map<UnaryOp, std::unordered_map<Type, std::string>> opMap = {
         {UnaryOp::INC, {
             {Type::_INT, "addi"}, {Type::_UNSIGNED_INT, "addi"}, {Type::_CHAR, "addi"},
-            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"},
+            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"}, {Type::_FLOAT, "add"}, {Type::_DOUBLE, "add"}
         }},
         {UnaryOp::DEC, {
             {Type::_INT, "addi"}, {Type::_UNSIGNED_INT, "addi"}, {Type::_CHAR, "addi"},
-            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"},
+            {Type::_SHORT, "addi"}, {Type::_LONG, "addi"}, {Type::_FLOAT, "fsub.s"}, {Type::_DOUBLE, "fsub.d"}
         }},
         {UnaryOp::PLUS, {
             {Type::_INT, "mv"}, {Type::_UNSIGNED_INT, "mv"}, {Type::_CHAR, "mv"},
@@ -40,19 +40,27 @@ std::string UnaryExpression::GetOperation(Type type) const {
         }
     }
 
+    std::cerr << "Unsupported unary operation or type: Operation = "
+    << static_cast<int>(op_) << ", Type = " << static_cast<int>(type) << std::endl;
+
     throw std::runtime_error("Unsupported unary operation or type.");
 }
 
 void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
-    Type type = context.get_operation_type();
+    Type type = GetType(context);
 
-    context.set_operation_type(type);
+    context.push_operation_type(type);
 
     std::string operand_register = context.get_register(type);
 
     operand_->EmitRISC(stream, context, operand_register);
 
     std::string operation = GetOperation(type);
+
+    //temporary fix for zero reg issue (IMPORTANT)
+    if (dest_reg == "zero") {
+        dest_reg = context.get_register(type); // Allocate a new temporary register
+    }
 
     // Emit the RISC-V instruction for the unary operation
     if (op_ == UnaryOp::INC) {
@@ -67,6 +75,14 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
         stream << operation << " " << dest_reg << ", " << operand_register << std::endl;
     } else if (op_ == UnaryOp::LOGICAL_NOT) {
         stream << operation << " " << dest_reg << ", " << operand_register << std::endl;
+    }
+
+    //If the operand is an identifier, store the result back to memory
+    const Identifier* identifier = dynamic_cast<const Identifier*>(operand_.get());
+    if (identifier){
+        Variable variable = context.get_variable(identifier->GetIdentifier());
+        int offset = variable.get_offset();
+        stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" <<std::endl;
     }
 
     context.deallocate_register(operand_register);
@@ -98,6 +114,11 @@ Type UnaryExpression::GetType(Context& context) const {
     }
 
     return operandObj->GetType(context);
+}
+
+bool UnaryExpression::isPointerOp(Context &context) const
+{
+    return dynamic_cast<const Operand *>(operand_.get())->isPointerOp(context);
 }
 
 } // namespace ast

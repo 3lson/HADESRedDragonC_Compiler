@@ -5,8 +5,7 @@ namespace ast {
 
 void CompoundStatement::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    context.set_initial_offset(context.get_stack_offset());
-    context.create_new_scope();
+    context.create_scope();
     for (const auto& statement : get_nodes())
     {
         statement->EmitRISC(stream, context, dest_reg);
@@ -55,13 +54,17 @@ int StatementList::GetOffset(Context &context) const
 
 int DeclarationList::GetOffset(Context &context) const
 {
-int offset = 0;
-for (const auto& node : get_nodes())
-{
-    const Declaration *declaration = dynamic_cast<const Declaration *>(node.get());
-    offset += declaration->GetOffset(context);
-}
-return offset;
+    int offset = 0;
+    for (const auto& node : get_nodes())
+    {
+        const Declaration *declaration = dynamic_cast<const Declaration *>(node.get());
+        offset += declaration->GetOffset(context);
+
+        if (offset % 4 !=0){
+            offset += 4 - (offset % 4);
+        }
+    }
+    return offset;
 }
 
 }

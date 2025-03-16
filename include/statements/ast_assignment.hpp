@@ -2,6 +2,14 @@
 
 #include "../ast_node.hpp"
 #include "../symbols/ast_identifier.hpp"
+#include "../arrays/ast_array_declaration.hpp"
+#include "../arrays/ast_array_initialization.hpp"
+#include "../arrays/ast_array_index_access.hpp"
+#include "../symbols/ast_constant.hpp"
+#include "../ast_direct_declarator.hpp"
+#include "../pointers/ast_pointer_declaration.hpp"
+#include "../pointers/ast_addressof.hpp"
+#include "../pointers/ast_dereference.hpp"
 
 namespace ast {
 
@@ -13,10 +21,20 @@ private:
 
 public:
     Assignment(NodePtr unary_expression, NodePtr expression) : unary_expression_(std::move(unary_expression)), expression_(std::move(expression)) {}
+
     std::string GetIdentifier() const;
+
+    int GetArraySize(Context &context) const;
+    bool isArrayInitialization() const;
+    bool isPointerInitialization() const;
+    int GetDereference() const;
+
+    void InitializeGlobals(std::ostream &stream, Context &context, Global &global) const;
+    void DeclareLocalScope(Type type, int offset, std::ostream &stream, Context &context) const;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
+
 };
 
 }//namespace ast

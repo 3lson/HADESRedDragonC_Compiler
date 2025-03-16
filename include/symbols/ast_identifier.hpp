@@ -12,7 +12,7 @@ private:
     std::string identifier_;
 
 public:
-    Identifier(std::string *identifier) : identifier_(std::move(*identifier)){ delete identifier;}; //opted for smart pointer to ensure correct pointer handling e.g. pointer handling
+    Identifier(std::string *identifier) : identifier_(std::move(*identifier)){ delete identifier; };
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
@@ -20,6 +20,9 @@ public:
     std::string GetIdentifier() const;
 
     Type GetType(Context &context) const override;
+
+    int GetValue(Context &context) const;
+    bool isPointerOp(Context &context) const override;
 };
 
 }//namespace ast

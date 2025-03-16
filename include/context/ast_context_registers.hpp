@@ -10,17 +10,15 @@ namespace ast {
 
 class Register {
 private:
-    bool is_available;   // Indicates if the register is free
-    Type type;           // Register type (int, float, etc.)
-    std::string reg_name; // Register name (e.g., "t0", "a1")
+    const std::string reg_name;
+    Type type;
+    bool is_available;
 
 public:
-    // Default constructor initializes as available and empty
-    Register() : is_available(true), type(Type::_VOID), reg_name("") {}
+    Register() : reg_name(""), type(Type::_VOID), is_available(false) {}
 
-    // Parameterized constructor
-    Register(std::string name, Type type = Type::_VOID, bool available = true)
-        : is_available(available), type(type), reg_name(std::move(name)) {}
+    Register(std::string name, Type type = Type::_VOID, bool available = false)
+        : reg_name(std::move(name)), type(type), is_available(available) {}
 
     // Getters
     bool isAvailable() const { return is_available; }
@@ -37,8 +35,6 @@ class ContextRegister {
 private:
     std::unordered_map<int, Register> register_file;
     std::unordered_map<std::string, int> register_name_to_int;
-    std::stack<std::set<int>> allocated_registers;
-    std::unordered_map<int, int> allocated_register_offsets;
 
 public:
     ContextRegister();
@@ -48,11 +44,11 @@ public:
     void deallocate_register(const std::string &reg_name);
     std::string get_register_name(int reg_number) const;
     void set_register_type(const std::string &reg_name, Type type);
-    //void add_register_to_set(const std::string &reg_name);
-    //void remove_register_from_set(const std::string &reg_name);
-    //void push_registers(std::ostream &stream);
-    //void pop_registers(std::ostream &stream);
-};
+    void allocate_register(std::string reg_name, Type type);
+    //Getters to be used outside in context class since register_file and register_to_int are private
+    Register& get_register_by_id(int reg_num) { return register_file[reg_num]; }
+    int get_register_id(const std::string& reg_name) const;
 
+};
 
 }//namespace ast

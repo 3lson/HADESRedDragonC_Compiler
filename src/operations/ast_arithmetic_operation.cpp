@@ -45,18 +45,42 @@ std::string ArithExpression::GetOperation(Type type) const {
 void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     Type type = std::max(context.get_operation_type(), GetType(context));
-
-    context.set_operation_type(type);
+    type = isPointerOp(context) ? Type::_INT : type;
+    context.push_operation_type(type);
 
     std::string left_register = context.get_register(type);
-    std::string right_register = context.get_register(type);
-
     left_->EmitRISC(stream, context, left_register);
+    ShiftPointerOp(stream, context, left_register, left_);
+    context.add_register_to_set(left_register);
+
+    std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
+    ShiftPointerOp(stream, context, right_register, right_);
+    const Operand* left_operand = dynamic_cast<const Operand*>(left_.get());
+    const Operand* right_operand = dynamic_cast<const Operand*>(right_.get());
+
+    if (!left_operand || !right_operand) {
+        throw std::runtime_error("Invalid operand type in ArithExpression.");
+    }
+
+    Type left_type = left_operand->GetType(context);
+    Type right_type = right_operand->GetType(context);
+
+    if (left_type == Type::_FLOAT && right_type != Type::_FLOAT) {
+        std::string temp_reg = context.get_register(Type::_FLOAT);
+        stream << "fcvt.s.w " << temp_reg << ", " << right_register << std::endl;
+        right_register = temp_reg;
+    } else if (right_type == Type::_FLOAT && left_type != Type::_FLOAT) {
+        std::string temp_reg = context.get_register(Type::_FLOAT);
+        stream << "fcvt.s.w " << temp_reg << ", " << left_register << std::endl;
+        left_register = temp_reg;
+    }
+
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
 
     context.deallocate_register(right_register);
     context.deallocate_register(left_register);
+    context.remove_register_from_set(left_register);
 
     context.pop_operation_type();
 }
@@ -94,6 +118,29 @@ Type ArithExpression::GetType(Context &context) const
     Type rightType = rightOperand->GetType(context);
 
     return std::max(leftType, rightType);
+}
+
+
+bool ArithExpression::isPointerOp(Context &context) const
+{
+    // Attempt to cast left_ and right_ to Operand
+    const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
+    const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
+
+    // Return true if either operand is a pointer
+    return left_operand->isPointerOp(context) || right_operand->isPointerOp(context);
+}
+
+void ArithExpression::ShiftPointerOp(std::ostream &stream, Context &context, std::string dest_reg, const NodePtr& node) const
+{
+    if (isPointerOp(context))
+    {
+        const Operand* operand = dynamic_cast<const Operand*>(node.get());
+        if (operand && !operand->isPointerOp(context))
+        {
+            stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(GetType(context)) << std::endl;
+        }
+    }
 }
 
 
