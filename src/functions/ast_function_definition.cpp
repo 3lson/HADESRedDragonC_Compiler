@@ -46,16 +46,16 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
 
         stream << "addi sp, sp, -" << stack_allocated_space << std::endl;
         stream << "sw ra, 0(sp)" <<std::endl;
-        stream << "sw s0, 4(sp)" <<std::endl;
+        stream << "sw s0, 4(sp)" <<std::endl; //stores old frame pointer which points to previous frame local variables ect.
         direct_declarator_->StoreParameters(stream, context, dest_reg);
-        stream << "addi s0, sp, " << stack_allocated_space <<std::endl;
+        stream << "addi s0, sp, " << stack_allocated_space <<std::endl; //loads new frame pointer value for current function stack points to top address of frame
 
         compound_statement_->EmitRISC(stream, context, dest_reg);
 
         stream << context.get_last_function_end_statement() << ":" << std::endl;
-        stream << "lw s0, 4(sp)" << std::endl;
-        stream << "lw ra, 0(sp)" <<std::endl;
-        stream << "addi sp, sp, " << stack_allocated_space <<std::endl;
+        stream << "lw s0, 4(sp)" << std::endl; //loads previous frame pointer back into fa register
+        stream << "lw ra, 0(sp)" <<std::endl; // loads return address
+        stream << "addi sp, sp, " << stack_allocated_space <<std::endl; // deallocates stack frame by adding back the allocated space to the stack pointer sa
         stream << "ret" << std::endl;
 
         context.pop_operation_type();

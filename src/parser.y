@@ -42,7 +42,7 @@
 %type <node> init_declarator type_specifier struct_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
 %type <node> struct_declarator enum_specifier enumerator_list enumerator declarator direct_declarator pointer parameter_list parameter_declaration
 %type <node> identifier_list type_name abstract_declarator direct_abstract_declarator initializer initializer_list statement labeled_statement
-%type <node> compound_statement declaration_list expression_statement selection_statement iteration_statement jump_statement
+%type <node> compound_statement declaration_list expression_statement selection_statement iteration_statement jump_statement switch_statement case_statement
 
 %type <node_list> statement_list
 
@@ -107,13 +107,6 @@ parameter_declaration
 	: declaration_specifiers declarator         { $$ = new ParameterDefinition(NodePtr($1), NodePtr($2)); }
 	;
 
-statement
-	: compound_statement 	{ $$ = new CompoundStatement(NodePtr($1)); }
-	| expression_statement 	{ $$ = $1; }
-	| jump_statement 		{ $$ = $1; }
-	| selection_statement	{ $$ = $1; }
-	| iteration_statement   { $$ = $1; }
-	;
 
 compound_statement
 	: '{' declaration_list '}' 					{ $$ = new CompoundStatement(NodePtr($2)); }
@@ -130,12 +123,30 @@ statement_list
 	| statement_list statement  { $1->PushBack(NodePtr($2)); $$=$1; }
 	;
 
+statement
+	: compound_statement 	{ $$ = new CompoundStatement(NodePtr($1)); }
+	| expression_statement 	{ $$ = $1; }
+	| jump_statement 		{ $$ = $1; }
+	| selection_statement	{ $$ = $1; }
+	| iteration_statement   { $$ = $1; }
+	| switch_statement 		{ $$ = $1; }
+	| case_statement		{ $$ = $1; }
+	;
+
 jump_statement
 	: RETURN ';'            { $$ = new ReturnStatement(nullptr); }
 	| RETURN expression ';' { $$ = new ReturnStatement(NodePtr($2)); }
 	;
 
+switch_statement
+	: SWITCH '(' expression ')' compound_statement {
+		$$ = new SwitchStatement(NodePtr($3), NodePtr($5));
+	}
+	;
 
+case_statement
+	: CASE expression ':' statement_list { $$ = new CaseStatement(NodePtr($2), NodePtr($4)); }
+	;
 selection_statement
     : IF '(' expression ')' compound_statement {
         $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr);

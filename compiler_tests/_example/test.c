@@ -1,4 +1,4 @@
-double f()
+int f(int a, int b, int c, int d, int e)
 {
-    return 5.0l;
+    return a+b+c+d+e;
 }

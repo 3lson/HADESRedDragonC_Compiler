@@ -24,6 +24,7 @@
 #include "symbols/ast_identifier.hpp"
 #include "symbols/ast_constant.hpp"
 
+#include "control_flow/ast_switch.hpp"
 #include "control_flow/ast_ifelse.hpp"
 #include "control_flow/ast_while.hpp"
 

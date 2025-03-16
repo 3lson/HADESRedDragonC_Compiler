@@ -1,4 +1,6 @@
 #include "../../include/statements/ast_statements.hpp"
+#include "../../include/control_flow/ast_switch.hpp"
+
 namespace ast {
 
 void CompoundStatement::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
@@ -29,6 +31,20 @@ int CompoundStatement::GetOffset(Context &context) const
         }
     }
     return offset;
+}
+
+int CompoundStatement::GetCases(Context &context) const{
+    int cases = 0;
+
+    for(const auto& node : get_nodes()){
+        if(!node){
+            continue;
+        }
+        if(dynamic_cast<const CaseStatement *>(node.get())){
+            cases++;
+        }
+    }
+    return cases;
 }
 
 int StatementList::GetOffset(Context &context) const

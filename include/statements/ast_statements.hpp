@@ -3,6 +3,12 @@
 #include "../ast_node.hpp"
 #include "ast_declaration.hpp"
 
+namespace ast {
+    class SwitchStatement;
+    class CaseStatement;
+}
+
+
 namespace ast{
 
 class Statement : public NodeList
@@ -20,6 +26,7 @@ public:
     using Statement::Statement;
     ~CompoundStatement() override = default;
     int GetOffset(Context &context) const;
+    int GetCases(Context &context) const;
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
 };
 
