@@ -26,10 +26,18 @@ int Context::get_stack_offset() const {
 
 void Context::increase_stack_offset(int offset){
     current_stack_offset.top() += offset;
+    //4 byte alignment
+    if (current_stack_offset.top() % 4 !=0){
+        current_stack_offset.top() += 4 - (current_stack_offset.top() % 4);
+    }
 }
 
 void Context::set_stack_offset(int offset){
     total_offset = offset;
+    if (offset % 4 != 0)
+    {
+        std::runtime_error("Context::set_stack_offset: stack offset not aligned to 4 bytes");
+    }
 }
 
 }//namespace ast

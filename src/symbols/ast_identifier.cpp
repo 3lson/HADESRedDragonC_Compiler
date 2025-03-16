@@ -8,11 +8,11 @@ void Identifier::EmitRISC(std::ostream &stream, Context &context, std::string de
     }
     else{
         Variable variable = context.get_variable(identifier_);
-        Type type = variable.get_type();
+        Type type = variable.is_pointer() ? Type::_INT : variable.get_type();
 
         if (variable.get_scope() == ScopeLevel::LOCAL){
             int offset = variable.get_offset();
-            stream << context.load_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
+            stream << context.load_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
         }
         else if (variable.get_scope() == ScopeLevel::GLOBAL)
         {
@@ -56,4 +56,13 @@ int Identifier::GetValue(Context &context) const{
     }
     return context.get_enum_label(identifier_);
 }
+
+bool Identifier::isPointerOp(Context &context) const
+{
+    if (context.is_enum(identifier_)){
+        return false;
+    }
+    return context.get_variable(identifier_).is_pointer();
+}
+
 }

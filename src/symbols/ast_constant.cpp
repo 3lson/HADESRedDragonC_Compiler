@@ -86,5 +86,11 @@ void DoubleConstant::SaveValue(Global &global) const
     global.push_upper(constant.get_high_bits());
 }
 
+bool Constant::isPointerOp(Context &context) const
+{
+    (void)context;
+    return false;
+}
+
 
 }

@@ -40,14 +40,16 @@ std::string BitwiseExpression::GetOperation(Type type) const {
 void BitwiseExpression::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     Type type = std::max(context.get_operation_type(), GetType(context));
-
+    type = isPointerOp(context) ? Type::_INT : type;
     context.push_operation_type(type);
 
     std::string left_register = context.get_register(type);
     left_->EmitRISC(stream, context, left_register);
+    ShiftPointerOp(stream, context, left_register, left_);
     context.add_register_to_set(left_register);
     std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
+    ShiftPointerOp(stream, context, right_register, right_);
 
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
 
@@ -93,4 +95,25 @@ Type BitwiseExpression::GetType(Context &context) const
     return std::max(leftType, rightType);
 }
 
+bool BitwiseExpression::isPointerOp(Context &context) const
+{
+    // Attempt to cast left_ and right_ to Operand
+    const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
+    const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
+
+    // Return true if either operand is a pointer
+    return left_operand->isPointerOp(context) || right_operand->isPointerOp(context);
+}
+
+void BitwiseExpression::ShiftPointerOp(std::ostream &stream, Context &context, std::string dest_reg, const NodePtr& node) const
+{
+    if (isPointerOp(context))
+    {
+        const Operand* operand = dynamic_cast<const Operand*>(node.get());
+        if (operand && !operand->isPointerOp(context))
+        {
+            stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(GetType(context)) << std::endl;
+        }
+    }
+}
 } // namespace ast

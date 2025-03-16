@@ -44,10 +44,15 @@
 #include "enums/ast_enum_specifier.hpp"
 #include "enums/ast_enum.hpp"
 
+#include "pointers/ast_pointer_declaration.hpp"
+#include "pointers/ast_addressof.hpp"
+#include "pointers/ast_dereference.hpp"
+
 #include "typedef/ast_typedef.hpp"
 
 #include "ast_translation_unit.hpp"
 #include "ast_direct_declarator.hpp"
+#include "ast_declarator.hpp"
 #include "ast_node.hpp"
 
 #include "context/ast_context.hpp"

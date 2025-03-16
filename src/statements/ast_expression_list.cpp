@@ -44,9 +44,12 @@ void ExpressionList::GetArguments(std::ostream &stream, Context &context, std::s
     int int_reg = 10, float_reg = 42;
     int arg_reg_num;
 
+    Type type;
+
     for (size_t arg = 0; arg < function.get_parameters().size(); ++arg)
     {
-        switch(function.get_parameters()[arg].get_type())
+        type = function.get_parameters()[arg].is_pointer() ? Type::_INT : function.get_parameters()[arg].get_type();
+        switch(type)
         {
             case Type::_CHAR:
             case Type::_UNSIGNED_INT:
@@ -62,7 +65,9 @@ void ExpressionList::GetArguments(std::ostream &stream, Context &context, std::s
         }
 
         std::string arg_reg_name = context.get_register_name(arg_reg_num);
+        context.push_operation_type(type);
         dynamic_cast<const Operand*>(get_nodes()[arg].get())->EmitRISC(stream, context, arg_reg_name);
+        context.pop_operation_type();
     }
 }
 
@@ -77,6 +82,11 @@ void ExpressionList::Print(std::ostream &stream) const
         stream << ", ";
     }
     stream << std::endl;
+}
+
+bool Expression::isPointerOp(Context &context) const
+{
+    return dynamic_cast<const Operand *>(nodes_[0].get())->isPointerOp(context);
 }
 
 }

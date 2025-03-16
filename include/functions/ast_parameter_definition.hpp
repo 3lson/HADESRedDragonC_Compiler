@@ -3,6 +3,7 @@
 #include "../ast_node.hpp"
 #include "../specifiers/ast_specifier.hpp"
 #include "../symbols/ast_identifier.hpp"
+#include "../pointers/ast_pointer_declaration.hpp"
 
 namespace ast{
 class ParameterDefinition : public Node
@@ -18,6 +19,8 @@ public:
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
     Type GetType(Context &context) const;
+    bool isPointer() const;
+    int GetDereference() const;
     std::string GetIdentifier() const;
     int GetTypeSize(Context &context) const;
     Parameter GetParameter(Context &context, int offset) const;

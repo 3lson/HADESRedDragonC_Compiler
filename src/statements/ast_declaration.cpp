@@ -3,7 +3,17 @@ namespace ast {
 
 void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
+    (void)context;
+    (void)dest_reg;
+    const Typedef *typedef_definition = dynamic_cast<const Typedef *>(type_specifier_.get());
+    if (typedef_definition){
+        return;
+    }
+
     const Specifier *specifier = dynamic_cast<const Specifier*>(type_specifier_.get());
+    if (!specifier) {
+        throw std::runtime_error("Declaration::EmitRISC: Invalid type specifier");
+    }
     specifier->DefineSpecifier(context);
 
     if (declarator_list_ == nullptr)
@@ -16,43 +26,30 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
     // Cast to const NodeList since declarator_list_ is a unique_ptr<const Node>
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
+    if (!declarator_list) {
+        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
+    }
 
     for (const auto &declarator_ptr : declarator_list->get_nodes()) // Use const reference
     {
         // Dynamic ast different declaration types
         const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_ptr.get());
         const Identifier *identifier = dynamic_cast<const Identifier *>(declarator_ptr.get());
-        const DirectDeclarator *direct_declarator = dynamic_cast<const DirectDeclarator *>(declarator_ptr.get());
         const ArrayDeclaration * array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator_ptr.get());
+        const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(declarator_ptr.get());
 
         int offset = context.get_stack_offset();
 
         if (assignment != nullptr)
         {
-            int array_size = assignment->GetArraySize(context);
-            bool is_array = assignment->isArrayInitialization();
-            context.increase_stack_offset(type_size * array_size);
-            std::string variable_name = assignment->GetIdentifier();
-            Variable variable(false, is_array, array_size, type, offset);
-            context.define_variable(variable_name, variable);
-            assignment->EmitRISC(stream, context, dest_reg);
+            assignment->DeclareLocalScope(type, offset, stream, context);
         }
         else if (identifier != nullptr)
         {
             context.increase_stack_offset(type_size);
             std::string variable_name = identifier->GetIdentifier();
-            Variable variable(false, false, type, offset);
+            Variable variable(false, false, type, offset, 0);
             context.define_variable(variable_name, variable);
-        }
-        else if (direct_declarator != nullptr)
-        {
-            std::string function_name = direct_declarator->GetIdentifier();
-
-            ReturnValue return_value = ReturnValue(false, false, type);
-            std::vector<Parameter> parameters = direct_declarator->GetParameters(context);
-            Function function = Function(return_value, parameters);
-
-            context.define_function(function_name, function);
         }
         else if (array_declaration != nullptr)
         {
@@ -67,7 +64,19 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
             std::string variable_name = array_declaration->GetIdentifier();
 
-            Variable variable(false, true, array_size, type, offset);
+            Variable variable(false, true, array_size, type, offset, 0);
+            context.define_variable(variable_name, variable);
+        }
+        else if (pointer_declaration != nullptr)
+        {
+            context.increase_stack_offset(types_size.at(Type::_INT));
+
+            // Get variable name
+            std::string variable_name = pointer_declaration->GetIdentifier();
+
+            // Add variable to bindings
+            int dereference_num = pointer_declaration->GetDereference();
+            Variable variable(true, false, Type::_INT, offset, dereference_num);
             context.define_variable(variable_name, variable);
         }
         else
@@ -100,26 +109,36 @@ int Declaration::GetOffset(Context &context) const
     int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
+    if (!declarator_list) {
+        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
+    }
 
     int total_size = 0;
 
     if (declarator_list_ != nullptr)
     {
-        for (const auto &declarator : declarator_list->get_nodes()) {
-            const Assignment *assignment = dynamic_cast<const Assignment *>(declarator.get());
-            const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator.get());
-            const Identifier *identifier = dynamic_cast<const Identifier*>(declarator.get());
+        for (const auto &declarator_ : declarator_list->get_nodes()) {
+            const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_.get());
+            const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator_.get());
+            const Identifier *identifier = dynamic_cast<const Identifier*>(declarator_.get());
+            const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration*>(declarator_.get());
 
             if (assignment != nullptr) {
-                if (assignment->isArrayInitialization()) {
-                    total_size += type_size * assignment->GetArraySize(context);
-                } else {
-                    total_size += type_size;
-                }
-            } else if (array_declaration != nullptr) {
-                total_size += type_size * array_declaration->GetArraySize(context);
+                //int actual_size = assignment->isPointerInitialization() ? types_size.at(Type::_INT) : type_size;
+                type_size = total_size + type_size * assignment->GetArraySize(context);
+            }
+            else if (array_declaration != nullptr) {
+                int actual_type_size = array_declaration->isPointer() ? types_size.at(Type::_INT) : type_size;
+                total_size = total_size + actual_type_size * array_declaration->GetArraySize(context);
             } else if (identifier != nullptr) {
                 type_size = total_size + type_size;
+            }
+            else if (pointer_declaration != nullptr){
+                type_size = total_size + types_size.at(Type::_INT);
+            }
+
+            if (type_size % 4 != 0){
+                type_size = type_size + 4 - (type_size% 4);
             }
         }
     }
@@ -140,7 +159,15 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 {
     (void)dest_reg;
 
+    const Typedef *typedef_definition = dynamic_cast<const Typedef *>(type_specifier_.get());
+    if (typedef_definition){
+        return;
+    }
+
     const Specifier *specifier = dynamic_cast<const Specifier *>(type_specifier_.get());
+    if (!specifier) {
+        throw std::runtime_error("Declaration::DeclareGlobal: Invalid type specifier");
+    }
     specifier->DefineSpecifier(context);
 
     if (declarator_list_ == nullptr)
@@ -151,12 +178,16 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
     //int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    for (const auto& declarator : declarator_list->get_nodes())
+    if (!declarator_list) {
+        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
+    }
+    for (const auto& declarator_ : declarator_list->get_nodes())
     {
-        const Assignment *assignment = dynamic_cast<const Assignment *>(declarator.get());
-        const Identifier *identifier = dynamic_cast<const Identifier *>(declarator.get());
-        const DirectDeclarator *direct_declarator = dynamic_cast<const DirectDeclarator *>(declarator.get());
-        const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator.get());
+        const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_.get());
+        const Identifier *identifier = dynamic_cast<const Identifier *>(declarator_.get());
+        const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator_.get());
+        const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration*>(declarator_.get());
+        const Declarator *declarator = dynamic_cast<const Declarator*>(declarator_.get());
 
         //int offset = context.get_stack_offset();
 
@@ -165,9 +196,11 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
             int array_size = assignment->GetArraySize(context);
 
             bool is_array = assignment->isArrayInitialization();
+            bool is_pointer = assignment->isPointerInitialization();
+            int dereference_num = assignment->GetDereference();
 
             std::string global_name = assignment->GetIdentifier();
-            Global global(false, is_array, array_size, type);
+            Global global(is_pointer, is_array, array_size, type, dereference_num);
             assignment->InitializeGlobals(stream, context, global);
             context.define_global(global_name, global);
         }
@@ -176,7 +209,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
         {
             std::string global_name = identifier->GetIdentifier();
 
-            Global global = Global(false, false, type);
+            Global global = Global(false, false, type, 0);
             context.define_global(global_name, global);
         }
 
@@ -190,17 +223,28 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
             }
 
             std::string global_name = array_declaration->GetIdentifier();
-
-            Global global(false, true, array_size, type);
+            int dereference_num = array_declaration->GetDereference();
+            Global global(false, true, array_size, type, dereference_num);
             context.define_global(global_name, global);
         }
-
-        else if (direct_declarator != nullptr)
+        else if (pointer_declaration != nullptr)
         {
-            std::string function_name = direct_declarator->GetIdentifier();
+            std::string global_name = pointer_declaration->GetIdentifier();
 
-            ReturnValue return_value = ReturnValue(false, false, type);
-            std::vector<Parameter> arguments = direct_declarator->GetParameters(context);
+            int dereference_num = pointer_declaration->GetDereference();
+            Global global(true, false, type, dereference_num);
+            context.define_global(global_name, global);
+        }
+        else if (declarator != nullptr)
+        {
+            // Get function name
+            std::string function_name = declarator->GetIdentifier();
+
+            // Define function return value and parameters
+            bool return_is_pointer = declarator->isPointer();
+            int dereference_num = declarator->GetDereference();
+            ReturnValue return_value = ReturnValue(return_is_pointer, false, type, dereference_num);
+            std::vector<Parameter> arguments = declarator->GetParameters(context);
 
             Function function = Function(return_value, arguments);
             context.define_function(function_name, function);

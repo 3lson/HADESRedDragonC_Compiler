@@ -15,6 +15,38 @@
   void use_space();
   void process_typedef(TypedefSpec spec);
 
+  //Function to suppress '*' if '&' is seen
+    char* cancel_pointer_pairs(const char* sequence) {
+      static char buffer[256]; // Buffer to hold the remaining characters
+      int star_count = 0;
+      int ampersand_count = 0;
+
+      // Count the number of * and & characters
+      for (int i = 0; sequence[i] != '\0'; i++) {
+          if (sequence[i] == '*') {
+              star_count++;
+          } else if (sequence[i] == '&') {
+              if (star_count > 0) {
+                  star_count--; // Cancel out a *
+              } else {
+                  ampersand_count++; // Unmatched &
+              }
+          }
+      }
+
+      // Construct the result with remaining unmatched characters
+      int index = 0;
+      for (int i = 0; i < star_count; i++) {
+          buffer[index++] = '*';
+      }
+      for (int i = 0; i < ampersand_count; i++) {
+          buffer[index++] = '&';
+      }
+      buffer[index] = '\0'; // Null-terminate the string
+
+      return buffer;
+  }
+
   // Suppress warning about unused function
   [[maybe_unused]] static void yyunput (int c, char * yy_bp );
 %}
@@ -35,20 +67,20 @@ IS  (u|U|l|L)*
 "case"			{return(CASE);}
 "char"			{return(CHAR);}
 "const"			{return(CONST);}
-"continue"  {return(CONTINUE);}
+"continue"      {return(CONTINUE);}
 "default"		{return(DEFAULT);}
-"do"			  {return(DO);}
+"do"			{return(DO);}
 "double"		{return(DOUBLE);}
 "else"			{return(ELSE);}
 "enum"			{return(ENUM);}
 "extern"		{return(EXTERN);}
 "float"			{return(FLOAT);}
-"for"			  {return(FOR);}
+"for"			{return(FOR);}
 "goto"			{return(GOTO);}
-"if"			  {return(IF);}
-"int"			  {return(INT);}
+"if"			{return(IF);}
+"int"			{return(INT);}
 "long"			{return(LONG);}
-"register"	{return(REGISTER);}
+"register"	    {return(REGISTER);}
 "return"		{return(RETURN);}
 "short"			{return(SHORT);}
 "signed"		{return(SIGNED);}
@@ -58,9 +90,9 @@ IS  (u|U|l|L)*
 "switch"		{return(SWITCH);}
 "typedef"		{return(TYPEDEF);}
 "union"			{return(UNION);}
-"unsigned"	{return(UNSIGNED);}
+"unsigned"	    {return(UNSIGNED);}
 "void"			{return(VOID);}
-"volatile"	{return(VOLATILE);}
+"volatile"	    {return(VOLATILE);}
 "while"			{return(WHILE);}
 
 {L}({L}|{D})*		{
@@ -72,7 +104,6 @@ IS  (u|U|l|L)*
   } else if(context.is_typedef(*str)){
     process_typedef(context.get_typedef(*str));
     delete str;
-    return(TYPE_NAME);
   } else {
     yylval.string = str;
     return(IDENTIFIER);
@@ -93,6 +124,15 @@ L?'(\\.|[^\\'])+' {yylval.number_int = yytext[1]; return(INT_CONSTANT);}
 {D}+"."{D}*({E})?{FSL}	{yylval.number_double = strtod(yytext, NULL); return(DOUBLE_CONSTANT);}
 
 L?\"(\\.|[^\\"])*\"	{yylval.string = new std::string(yytext); return(STRING_LITERAL);}
+
+(\*+&+)+	{
+              char* result = cancel_pointer_pairs(yytext);
+              if (result[0] != '\0') {
+                  for (int i = strlen(result) - 1; i >= 0; i--) {
+                      unput(result[i]);
+                  }
+              }
+}
 
 "..."      {return(ELLIPSIS);}
 ">>="			 {return(RIGHT_ASSIGN);}
@@ -154,50 +194,44 @@ void yyerror (char const *s)
 
 // Push back a string in reverse order with leading and trailing space
 void push_back_string(const std::string &s) {
-    use_space(); // Ensure spaces are managed
+    use_space();
     for (int i = s.size() - 1; i >= 0; --i) {
-        unput(s[i]); // Push characters one by one
+        unput(s[i]);
     }
-    unput(' '); // Add space after string
+    unput(' ');
 }
 
 // Consume leading spaces or tabs before processing the next token
 void use_space() {
     char next_char;
     while ((next_char = yyinput()) == ' ' || next_char == '\t') {
-        // Skip spaces and tabs
     }
-    unput(next_char); // Push back first non-space character for later handling
+    unput(next_char);
 }
 
-// Process a single parameter within a typedef declaration
+
 void process_single_parameter(TypedefSpec typedef_spec, std::vector<std::string>& parameters, std::vector<int>& pointer_counts, std::vector<char>& separators) {
     char next_char;
     std::string variable_name = "";
 
-    // Capture variable name until we hit a ',', ';', '(', or ')'
     while ((next_char = yyinput()) != ',' && next_char != ';' && next_char != '(' && next_char != ')') {
         variable_name += next_char;
     }
 
-    // Store the trimmed variable name, pointer count, and separator
     parameters.push_back(variable_name);
     pointer_counts.push_back(typedef_spec.get_number_pointers());
     separators.push_back(next_char);
 
-    // If a comma is encountered, recursively process the next parameter
     if (next_char == ',') {
         process_single_parameter(typedef_spec, parameters, pointer_counts, separators);
     }
 }
 
-// Process typedef and push back all parameters and types
 void process_typedef(TypedefSpec typedef_spec) {
-    std::vector<std::string> parameters; // Store parameter names
-    std::vector<int> pointer_counts;     // Store pointer counts
-    std::vector<char> separators;        // Store separators (e.g., ',', ';', etc.)
+    std::vector<std::string> parameters;
+    std::vector<int> pointer_counts;
+    std::vector<char> separators;
 
-    // Recursively process each parameter
     process_single_parameter(typedef_spec, parameters, pointer_counts, separators);
 
     // Push back parameters in reverse order

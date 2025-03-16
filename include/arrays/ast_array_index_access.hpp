@@ -15,6 +15,7 @@ public:
     std::string GetIdentifier() const;
     Type GetType(Context& context) const;
     void GetIndex(std::ostream& stream, Context& context, std::string dest_reg, Type type) const;
+    bool isPointerOp(Context &context) const override;
 
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const;
     void Print(std::ostream& stream) const;

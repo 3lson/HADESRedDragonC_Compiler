@@ -19,5 +19,6 @@ public:
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
     Type GetType(Context &context) const override;
+    bool isPointerOp(Context &context) const override;
 };
 }//namespace ast

@@ -10,6 +10,7 @@ class Constant : public Operand
 public:
     Type GetType(Context &context) const override = 0;
     virtual void SaveValue(Global &global) const =0;
+    bool isPointerOp(Context &context) const override;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string passed_reg) const override = 0;
     void Print(std::ostream &stream) const override = 0;

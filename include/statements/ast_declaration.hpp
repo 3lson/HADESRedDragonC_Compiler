@@ -6,6 +6,7 @@
 #include "../ast_direct_declarator.hpp"
 #include "../arrays/ast_array_declaration.hpp"
 #include "ast_assignment.hpp"
+#include "../typedef/ast_typedef.hpp"
 
 namespace ast{
 

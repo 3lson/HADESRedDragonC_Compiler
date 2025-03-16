@@ -4,9 +4,14 @@ namespace ast{
 std::string ArrayDeclaration::GetIdentifier() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(identifier_.get());
+    const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (identifier != nullptr)
     {
         return identifier->GetIdentifier();
+    }
+    else if (declarator != nullptr)
+    {
+        return declarator->GetIdentifier();
     }
     throw std::runtime_error("ArrayDeclaration::GetIdentifier - not an identifier");
 }
@@ -47,4 +52,37 @@ void ArrayDeclaration::Print(std::ostream &stream) const
     }
     stream << "]";
 }
+
+bool ArrayDeclaration::isPointer() const
+{
+    return dynamic_cast<const PointerDeclaration *>(identifier_.get()) != nullptr;
+}
+
+std::vector<Parameter> ArrayDeclaration::GetParameters(Context &context) const
+{
+    return dynamic_cast<const Declarator *>(identifier_.get())->GetParameters(context);
+}
+
+int ArrayDeclaration::GetOffset() const
+{
+    return dynamic_cast<const Declarator *>(identifier_.get())->GetOffset();
+}
+
+void ArrayDeclaration::StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const
+{
+    return dynamic_cast<const Declarator *>(identifier_.get())->StoreParameters(stream, context, dest_reg);
+}
+
+int ArrayDeclaration::GetDereference() const
+{
+    const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
+    if (declarator)
+    {
+        return declarator->GetDereference();
+    }
+
+    return 0;
+}
+
+
 }

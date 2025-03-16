@@ -5,9 +5,13 @@ namespace ast{
 std::string ArrayIndexAccess::GetIdentifier() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(identifier_.get());
+    const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(identifier_.get());
     if (identifier != nullptr)
     {
         return identifier->GetIdentifier();
+    }
+    else if (array_index_access != nullptr){
+        return array_index_access->GetIdentifier();
     }
     throw std::runtime_error("ArrayIndexAccess::GetIdentifier - not an identifier");
 }
@@ -22,8 +26,26 @@ void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::str
     GetIndex(stream, context, index_register, type);
 
     if (variable.get_scope() ==ScopeLevel::LOCAL){
-        stream << "add " << index_register << ", " << index_register << ", sp" << std::endl;
-        stream << context.load_instr(type) << " " << dest_reg << ", " << variable.get_offset() << "(" << index_register << ")" << std::endl;
+        if (variable.is_pointer())
+        {
+            // Pointers points to first item in list
+            std::string pointer_register = context.get_register(Type::_INT);
+            stream << context.load_instr(Type::_INT) << " " << pointer_register << ", " << variable.get_offset() << "(s0)" << std::endl;
+            stream << "add " << index_register << ", " << index_register << ", " << pointer_register << std::endl;
+            context.deallocate_register(pointer_register);
+        }
+        else if (variable.is_array())
+        {
+            // Add index to base pointe
+            stream << "add " << index_register << ", " << index_register << ", s0" << std::endl;
+            stream << "addi " << index_register << ", " << index_register << ", " << variable.get_offset() << std::endl;
+        }
+        else
+        {
+            throw std::runtime_error("ArrayAccess EmitRISC: Variable is not a pointer or array");
+        }
+
+        stream << context.load_instr(type) << " " << dest_reg << ", 0(" << index_register << ")" << std::endl;
     }
     else if(variable.get_scope() == ScopeLevel::GLOBAL){
         std::string global_memory_location = "global_" + GetIdentifier();
@@ -64,5 +86,10 @@ Type ArrayIndexAccess::GetType(Context &context) const
 {
     Variable variable = context.get_variable(GetIdentifier());
     return variable.get_type();
+}
+
+bool ArrayIndexAccess::isPointerOp(Context &context) const
+{
+    return context.get_variable(GetIdentifier()).is_pointer();
 }
 }//namespace ast

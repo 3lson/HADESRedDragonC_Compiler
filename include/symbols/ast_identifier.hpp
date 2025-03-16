@@ -22,6 +22,7 @@ public:
     Type GetType(Context &context) const override;
 
     int GetValue(Context &context) const;
+    bool isPointerOp(Context &context) const override;
 };
 
 }//namespace ast

@@ -92,6 +92,7 @@ type_specifier
 	| CHAR 		{ $$ = new TypeSpecifier(Type::_CHAR); }
 	| UNSIGNED 	{ $$ = new TypeSpecifier(Type::_UNSIGNED_INT); }
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
+    | VOID      { $$ = new TypeSpecifier(Type::_VOID); }
 	| enum_specifier { $$ = $1; }
 	;
 
@@ -104,7 +105,7 @@ enum_specifier
 		NodeList* enumerator_list = dynamic_cast<NodeList*>($4);
 		$$ = new EnumeratorSpecifier($2, enumerator_list);
 	}
-	| ENUM IDENTIFIER { $$ = new EnumeratorSpecifier($2); }
+	| ENUM INT	{ $$ = new TypeSpecifier(Type::_INT); }
 	;
 
 enumerator_list
@@ -123,14 +124,26 @@ enumerator
 
 declarator
 	: direct_declarator { $$ = $1; }
-	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
-	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
+	| pointer direct_declarator {
+		PointerDeclaration* _ptr = new PointerDeclaration(NodePtr($2));
+		for (int i = 1; i< dynamic_cast<const IntConstant*>($1)->GetValue(); i++){
+			_ptr = new PointerDeclaration(NodePtr(_ptr));
+		}
+		$$ = _ptr;
+		delete $1;
+		}
 	;
+
+pointer
+	: '*' { $$ = new IntConstant(1); }
+	| '*' pointer { $$ = new IntConstant(dynamic_cast<const IntConstant *>($2)->GetValue() +1); delete $2; }
 
 direct_declarator
 	: IDENTIFIER                { $$ = new Identifier($1); }
 	| direct_declarator '(' ')' { $$ = new DirectDeclarator(NodePtr($1)); }
 	| direct_declarator '(' parameter_list ')' { $$ = new DirectDeclarator(NodePtr($1), NodePtr($3)); }
+	| direct_declarator '[' ']'				{ $$ = new ArrayDeclaration(NodePtr($1), nullptr); }
+	| direct_declarator '[' constant_expression ']'  { $$ = new ArrayDeclaration(NodePtr($1), NodePtr($3)); }
 	;
 
 parameter_list
@@ -234,6 +247,8 @@ unary_expression
 	| '-' cast_expression { $$ = new UnaryExpression(UnaryOp::MINUS, NodePtr($2)); }
 	| '~' cast_expression { $$ = new UnaryExpression(UnaryOp::BITWISE_NOT, NodePtr($2)); }
 	| '!' cast_expression { $$ = new UnaryExpression(UnaryOp::LOGICAL_NOT, NodePtr($2)); }
+	| '&' cast_expression	{ $$ = new AddressOf(NodePtr($2)); }
+	| '*' cast_expression	{ $$ = new Dereference(NodePtr($2)); }
 	| SIZEOF unary_expression { $$ = new SizeOf(NodePtr($2)); }
 	| SIZEOF '(' type_specifier ')' { $$ = new SizeOf(NodePtr($3)); }
 	;

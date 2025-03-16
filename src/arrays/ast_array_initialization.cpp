@@ -32,7 +32,7 @@ void ArrayInitialization::SaveValue(std::ostream &stream, Context &context, Vari
         for (const auto& initializer : dynamic_cast<const NodeList *>(initializer_list_.get())->get_nodes())
         {
             dynamic_cast<const Operand *>(initializer.get())->EmitRISC(stream, context, dest_reg);
-            stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
+            stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
             offset += types_size.at(type);
         }

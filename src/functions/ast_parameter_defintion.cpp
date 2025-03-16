@@ -4,12 +4,11 @@ namespace ast{
 
 void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    const Specifier* type_specifier_ptr = dynamic_cast<const Specifier*>(type_specifier_.get());
-    Type type = type_specifier_ptr->GetType();
+    Type type = GetType(context);
     int offset = context.get_stack_offset();
-    stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" << std::endl;
+    stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
-    Variable variable(false, false, type, offset);
+    Variable variable(isPointer(), false, type, offset, GetDereference());
     context.define_variable(GetIdentifier(), variable);
     context.increase_stack_offset(GetTypeSize(context));
 }
@@ -62,27 +61,40 @@ std::vector<Parameter> ParameterList::GetParameters(Context &context) const {
 
     for (const auto& node : get_nodes()) {
         const ParameterDefinition* parameter = dynamic_cast<const ParameterDefinition*>(node.get());
-        Parameter Parameter = parameter->GetParameter(context, start_offset + GetOffset());
+        Parameter Parameter = parameter->GetParameter(context, start_offset - GetOffset());
         parameters.push_back(Parameter);
     }
     return parameters;
 }
 
 int ParameterList::GetOffset() const {
-    int newoffset = 0;
-    for (const auto& param : get_nodes()) {
-        const ParameterDefinition* param_def = dynamic_cast<const ParameterDefinition*>(param.get());
+    int size = 0;
 
-        Context dummy_context;
-        newoffset += types_size.at(param_def->GetType(dummy_context));
+    for (Parameter Parameter : parameters)
+    {
+        size += Parameter.GetTypeSize();
+
+        // Align offset to 4 bytes
+        if (size % 4 != 0)
+        {
+            size += 4 - (size % 4);
+        }
     }
-    return newoffset;
+    return size;
 }
 
 std::string ParameterDefinition::GetIdentifier() const
 {
     const Identifier* identifier = dynamic_cast<const Identifier*>(declarator_.get());
-    return identifier->GetIdentifier();
+    const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(declarator_.get());
+    if (identifier){
+        return identifier->GetIdentifier();
+    }
+    else if (pointer_declaration)
+    {
+        return pointer_declaration->GetIdentifier();
+    }
+    throw std::runtime_error("ParameterDeclaration::GetIdentifier() - declarator_ is not an Identifier or PointerDeclarator");
 }
 
 Type ParameterDefinition::GetType(Context &context) const
@@ -94,15 +106,45 @@ Type ParameterDefinition::GetType(Context &context) const
 
 Parameter ParameterDefinition::GetParameter(Context &context, int offset) const
 {
-    Type type = GetType(context);
-    return Parameter(GetIdentifier(), false, false, type, offset);
+    if (isPointer())
+    {
+        return Parameter(GetIdentifier(), true, false, GetType(context), offset, GetDereference());
+    }
+    return Parameter(GetIdentifier(), false, false, GetType(context), offset, 0);
 }
 
 int ParameterDefinition::GetTypeSize(Context &context) const
 {
+    if (isPointer()){
+        types_size.at(Type::_INT);
+    }
     return types_size.at(GetType(context));
 }
 
+
+bool ParameterDefinition::isPointer() const
+{
+
+    if (dynamic_cast<const PointerDeclaration *>(declarator_.get()))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+int ParameterDefinition::GetDereference() const
+{
+    // Get dereference number for parameter
+    const Declarator *declarator = dynamic_cast<const Declarator *>(declarator_.get());
+
+    if (declarator)
+    {
+        return declarator->GetDereference();
+    }
+
+    return 0;
+}
 
 
 }

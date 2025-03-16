@@ -170,7 +170,7 @@ void Context::push_registers(std::ostream &stream)
     {
         int offset = get_stack_offset();
         Type type = reg_manager.get_register_by_id(reg).getType();
-        stream << store_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << offset << "(sp)" << std::endl;
+        stream << store_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << offset << "(s0)" << std::endl;
         allocated_register_offsets[reg] = offset;
         increase_stack_offset(types_size.at(type));
 
@@ -183,7 +183,7 @@ void Context::pop_registers(std::ostream &stream)
     for (int reg : allocated_registers.top())
     {
         Type type = reg_manager.get_register_by_id(reg).getType();
-        stream << load_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << allocated_register_offsets[reg] << "(sp)" << std::endl;
+        stream << load_instr(type) << " " << reg_manager.get_register_name(reg) << ", " << allocated_register_offsets[reg] << "(s0)" << std::endl;
         increase_stack_offset(-types_size.at(type));
         allocated_register_offsets.erase(reg);
 

@@ -40,5 +40,11 @@ Type FunctionInvocation::GetType(Context &context) const
     return function.get_return_value().get_type();
 }
 
+bool FunctionInvocation::isPointerOp(Context &context) const
+{
+    Function function = context.get_function(dynamic_cast<const Identifier *>(identifier_.get())->GetIdentifier());
+    return function.get_return_value().is_pointer();
+}
+
 
 }

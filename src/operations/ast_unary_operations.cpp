@@ -82,7 +82,7 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
     if (identifier){
         Variable variable = context.get_variable(identifier->GetIdentifier());
         int offset = variable.get_offset();
-        stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(sp)" <<std::endl;
+        stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" <<std::endl;
     }
 
     context.deallocate_register(operand_register);
@@ -114,6 +114,11 @@ Type UnaryExpression::GetType(Context& context) const {
     }
 
     return operandObj->GetType(context);
+}
+
+bool UnaryExpression::isPointerOp(Context &context) const
+{
+    return dynamic_cast<const Operand *>(operand_.get())->isPointerOp(context);
 }
 
 } // namespace ast

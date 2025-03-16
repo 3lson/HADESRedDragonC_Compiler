@@ -4,6 +4,8 @@
 #include "../specifiers/ast_specifier.hpp"
 #include "../arrays/ast_array_declaration.hpp"
 #include "../symbols/ast_identifier.hpp"
+#include "../pointers/ast_addressof.hpp"
+#include "../pointers/ast_pointer_declaration.hpp"
 
 namespace ast{
 

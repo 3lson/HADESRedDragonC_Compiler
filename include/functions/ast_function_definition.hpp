@@ -4,6 +4,7 @@
 #include "../ast_direct_declarator.hpp"
 #include "../specifiers/ast_specifier.hpp"
 #include "../statements/ast_statements.hpp"
+#include "../ast_declarator.hpp"
 
 namespace ast {
 

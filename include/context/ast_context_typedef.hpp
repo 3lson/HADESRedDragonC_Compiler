@@ -16,7 +16,7 @@ private:
 
 public:
     TypedefSpec()
-        : number_pointers_(0), base_class_("empty"), type_(Type::_VOID), array_size_(0) {}
+        : number_pointers_(0), base_class_(""), type_(Type::_VOID), array_size_(0) {}
 
     TypedefSpec(Type type, int number_pointers)
         : number_pointers_(number_pointers), base_class_(""), type_(type), array_size_(0) {}

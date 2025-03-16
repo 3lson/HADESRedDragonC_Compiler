@@ -26,16 +26,26 @@ void Typedef::DefineTypedef(NodeList *aliases)
 
         const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(alias.get());
         const Identifier *identifier = dynamic_cast<const Identifier *>(alias.get());
+        const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(alias.get());
+        const AddressOf *address_of = dynamic_cast<const AddressOf *>(alias.get());
 
         if (array_declaration != nullptr)
         {
             alias_name = array_declaration->GetIdentifier();
-            //pointer += array_declaration->GetDereferenceNumber();
+            pointer += array_declaration->GetDereference();
             throw std::runtime_error("Typedef::DefineTypedef - ArrayDeclaration not implemented");
         }
         else if (identifier != nullptr)
         {
             alias_name = identifier->GetIdentifier();
+        }
+        else if( pointer_declaration != nullptr){
+            pointer += pointer_declaration->GetDereference();
+            alias_name = pointer_declaration->GetIdentifier();
+        }
+        else if (address_of != nullptr){
+            pointer -= address_of->AddressCount();
+            alias_name = address_of->GetIdentifier();
         }
 
         TypedefSpec typedef_spec;

@@ -4,7 +4,7 @@ void Context::define_function(std::string identifier, Function function)
 {
     functionMap[identifier] = function;
     last_function_end_statement = identifier + "_end";
-    set_return_register(function.get_return_value().get_type());
+    set_return_register(function.get_return_value().is_pointer() ? Type::_INT : function.get_return_value().get_type());
     current_stack_offset.push(0);
 }
 
@@ -52,6 +52,9 @@ void Context::set_return_register(Type type)
 }
 
 int Parameter::GetTypeSize() const{
+    if (is_pointer()){
+        return types_size.at(Type::_INT);
+    }
     return types_size.at(type);
 }
 

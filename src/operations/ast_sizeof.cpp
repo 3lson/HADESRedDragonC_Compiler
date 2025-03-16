@@ -10,7 +10,7 @@ Type SizeOf::GetType(Context &context) const
 
 void SizeOf::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const{
     (void)context;
-    const TypeSpecifier *type_specifier = dynamic_cast<const TypeSpecifier *>(unary_expression_.get());
+    const Specifier *type_specifier = dynamic_cast<const Specifier *>(unary_expression_.get());
     const Operand *operand = dynamic_cast<const Operand *>(unary_expression_.get());
 
     Type type;
@@ -19,7 +19,7 @@ void SizeOf::EmitRISC(std::ostream &stream, Context &context, std::string dest_r
         type = type_specifier->GetType();
     }
     else if (operand != nullptr){
-        type = operand->GetType(context);
+        type = operand->isPointerOp(context) ? Type::_INT : operand->GetType(context);
     }
     else{
         throw std::runtime_error("SizeOf::EmitRISC unary_expression is not a TypeSpecifier or Operand");
@@ -33,5 +33,12 @@ void SizeOf::Print(std::ostream &stream) const{
     unary_expression_->Print(stream);
     stream << ")";
 }
+
+bool SizeOf::isPointerOp(Context &context) const
+{
+    (void)context;
+    return false;
+}
+
 
 }//namespace ast

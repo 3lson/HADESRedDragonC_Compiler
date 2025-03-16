@@ -16,6 +16,7 @@ public:
 
     Type GetType(Context &context) const;
     void PushBack(NodePtr item);
+    bool isPointerOp(Context &context) const override;
 
     virtual void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     virtual void Print(std::ostream &stream) const override;
