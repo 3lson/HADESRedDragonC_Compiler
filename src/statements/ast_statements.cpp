@@ -33,6 +33,7 @@ int CompoundStatement::GetOffset(Context &context) const
 }
 
 int CompoundStatement::GetCases(Context &context) const{
+    (void)context;
     int cases = 0;
 
     for(const auto& node : get_nodes()){

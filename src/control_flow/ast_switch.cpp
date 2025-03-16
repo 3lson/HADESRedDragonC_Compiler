@@ -4,6 +4,9 @@
 namespace ast {
 
     void SwitchStatement::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
+        (void)dest_reg;
+        (void)context;
+        (void)stream;
 
         std::string condition_reg = context.get_register(Type::_INT);
 
@@ -13,20 +16,22 @@ namespace ast {
 
         int cases = compound_statement->GetCases(context);
 
-
+        (void)cases;
 
     }
 
     void SwitchStatement::Print(std::ostream& stream) const {
-
+        (void)stream;
     }
 
     void CaseStatement::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const {
-
+        (void)stream;
+        (void)context;
+        (void)dest_reg;
     }
 
     void CaseStatement::Print(std::ostream& stream) const {
-
+        (void)stream;
     }
 
  }

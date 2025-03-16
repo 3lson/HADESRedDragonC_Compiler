@@ -2,7 +2,6 @@
 
 #include "ast_node.hpp"
 #include "../statements/ast_statements.hpp"
-#include "../types/ast_type_specifier.hpp"
 #include "../ast_direct_declarator.hpp"
 
 namespace ast {
@@ -25,7 +24,7 @@ private:
     NodePtr condition_;
     NodePtr statement_list_;
 public:
-    CaseStatement(NodePtr condition, NodePtr statement_list, NodePtr value)
+    CaseStatement(NodePtr condition, NodePtr statement_list)
         : condition_(std::move(condition)), statement_list_(std::move(statement_list)){}
 
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
