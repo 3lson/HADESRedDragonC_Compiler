@@ -26,9 +26,6 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
     // Cast to const NodeList since declarator_list_ is a unique_ptr<const Node>
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    if (!declarator_list) {
-        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
-    }
 
     for (const auto &declarator_ptr : declarator_list->get_nodes()) // Use const reference
     {
@@ -109,9 +106,6 @@ int Declaration::GetOffset(Context &context) const
     int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    if (!declarator_list) {
-        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
-    }
 
     int total_size = 0;
 
@@ -178,9 +172,6 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
     //int type_size = types_size.at(type);
 
     const NodeList *declarator_list = dynamic_cast<const NodeList *>(declarator_list_.get());
-    if (!declarator_list) {
-        throw std::runtime_error("Declaration DeclareGlobal: Invalid declarator list");
-    }
     for (const auto& declarator_ : declarator_list->get_nodes())
     {
         const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_.get());

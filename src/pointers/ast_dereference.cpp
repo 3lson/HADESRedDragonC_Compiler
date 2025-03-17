@@ -96,7 +96,7 @@ void Dereference::StartingOffset(std::ostream &stream, Context &context, std::st
     std::string variable_identifier = GetIdentifier();
     Variable variable = context.get_variable(variable_identifier);
     ScopeLevel scope = variable.get_scope();
-    Type type = GetType(context);
+    Type type = isPointerOp(context) ? Type::_INT : GetType(context);
 
     if (scope == ScopeLevel::LOCAL)
     {
