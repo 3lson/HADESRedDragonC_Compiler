@@ -16,6 +16,7 @@ private:
     Type type;
     int initial_ptrs = 0;
     std::string base_type;
+    int initial_array_size = 0;
 
 public:
     Typedef(NodePtr declaration_specifier) : declaration_specifier_(std::move(declaration_specifier)) { GetDeclarationSpecifier(); }

@@ -96,13 +96,21 @@ type_specifier
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
     | VOID      { $$ = new TypeSpecifier(Type::_VOID); }
 	| enum_specifier { $$ = $1; }
-	| struct_specifier { $$ = $1; }
+	//| struct_specifier { $$ = $1; }
 	;
 
+/*
+
 struct_specifier
-	: STRUCT IDENTIFIER '{' struct_declaration_list '}' { $$ = new StructSpecifier($2, NodePtr($4)); }
-	| STRUCT '{' struct_declaration_list '}' { $$ = new StructSpecifier("", NodePtr($3)); }
-	| STRUCT IDENTIFIER { $$ = new StructSpecifier($2, nullptr); }
+	: STRUCT IDENTIFIER '{' struct_declaration_list '}' {
+		NodeList* struct_declaration_list = dynamic_cast<NodeList*>($4);
+		$$ = new StructSpecifier($2,  struct_declaration_list);
+		}
+	| STRUCT '{' struct_declaration_list '}' {
+		NodeList* struct_declaration_list = dynamic_cast<NodeList*>($3);
+		$$ = new StructSpecifier(struct_declaration_list);
+		}
+	| STRUCT IDENTIFIER { $$ = new StructSpecifier($2); }
 	;
 
 struct_declaration_list
@@ -137,6 +145,8 @@ struct_declarator
 	| ':' constant_expression
 	| declarator ':' constant_expression
 	;
+
+*/
 
 enum_specifier
 	: ENUM '{' enumerator_list '}' {
@@ -304,6 +314,15 @@ unary_expression
 	| '*' cast_expression	{ $$ = new Dereference(NodePtr($2)); }
 	| SIZEOF unary_expression { $$ = new SizeOf(NodePtr($2)); }
 	| SIZEOF '(' type_specifier ')' { $$ = new SizeOf(NodePtr($3)); }
+	| SIZEOF '(' type_specifier pointer ')'						{
+		const IntConstant *pointer_node = dynamic_cast<const IntConstant *>($4);
+		$$ = new SizeOf(NodePtr($3), pointer_node->GetValue());
+		}
+	| SIZEOF '(' type_specifier '[' constant_expression ']' ')'		{ $$ = new SizeOf(NodePtr($3), NodePtr($5)); }
+	| SIZEOF '(' type_specifier pointer '[' constant_expression ']' ')' {
+		const IntConstant *pointer_node = dynamic_cast<const IntConstant *>($4);
+		$$ = new SizeOf(NodePtr($3), pointer_node->GetValue(), NodePtr($6));
+		}
 	;
 
 cast_expression

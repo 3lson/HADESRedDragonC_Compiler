@@ -146,15 +146,13 @@ public:
     // -------- Enum Management ---------
     bool is_enum(std::string identifier);
     int get_enum_label(std::string label);
-    void define_enum(std::string name, std::vector<std::string> labels);
+    void define_enum(std::string name);
     void define_enum_label(std::string label, int value);
 
     // ----- Typedef Management -------
     void define_typedef(const std::string& name, const TypedefSpec& spec);
     TypedefSpec get_typedef(const std::string& name) const;
     bool is_typedef(const std::string& name) const;
-    int get_typedef_base_pointers(std::string alias);
-    Type get_typedef_base_type(std::string alias);
 
     // ------ Pointer Management ----------
     char *cancel_complement(const char *sequence);

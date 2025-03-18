@@ -202,16 +202,67 @@ void use_space() {
 void process_single_parameter(TypedefSpec typedef_spec, std::vector<std::string>& parameters, std::vector<int>& pointer_counts, std::vector<char>& separators) {
     char next_char;
     std::string variable_name = "";
+    bool is_initializer = false;  // Flag to track if we're inside an initializer
+    int brace_count = 0;  // Track braces for initializer lists
 
-    while ((next_char = yyinput()) != ',' && next_char != ';' && next_char != '(' && next_char != ')') {
-        variable_name += next_char;
+    // Capture variable name until we hit a ',', ';', '(', or ')', or encounter an initializer
+    while (true) {
+        next_char = yyinput();
+
+        if (next_char == ',' && !is_initializer) {
+            // Comma, but not inside an initializer, so it's a parameter separator
+            break;
+        } else if (next_char == ';' && brace_count == 0) {
+            // End of declaration or function argument list
+            break;
+        } else if (next_char == '(' || next_char == ')') {
+            // Handle function argument lists
+            break;
+        } else if (next_char == '=') {
+            // Found initializer, handle separately
+            is_initializer = true;
+            variable_name += " = ";
+        } else if (next_char == '{') {
+            // Start of initializer list
+            brace_count++;
+            variable_name += next_char;
+        } else if (next_char == '}') {
+            // End of initializer list
+            brace_count--;
+            variable_name += next_char;
+
+            // If all braces are closed, check for semicolon or comma
+            if (brace_count == 0) {
+                next_char = yyinput();
+                if (next_char == ';' || next_char == ',') {
+                    break;
+                } else {
+                    variable_name += next_char;  // Continue processing if more characters exist
+                }
+            }
+        } else {
+            // Regular character, append to the variable name
+            variable_name += next_char;
+        }
     }
 
+    // If it's an array, append the array size before any initializer
+    if (typedef_spec.get_array_size() > 1) {
+        size_t equals_pos = variable_name.find('=');
+        if (equals_pos != std::string::npos) {
+            variable_name.insert(equals_pos, "[" + std::to_string(typedef_spec.get_array_size()) + "]");
+        } else {
+            variable_name += "[" + std::to_string(typedef_spec.get_array_size()) + "]";
+        }
+    }
+
+    // Store the trimmed variable name, pointer count, and separator
     parameters.push_back(variable_name);
     pointer_counts.push_back(typedef_spec.get_number_pointers());
     separators.push_back(next_char);
 
-    if (next_char == ',') {
+    // If a comma is encountered (not in initializer), recursively process the next parameter
+    if (next_char == ',' && brace_count == 0) {
         process_single_parameter(typedef_spec, parameters, pointer_counts, separators);
     }
 }

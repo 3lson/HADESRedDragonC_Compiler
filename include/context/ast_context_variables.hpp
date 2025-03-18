@@ -55,6 +55,8 @@ class Global : public Variable {
     private:
         std::vector<uint32_t> lowerValues;
         std::vector<uint32_t> upperValues;
+        std::vector<std::string> labels;
+        bool hasLabel = false;
 
     public:
         Global() : Variable() {}
@@ -62,7 +64,13 @@ class Global : public Variable {
         Global(bool ptr, bool arr, int size, Type type, int dereference_num) : Variable(ptr, arr, size, type, ScopeLevel::GLOBAL, dereference_num) {}
 
         void print_global(std::ostream &stream) const;
+
+        void print_labels(std::ostream &stream) const;
+        void print_num(std::ostream &stream) const;
+
         void push_lower(uint32_t value);
         void push_upper(uint32_t value);
+
+        void push_label(std::string label);
     };
 }//namespace ast

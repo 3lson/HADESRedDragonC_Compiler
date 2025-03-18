@@ -18,11 +18,11 @@ public:
     TypedefSpec()
         : number_pointers_(0), base_class_(""), type_(Type::_VOID), array_size_(0) {}
 
-    TypedefSpec(Type type, int number_pointers)
-        : number_pointers_(number_pointers), base_class_(""), type_(type), array_size_(0) {}
+    TypedefSpec(Type type, int number_pointers, int array_size)
+        : number_pointers_(number_pointers), base_class_(""), type_(type), array_size_(array_size) {}
 
-    TypedefSpec(const std::string& base_class, int number_pointers)
-        : number_pointers_(number_pointers), base_class_(base_class), type_(Type::_STRUCT), array_size_(0) {}
+    TypedefSpec(const std::string& base_class, int number_pointers, int array_size)
+        : number_pointers_(number_pointers), base_class_(base_class), type_(Type::_STRUCT), array_size_(array_size) {}
 
     // Getters
     int get_number_pointers() const { return number_pointers_; }

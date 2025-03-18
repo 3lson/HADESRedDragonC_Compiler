@@ -19,7 +19,7 @@ public:
     ArrayDeclaration(NodePtr identifier) : identifier_(std::move(identifier)), constant_expression_(nullptr) {}
 
     std::string GetId() const override;
-    int GetArraySize(Context &context) const;
+    int GetArraySize() const;
     bool isPointer() const override;
 
     virtual std::vector<Parameter>GetParameters(Context &context) const override;

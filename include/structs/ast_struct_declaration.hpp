@@ -13,10 +13,10 @@ private:
     NodePtr declarators_;
 
 public:
-    StructDeclaration(NodePtr specifiers, NodePtr declarators) : specifiers_(specifiers), declarators_(declarators) {}
+    StructDeclaration(NodePtr specifiers, NodePtr declarators) : specifiers_(std::move(specifiers)), declarators_(std::move(declarators)) {}
 
     void Print(std::ostream& stream) const override;
     void EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const override;
-}
+};
 
 }//namespace ast

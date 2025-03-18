@@ -10,7 +10,26 @@ void Global::push_upper(uint32_t value){
     upperValues.push_back(value);
 }
 
+void Global::push_label(std::string label)
+{
+    labels.push_back(label);
+    hasLabel = true;
+}
+
+
 void Global::print_global(std::ostream &stream) const
+{
+    if (hasLabel)
+    {
+        print_labels(stream);
+    }
+    else
+    {
+        print_num(stream);
+    }
+}
+
+void Global::print_num(std::ostream &stream) const
 {
     Type type = get_type();
 
@@ -32,6 +51,25 @@ void Global::print_global(std::ostream &stream) const
     }
 }
 
+void Global::print_labels(std::ostream &stream) const
+{
+
+    Type actual_type = is_pointer() ? Type::_INT : this->get_type();
+
+    for (size_t i = 0; i < labels.size(); i++)
+    {
+        stream << "\t" << assembler_directives.at(actual_type) << " " << labels.at(i) << std::endl;
+    }
+
+    size_t i = lowerValues.size();
+    while (i < static_cast<size_t>(get_array_size()))
+    {
+        stream << "\t.zero " << types_size.at(actual_type) << std::endl;
+        i++;
+    }
+}
+
+
 void Context::print_global(std::ostream &stream) const
 {
     stream << "\t.data" << std::endl;
@@ -47,5 +85,6 @@ void Context::print_global(std::ostream &stream) const
         stream << std::endl;
     }
 }
+
 
 }

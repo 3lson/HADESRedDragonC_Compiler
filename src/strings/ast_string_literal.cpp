@@ -31,4 +31,12 @@ std::string StringLiteral::GetString() const
     return value_;
 }
 
+void StringLiteral::SaveValue(Context &context, Global &global) const
+{
+    int index = context.define_string(value_);
+    std::string label = "string_" + std::to_string(index);
+
+    global.push_label(label);
+}
+
 }//namespace ast

@@ -16,7 +16,7 @@ std::string ArrayDeclaration::GetId() const
     throw std::runtime_error("ArrayDeclaration::GetId - not an identifier");
 }
 
-int ArrayDeclaration::GetArraySize(Context &context) const
+int ArrayDeclaration::GetArraySize() const
 {
     if (constant_expression_ == nullptr)
     {

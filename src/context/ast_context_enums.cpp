@@ -2,8 +2,19 @@
 
 namespace ast{
 
-void Context::define_enum(std::string name, std::vector<std::string> labels){
-    enumsDefinitions[name] = labels;
+void Context::define_enum(std::string name){
+    if (typedefMap.empty())
+    {
+        throw std::runtime_error("Context::define_enum: custom_typedef is empty.");
+    }
+
+    if (enumMap.empty())
+    {
+        throw std::runtime_error("Context::define_enum: enum_name is empty.");
+    }
+
+    TypedefSpec typedef_specs = TypedefSpec(Type::_INT, 0, 0);
+    typedefMap.back()[name] = typedef_specs;
 }
 
 void Context::define_enum_label(std::string label, int value){

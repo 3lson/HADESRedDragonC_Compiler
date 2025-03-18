@@ -50,9 +50,9 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
         }
         else if (array_declaration != nullptr)
         {
-            int array_size = array_declaration->GetArraySize(context);
+            int array_size = array_declaration->GetArraySize();
 
-            if (array_declaration->GetArraySize(context) == -1)
+            if (array_declaration->GetArraySize() == -1)
             {
                 throw std::runtime_error("Declaration EmitRISC: Array size not specified");
             }
@@ -119,11 +119,11 @@ int Declaration::GetOffset(Context &context) const
 
             if (assignment != nullptr) {
                 //int actual_size = assignment->isPointerInitialization() ? types_size.at(Type::_INT) : type_size;
-                type_size = total_size + type_size * assignment->GetArraySize(context);
+                type_size = total_size + type_size * assignment->GetArraySize();
             }
             else if (array_declaration != nullptr) {
                 int actual_type_size = array_declaration->isPointer() ? types_size.at(Type::_INT) : type_size;
-                total_size = total_size + actual_type_size * array_declaration->GetArraySize(context);
+                total_size = total_size + actual_type_size * array_declaration->GetArraySize();
             } else if (identifier != nullptr) {
                 type_size = total_size + type_size;
             }
@@ -184,7 +184,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
         if (assignment != nullptr)
         {
-            int array_size = assignment->GetArraySize(context);
+            int array_size = assignment->GetArraySize();
 
             bool is_array = assignment->isArrayInitialization();
             bool is_pointer = assignment->isPointerInitialization();
@@ -206,9 +206,9 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
         else if (array_declaration != nullptr)
         {
-            int array_size = array_declaration->GetArraySize(context);
+            int array_size = array_declaration->GetArraySize();
 
-            if (array_declaration->GetArraySize(context) == -1)
+            if (array_declaration->GetArraySize() == -1)
             {
                 throw std::runtime_error("Declaration EmitRISC: Array size not specified");
             }

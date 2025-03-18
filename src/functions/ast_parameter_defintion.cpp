@@ -4,13 +4,13 @@ namespace ast{
 
 void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    Type type = isPointer() ? Type::_INT : GetType(context);
+    Type type = isPointer() ? Type::_INT : GetType();
     int offset = context.get_stack_offset();
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
-    Variable variable(isPointer(), false, GetType(context), offset, GetDereference());
+    Variable variable(isPointer(), false, GetType(), offset, GetDereference());
     context.define_variable(GetId(), variable);
-    context.increase_stack_offset(GetTypeSize(context));
+    context.increase_stack_offset(GetTypeSize());
 }
 
 void ParameterDefinition::Print(std::ostream &stream) const{
@@ -25,33 +25,56 @@ void ParameterList::EmitRISC(std::ostream &stream, Context &context, std::string
     int float_register = 42;
     std::string register_name;
 
-    for (const auto& node : get_nodes())
-    {
+    int stack_offset = context.get_stack_offset();
+
+    for (size_t i=0; i < get_nodes().size(); ++i){
+        const auto& node = get_nodes()[i];
+
         if (!node){
             continue;
         }
         const ParameterDefinition* parameter = dynamic_cast< const ParameterDefinition*>(node.get());
 
-        Type type = parameter->isPointer() ? Type::_INT : parameter->GetType(context);
+        Type type = parameter->isPointer() ? Type::_INT : parameter->GetType();
 
-        switch(type){
-            case Type::_CHAR:
-            case Type::_SHORT:
-            case Type::_INT:
-            case Type::_UNSIGNED_INT:
-            case Type::_LONG:
-                register_num = int_register++;
-                break;
-            case Type::_FLOAT:
-            case Type::_DOUBLE:
-                register_num = float_register++;
-                break;
-            default:
-                throw std::runtime_error("ParameterDefinition::EmitRISC - Invalid type");
+        if (i<8) {
+            switch(type){
+                case Type::_CHAR:
+                case Type::_SHORT:
+                case Type::_INT:
+                case Type::_UNSIGNED_INT:
+                case Type::_LONG:
+                    register_num = int_register++;
+                    break;
+                case Type::_FLOAT:
+                case Type::_DOUBLE:
+                    register_num = float_register++;
+                    break;
+                default:
+                    throw std::runtime_error("ParameterDefinition::EmitRISC - Invalid type");
+            }
+
+            register_name = context.get_register_name(register_num);
+            parameter->EmitRISC(stream, context, register_name);
+        } else {
+            stack_offset -= types_size.at(type);
+
+            std::cout << "Stack_offset: " << stack_offset << std::endl;
+
+            //Alignment
+            int offset = (-1 * stack_offset) + 4;
+
+            std::cout << "Offset: " << offset << std::endl;
+
+
+            std::string temp_reg = context.get_register(type);
+            stream << context.load_instr(type) << " " << temp_reg << ", " << offset << "(sp)" << std::endl;
+
+            parameter->EmitRISC(stream, context, temp_reg);
+
+            context.deallocate_register(temp_reg);
         }
 
-        register_name = context.get_register_name(register_num);
-        parameter->EmitRISC(stream, context, register_name);
     }
     (void)dest_reg;
 
@@ -99,7 +122,7 @@ std::string ParameterDefinition::GetId() const
     throw std::runtime_error("ParameterDeclaration::GetId() - declarator_ is not an Identifier or PointerDeclarator");
 }
 
-Type ParameterDefinition::GetType(Context &context) const
+Type ParameterDefinition::GetType() const
 {
     const Specifier* type_specifier_ptr = dynamic_cast<const Specifier*>(type_specifier_.get());
     (void)context;
@@ -108,19 +131,20 @@ Type ParameterDefinition::GetType(Context &context) const
 
 Parameter ParameterDefinition::GetParameter(Context &context, int offset) const
 {
+    (void)context;
     if (isPointer())
     {
-        return Parameter(GetId(), true, false, GetType(context), offset, GetDereference());
+        return Parameter(GetId(), true, false, GetType(), offset, GetDereference());
     }
-    return Parameter(GetId(), false, false, GetType(context), offset, 0);
+    return Parameter(GetId(), false, false, GetType(), offset, 0);
 }
 
-int ParameterDefinition::GetTypeSize(Context &context) const
+int ParameterDefinition::GetTypeSize() const
 {
     if (isPointer()){
         types_size.at(Type::_INT);
     }
-    return types_size.at(GetType(context));
+    return types_size.at(GetType());
 }
 
 

@@ -25,7 +25,7 @@ public:
 
     std::string GetId() const;
 
-    int GetArraySize(Context &context) const;
+    int GetArraySize() const;
     bool isArrayInitialization() const;
     bool isPointerInitialization() const;
     int GetDereference() const;

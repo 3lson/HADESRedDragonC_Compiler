@@ -45,8 +45,15 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         context.increase_stack_offset(8);
         int initial_offset = 8 + direct_declarator_->GetOffset();
 
-        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset + 32;
+        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset + 128;
         stack_allocated_space = stack_allocated_space + (4 - stack_allocated_space % 4);
+
+        //Added for more than 8 params
+
+        if (parameters.size() > 8){
+            int additional_args_space = (parameters.size() -8) * 4;
+            stack_allocated_space += additional_args_space;
+        }
         context.set_stack_offset(stack_allocated_space);
 
         stream << "addi sp, sp, -" << stack_allocated_space << std::endl;

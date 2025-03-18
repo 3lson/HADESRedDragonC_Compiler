@@ -1,4 +1,4 @@
-#include "..structs/ast_struct_specifier.hpp"
+#include "../../include/structs/ast_struct_specifier.hpp"
 
 namespace ast{
 

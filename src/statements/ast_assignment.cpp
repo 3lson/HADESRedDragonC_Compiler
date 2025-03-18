@@ -205,18 +205,18 @@ std::string Assignment::GetId() const
     throw std::runtime_error("Assignment GetId: Not an identifier, array access, array declarator, declarator");
 }
 
-int Assignment::GetArraySize(Context &context) const
+int Assignment::GetArraySize() const
 {
     const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(unary_expression_.get());
 
     if (array_declaration != nullptr)
     {
 
-        if (array_declaration->GetArraySize(context) == -1)
+        if (array_declaration->GetArraySize() == -1)
         {
             return dynamic_cast<const ArrayInitialization *>(expression_.get())->GetArraySize();
         }
-        return array_declaration->GetArraySize(context);
+        return array_declaration->GetArraySize();
     }
 
     return 1;
@@ -229,16 +229,29 @@ bool Assignment::isArrayInitialization() const
 
 void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
 {
+    const Constant *constant = dynamic_cast<const Constant *>(expression_.get());
+    const StringLiteral *string_literal = dynamic_cast<const StringLiteral *>(expression_.get());
+    const ArrayInitialization *array_initialization = dynamic_cast<const ArrayInitialization *>(expression_.get());
 
-
-    if (isArrayInitialization())
+    if (constant != nullptr)
     {
-        dynamic_cast<const ArrayInitialization *>(expression_.get())->InitializeGlobals(stream, context, global);
+        constant->SaveValue(global);
+    }
+
+    else if (string_literal != nullptr)
+    {
+        string_literal->SaveValue(context, global);
+    }
+
+    else if (array_initialization != nullptr)
+    {
+        array_initialization->InitializeGlobals(stream, context, global);
     }
 
     else
     {
-        dynamic_cast<const Constant *>(expression_.get())->SaveValue(global);
+        std::cout << "Assignment InitializeGlobals: type is " << typeid(expression_).name() << std::endl;
+        throw std::runtime_error("Assignment InitializeGlobals: Not a constant or string literal");
     }
 }
 
@@ -253,7 +266,7 @@ bool Assignment::isPointerInitialization() const
 
 void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, Context &context) const
 {
-    int array_size = GetArraySize(context);
+    int array_size = GetArraySize();
 
     bool is_array = isArrayInitialization();
     bool is_pointer = isPointerInitialization();

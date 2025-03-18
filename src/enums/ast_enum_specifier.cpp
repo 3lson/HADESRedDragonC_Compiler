@@ -23,7 +23,10 @@ void EnumeratorSpecifier::DefineSpecifier(Context &context) const
             labels.push_back(enumerator_->GetLabel());
         }
 
-        context.define_enum(*identifier_, labels);
+    }
+    if (identifier_ != nullptr)
+    {
+        context.define_enum(*identifier_);
     }
 }
 

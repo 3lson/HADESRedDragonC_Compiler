@@ -9,12 +9,17 @@ namespace ast{
 
 class StructSpecifier : public Specifier{
 private:
-    std::string name;
+    std::string *name_;
     NodeList* declarations;
 
 public:
-    StructSpecifier(const std::string& name, NodeList* declarations) : name(name), declarations(declarations) {}
+    StructSpecifier(std::string *name, NodeList* declarations) : name_(name), declarations(declarations) {}
+    StructSpecifier(std::string *name) : name_(name), declarations(nullptr) {}
+    StructSpecifier(NodeList* declarations) : name_(nullptr), declarations(declarations) {}
     ~StructSpecifier() {
+        if (name_){
+            delete name_;
+        }
         if (declarations) {
             delete declarations;
         }
