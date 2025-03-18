@@ -14,9 +14,9 @@ Type Dereference::GetType(Context& context) const
 bool Dereference::isPointer(Context &context) const{
     Variable variable = context.get_variable(GetIdentifier());
     if (variable.get_dereference_num() == dereferenceCount()){
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 
@@ -96,7 +96,7 @@ void Dereference::StartingOffset(std::ostream &stream, Context &context, std::st
     std::string variable_identifier = GetIdentifier();
     Variable variable = context.get_variable(variable_identifier);
     ScopeLevel scope = variable.get_scope();
-    Type type = GetType(context);
+    Type type = isPointer(context) ? Type::_INT : GetType(context);
 
     if (scope == ScopeLevel::LOCAL)
     {

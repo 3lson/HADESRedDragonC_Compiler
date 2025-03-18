@@ -13,7 +13,7 @@ void AddressOf::EmitRISC(std::ostream& stream, Context& context, std::string des
     std::string identifier = GetIdentifier();
 
     Variable variable = context.get_variable(identifier);
-    Type type = GetType(context);
+    Type type = isPointerOp(context) ? Type::_INT : GetType(context);
 
     const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(operand_.get());
 

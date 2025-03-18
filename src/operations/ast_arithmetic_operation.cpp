@@ -62,7 +62,7 @@ void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::stri
     if (!left_operand || !right_operand) {
         throw std::runtime_error("Invalid operand type in ArithExpression.");
     }
-
+    //Not working yet for mixed operations
     Type left_type = left_operand->GetType(context);
     Type right_type = right_operand->GetType(context);
 
@@ -135,12 +135,24 @@ void ArithExpression::ShiftPointerOp(std::ostream &stream, Context &context, std
 {
     if (isPointerOp(context))
     {
-        const Operand* operand = dynamic_cast<const Operand*>(node.get());
-        if (operand && !operand->isPointerOp(context))
+        if (!dynamic_cast<const Operand *>(node.get())->isPointerOp(context))
         {
-            stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(GetType(context)) << std::endl;
+            Type type = NewPointerType(context);
+            stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(type) << std::endl;
         }
     }
+}
+
+Type ArithExpression::NewPointerType(Context &context) const
+{
+    const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
+    const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
+
+    if (left_operand->isPointerOp(context))
+    {
+        return left_operand->GetType(context);
+    }
+    return right_operand->GetType(context);
 }
 
 

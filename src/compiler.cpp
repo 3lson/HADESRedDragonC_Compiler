@@ -75,6 +75,7 @@ void Compile(const NodePtr& root, const std::string& compile_output_path)
     root->EmitRISC(output, ctx, "zero");
     output << std::endl;
     ctx.outputConstantDeclaration(output);
+    ctx.print_string(output);
     output << std::endl;
     ctx.print_global(output);
     output.close();

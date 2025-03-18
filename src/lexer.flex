@@ -15,38 +15,6 @@
   void use_space();
   void process_typedef(TypedefSpec spec);
 
-  //Function to suppress '*' if '&' is seen
-    char* cancel_pointer_pairs(const char* sequence) {
-      static char buffer[256]; // Buffer to hold the remaining characters
-      int star_count = 0;
-      int ampersand_count = 0;
-
-      // Count the number of * and & characters
-      for (int i = 0; sequence[i] != '\0'; i++) {
-          if (sequence[i] == '*') {
-              star_count++;
-          } else if (sequence[i] == '&') {
-              if (star_count > 0) {
-                  star_count--; // Cancel out a *
-              } else {
-                  ampersand_count++; // Unmatched &
-              }
-          }
-      }
-
-      // Construct the result with remaining unmatched characters
-      int index = 0;
-      for (int i = 0; i < star_count; i++) {
-          buffer[index++] = '*';
-      }
-      for (int i = 0; i < ampersand_count; i++) {
-          buffer[index++] = '&';
-      }
-      buffer[index] = '\0'; // Null-terminate the string
-
-      return buffer;
-  }
-
   // Suppress warning about unused function
   [[maybe_unused]] static void yyunput (int c, char * yy_bp );
 %}
@@ -123,10 +91,31 @@ L?'(\\.|[^\\'])+' {yylval.number_int = yytext[1]; return(INT_CONSTANT);}
 {D}*"."{D}+({E})?{FSL}	{yylval.number_double = strtod(yytext, NULL); return(DOUBLE_CONSTANT);}
 {D}+"."{D}*({E})?{FSL}	{yylval.number_double = strtod(yytext, NULL); return(DOUBLE_CONSTANT);}
 
-L?\"(\\.|[^\\"])*\"	{yylval.string = new std::string(yytext); return(STRING_LITERAL);}
+L?'(\\.|[^\\'])' {
+    // Process the character literal
+    char* characters = context.process_characters(yytext);
+
+    yylval.character = characters[0];
+    std::cout << "Character literal: " << yylval.character << std::endl;
+
+    delete[] characters;
+    return(CHAR_LITERAL);
+}
+
+L?\"(\\.|[^\\"])*\" {
+    // Process the string literal
+    char* characters = context.process_characters(yytext);
+    std::string output = context.escape_sequences(characters);
+
+    yylval.string = new std::string(output);
+    std::cout << "String literal: " << *(yylval.string) << std::endl;
+
+    delete[] characters;
+    return(STRING_LITERAL);
+}
 
 (\*+&+)+	{
-              char* result = cancel_pointer_pairs(yytext);
+              char* result = context.cancel_complement(yytext);
               if (result[0] != '\0') {
                   for (int i = strlen(result) - 1; i >= 0; i--) {
                       unput(result[i]);

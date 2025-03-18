@@ -55,6 +55,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
         // If array access, load expression into specific element by first evaluating index
         else if (array_index_access != nullptr)
         {
+            type = array_index_access->isPointerOp(context) ? Type::_INT : array_index_access->GetType(context);
             std::string index_register = context.get_register(Type::_INT);
             array_index_access->GetIndex(stream, context, index_register, type);
 
@@ -228,6 +229,8 @@ bool Assignment::isArrayInitialization() const
 
 void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
 {
+
+
     if (isArrayInitialization())
     {
         dynamic_cast<const ArrayInitialization *>(expression_.get())->InitializeGlobals(stream, context, global);
@@ -263,7 +266,7 @@ void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, 
     std::string variable_name = GetIdentifier();
 
     int dereference_num = GetDereference();
-    Variable variable(is_pointer, is_array, array_size, actual_type, offset, dereference_num);
+    Variable variable(is_pointer, is_array, array_size, type, offset, dereference_num);
     context.define_variable(variable_name, variable);
 
     // Evaluate expression and store in variable

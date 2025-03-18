@@ -13,13 +13,21 @@ void FunctionInvocation::EmitRISC(std::ostream &stream, Context &context, std::s
         dynamic_cast<const ExpressionList *>(argument_list_.get())->GetArguments(stream, context, dest_reg);
     }
 
-    context.push_operation_type(GetType(context));
+    Type return_type = isPointerOp(context) ? Type::_INT : GetType(context);
+    if (return_type != Type::_VOID){
+        context.push_operation_type(return_type);
+    }
 
     stream << "call " << func_name << std::endl;
-    stream << context.move_instr(context.get_function_call().get_return_value().get_type()) << " " << dest_reg << ", " << context.get_return_register() << std::endl;
-    context.pop_operation_type();
+    if(context.is_type_stack_empty() && !(return_type == Type::_VOID)){
+        stream << context.move_instr(return_type) << " " << dest_reg << ", " << context.get_return_register() << std::endl;
+    }
     context.pop_function_call();
     context.pop_registers(stream);
+
+    if (return_type != Type::_VOID){
+        context.pop_operation_type();
+    }
 }
 
 void FunctionInvocation::Print(std::ostream &stream) const
