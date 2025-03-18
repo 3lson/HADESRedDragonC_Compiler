@@ -3,7 +3,7 @@ namespace ast{
 void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     (void)dest_reg;
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
     Type type = variable.is_pointer() ? Type::_INT : variable.get_type();
     int offset = variable.get_offset();
     context.push_operation_type(type);
@@ -15,7 +15,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
     {
         const ArrayInitialization *array_init = dynamic_cast<const ArrayInitialization *>(expression_.get());
         if (array_init) {
-            array_init->SaveValue(stream, context, variable, GetIdentifier());
+            array_init->SaveValue(stream, context, variable, GetId());
         } else {
             throw std::runtime_error("Assignment EmitRISC: Expected an array initialization");
         }
@@ -38,7 +38,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
 
             else if (variable.get_scope() == ScopeLevel::GLOBAL)
             {
-                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_location = "global_" + GetId();
                 std::string global_memory_register = context.get_register(Type::_INT);
 
                 stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
@@ -85,7 +85,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
             // If global scope, access global memory by targetting global label
             else if (variable.get_scope() == ScopeLevel::GLOBAL)
             {
-                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_location = "global_" + GetId();
                 std::string global_memory_register = context.get_register(Type::_INT);
 
                 // Access global memory by targetting global label
@@ -114,7 +114,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
             // If global scope, access global memory by targetting global label
             else if (variable.get_scope() == ScopeLevel::GLOBAL)
             {
-                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_location = "global_" + GetId();
                 std::string global_memory_register = context.get_register(Type::_INT);
 
                 // Access global memory by targetting global label
@@ -132,7 +132,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
 
             else if (variable.get_scope() == ScopeLevel::GLOBAL)
             {
-                std::string global_memory_location = "global_" + GetIdentifier();
+                std::string global_memory_location = "global_" + GetId();
                 std::string global_memory_register = context.get_register(Type::_INT);
 
                 stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
@@ -175,7 +175,7 @@ void Assignment::Print(std::ostream &stream) const
     stream << ";" << std::endl;
 }
 
-std::string Assignment::GetIdentifier() const
+std::string Assignment::GetId() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(unary_expression_.get());
     const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(unary_expression_.get());
@@ -184,25 +184,25 @@ std::string Assignment::GetIdentifier() const
     const AddressOf *address_of = dynamic_cast<const AddressOf *>(unary_expression_.get());
     if (identifier != nullptr)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (array_index_access != nullptr)
     {
-        return array_index_access->GetIdentifier();
+        return array_index_access->GetId();
     }
     else if (declarator != nullptr)
     {
-        return declarator->GetIdentifier();
+        return declarator->GetId();
     }
     else if (dereference != nullptr)
     {
-        return dereference->GetIdentifier();
+        return dereference->GetId();
     }
     else if (address_of != nullptr)
     {
-        return address_of->GetIdentifier();
+        return address_of->GetId();
     }
-    throw std::runtime_error("Assignment GetIdentifier: Not an identifier, array access, array declarator, declarator");
+    throw std::runtime_error("Assignment GetId: Not an identifier, array access, array declarator, declarator");
 }
 
 int Assignment::GetArraySize(Context &context) const
@@ -263,7 +263,7 @@ void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, 
     int actual_type_size = types_size.at(actual_type);
     context.increase_stack_offset(actual_type_size * array_size);
 
-    std::string variable_name = GetIdentifier();
+    std::string variable_name = GetId();
 
     int dereference_num = GetDereference();
     Variable variable(is_pointer, is_array, array_size, type, offset, dereference_num);

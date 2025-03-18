@@ -23,7 +23,7 @@ private:
 public:
     Assignment(NodePtr unary_expression, NodePtr expression) : unary_expression_(std::move(unary_expression)), expression_(std::move(expression)) {}
 
-    std::string GetIdentifier() const;
+    std::string GetId() const;
 
     int GetArraySize(Context &context) const;
     bool isArrayInitialization() const;

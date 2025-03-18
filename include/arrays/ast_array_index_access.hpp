@@ -12,7 +12,7 @@ private:
 public:
     ArrayIndexAccess(NodePtr identifier, NodePtr index) : identifier_(std::move(identifier)), index_(std::move(index)) {}
 
-    std::string GetIdentifier() const;
+    std::string GetId() const;
     Type GetType(Context& context) const;
     void GetIndex(std::ostream& stream, Context& context, std::string dest_reg, Type type) const;
     bool isPointerOp(Context &context) const override;

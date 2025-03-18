@@ -8,7 +8,7 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         throw std::runtime_error("Failed to cast declarator_ to DirectDeclarator");
     }
 
-    std::string function_name = direct_declarator_->GetIdentifier();
+    std::string function_name = direct_declarator_->GetId();
 
     const Specifier *return_type_specifier = dynamic_cast<const Specifier *>(declaration_specifiers_.get());
     if (!return_type_specifier) {

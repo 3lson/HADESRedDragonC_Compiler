@@ -9,7 +9,7 @@ void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
     Variable variable(isPointer(), false, GetType(context), offset, GetDereference());
-    context.define_variable(GetIdentifier(), variable);
+    context.define_variable(GetId(), variable);
     context.increase_stack_offset(GetTypeSize(context));
 }
 
@@ -85,18 +85,18 @@ int ParameterList::GetOffset() const {
     return size;
 }
 
-std::string ParameterDefinition::GetIdentifier() const
+std::string ParameterDefinition::GetId() const
 {
     const Identifier* identifier = dynamic_cast<const Identifier*>(declarator_.get());
     const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(declarator_.get());
     if (identifier){
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (pointer_declaration)
     {
-        return pointer_declaration->GetIdentifier();
+        return pointer_declaration->GetId();
     }
-    throw std::runtime_error("ParameterDeclaration::GetIdentifier() - declarator_ is not an Identifier or PointerDeclarator");
+    throw std::runtime_error("ParameterDeclaration::GetId() - declarator_ is not an Identifier or PointerDeclarator");
 }
 
 Type ParameterDefinition::GetType(Context &context) const
@@ -110,9 +110,9 @@ Parameter ParameterDefinition::GetParameter(Context &context, int offset) const
 {
     if (isPointer())
     {
-        return Parameter(GetIdentifier(), true, false, GetType(context), offset, GetDereference());
+        return Parameter(GetId(), true, false, GetType(context), offset, GetDereference());
     }
-    return Parameter(GetIdentifier(), false, false, GetType(context), offset, 0);
+    return Parameter(GetId(), false, false, GetType(context), offset, 0);
 }
 
 int ParameterDefinition::GetTypeSize(Context &context) const

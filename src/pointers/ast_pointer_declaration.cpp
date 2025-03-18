@@ -2,21 +2,21 @@
 
 namespace ast{
 
-std::string PointerDeclaration::GetIdentifier() const
+std::string PointerDeclaration::GetId() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(direct_declarator_.get());
     const Declarator *declarator = dynamic_cast<const Declarator *>(direct_declarator_.get());
 
     if (identifier)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (declarator)
     {
-        return declarator->GetIdentifier();
+        return declarator->GetId();
     }
 
-    throw std::runtime_error("PointerDeclaration::GetIdentifier() - direct_declarator_ is not an Identifier or PointerDeclarator");
+    throw std::runtime_error("PointerDeclaration::GetId() - direct_declarator_ is not an Identifier or PointerDeclarator");
 }
 
 void PointerDeclaration::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const

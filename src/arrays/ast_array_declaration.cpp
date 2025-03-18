@@ -1,19 +1,19 @@
 #include "../../include/arrays/ast_array_declaration.hpp"
 
 namespace ast{
-std::string ArrayDeclaration::GetIdentifier() const
+std::string ArrayDeclaration::GetId() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(identifier_.get());
     const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (identifier != nullptr)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (declarator != nullptr)
     {
-        return declarator->GetIdentifier();
+        return declarator->GetId();
     }
-    throw std::runtime_error("ArrayDeclaration::GetIdentifier - not an identifier");
+    throw std::runtime_error("ArrayDeclaration::GetId - not an identifier");
 }
 
 int ArrayDeclaration::GetArraySize(Context &context) const

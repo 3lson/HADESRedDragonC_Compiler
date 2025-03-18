@@ -21,7 +21,7 @@ public:
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;
 
-    std::string GetIdentifier() const override;
+    std::string GetId() const override;
     std::vector<Parameter>GetParameters(Context &context) const override;
     int GetDereference() const override;
     int GetOffset() const override;

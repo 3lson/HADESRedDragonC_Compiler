@@ -36,7 +36,7 @@ void Identifier::Print(std::ostream &stream) const
     stream << identifier_;
 };
 
-std::string Identifier::GetIdentifier() const
+std::string Identifier::GetId() const
 {
     return identifier_;
 }

@@ -19,16 +19,16 @@ void DirectDeclarator::Print(std::ostream &stream) const
     }
 }
 
-std::string DirectDeclarator::GetIdentifier() const
+std::string DirectDeclarator::GetId() const
 {
     const Identifier *id = dynamic_cast<const Identifier *>(identifier_.get());
     const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (id != nullptr) {
-        return id->GetIdentifier();
+        return id->GetId();
     } else if (declarator != nullptr){
-        return declarator->GetIdentifier();
+        return declarator->GetId();
     }
-    throw std::runtime_error("DirectDeclarator::GetIdentifier() - identifier_ is not an Identifier");
+    throw std::runtime_error("DirectDeclarator::GetId() - identifier_ is not an Identifier");
 
 }
 

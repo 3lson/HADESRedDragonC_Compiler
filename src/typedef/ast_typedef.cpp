@@ -31,21 +31,21 @@ void Typedef::DefineTypedef(NodeList *aliases)
 
         if (array_declaration != nullptr)
         {
-            alias_name = array_declaration->GetIdentifier();
+            alias_name = array_declaration->GetId();
             pointer += array_declaration->GetDereference();
             throw std::runtime_error("Typedef::DefineTypedef - ArrayDeclaration not implemented");
         }
         else if (identifier != nullptr)
         {
-            alias_name = identifier->GetIdentifier();
+            alias_name = identifier->GetId();
         }
         else if( pointer_declaration != nullptr){
             pointer += pointer_declaration->GetDereference();
-            alias_name = pointer_declaration->GetIdentifier();
+            alias_name = pointer_declaration->GetId();
         }
         else if (address_of != nullptr){
             pointer -= address_of->AddressCount();
-            alias_name = address_of->GetIdentifier();
+            alias_name = address_of->GetId();
         }
 
         TypedefSpec typedef_spec;

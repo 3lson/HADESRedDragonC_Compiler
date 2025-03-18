@@ -22,7 +22,7 @@ public:
 
     int AddressCount() const;
 
-    std::string GetIdentifier() const;
+    std::string GetId() const;
     bool isPointerOp(Context &context) const override;
 };
 

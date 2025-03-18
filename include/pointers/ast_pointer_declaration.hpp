@@ -15,7 +15,7 @@ private:
 public:
     PointerDeclaration(NodePtr direct_declarator) : direct_declarator_(std::move(direct_declarator)) {}
 
-    std::string GetIdentifier() const override;
+    std::string GetId() const override;
     Type GetType() const;
 
     virtual std::vector<Parameter>GetParameters(Context &context) const override;

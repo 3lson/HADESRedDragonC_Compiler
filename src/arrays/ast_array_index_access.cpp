@@ -2,23 +2,23 @@
 
 namespace ast{
 
-std::string ArrayIndexAccess::GetIdentifier() const
+std::string ArrayIndexAccess::GetId() const
 {
     const Identifier *identifier = dynamic_cast<const Identifier *>(identifier_.get());
     const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(identifier_.get());
     if (identifier != nullptr)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (array_index_access != nullptr){
-        return array_index_access->GetIdentifier();
+        return array_index_access->GetId();
     }
-    throw std::runtime_error("ArrayIndexAccess::GetIdentifier - not an identifier");
+    throw std::runtime_error("ArrayIndexAccess::GetId - not an identifier");
 }
 
 void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
 
     Type type = isPointerOp(context) ? Type::_INT : GetType(context);
 
@@ -48,7 +48,7 @@ void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::str
         stream << context.load_instr(type) << " " << dest_reg << ", 0(" << index_register << ")" << std::endl;
     }
     else if(variable.get_scope() == ScopeLevel::GLOBAL){
-        std::string global_memory_location = "global_" + GetIdentifier();
+        std::string global_memory_location = "global_" + GetId();
         std::string global_memory_register = context.get_register(Type::_INT);
 
         stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
@@ -84,13 +84,13 @@ void ArrayIndexAccess::Print(std::ostream &stream) const
 
 Type ArrayIndexAccess::GetType(Context &context) const
 {
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
     return variable.get_type();
 }
 
 bool ArrayIndexAccess::isPointerOp(Context &context) const
 {
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
 
     if (!variable.is_pointer())
     {

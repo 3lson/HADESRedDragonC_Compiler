@@ -21,7 +21,7 @@ public:
     Type GetType(Context &context) const;
     bool isPointer() const;
     int GetDereference() const;
-    std::string GetIdentifier() const;
+    std::string GetId() const;
     int GetTypeSize(Context &context) const;
     Parameter GetParameter(Context &context, int offset) const;
 };

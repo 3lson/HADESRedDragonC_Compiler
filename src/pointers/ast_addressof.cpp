@@ -10,7 +10,7 @@ Type AddressOf::GetType(Context& context) const
 
 void AddressOf::EmitRISC(std::ostream& stream, Context& context, std::string dest_reg) const
 {
-    std::string identifier = GetIdentifier();
+    std::string identifier = GetId();
 
     Variable variable = context.get_variable(identifier);
     Type type = isPointerOp(context) ? Type::_INT : GetType(context);
@@ -76,7 +76,7 @@ void AddressOf::Print(std::ostream& stream) const
     operand_->Print(stream);
 }
 
-std::string AddressOf::GetIdentifier() const
+std::string AddressOf::GetId() const
 {
     const Identifier* identifier = dynamic_cast<const Identifier*>(operand_.get());
     const ArrayIndexAccess* array_index_access = dynamic_cast<const ArrayIndexAccess*>(operand_.get());
@@ -84,15 +84,15 @@ std::string AddressOf::GetIdentifier() const
 
     if (identifier != nullptr)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (array_index_access != nullptr)
     {
-        return array_index_access->GetIdentifier();
+        return array_index_access->GetId();
     }
     else if (address_of != nullptr)
     {
-        return address_of->GetIdentifier();
+        return address_of->GetId();
     }
 
     throw std::runtime_error("Invalid address-of expression: expected an identifier or array access");

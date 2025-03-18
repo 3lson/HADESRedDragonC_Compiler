@@ -44,7 +44,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
         else if (identifier != nullptr)
         {
             context.increase_stack_offset(type_size);
-            std::string variable_name = identifier->GetIdentifier();
+            std::string variable_name = identifier->GetId();
             Variable variable(false, false, type, offset, 0);
             context.define_variable(variable_name, variable);
         }
@@ -59,7 +59,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
             context.increase_stack_offset(type_size * array_size);
 
-            std::string variable_name = array_declaration->GetIdentifier();
+            std::string variable_name = array_declaration->GetId();
 
             Variable variable(false, true, array_size, type, offset, 0);
             context.define_variable(variable_name, variable);
@@ -69,7 +69,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
             context.increase_stack_offset(types_size.at(Type::_INT));
 
             // Get variable name
-            std::string variable_name = pointer_declaration->GetIdentifier();
+            std::string variable_name = pointer_declaration->GetId();
 
             // Add variable to bindings
             int dereference_num = pointer_declaration->GetDereference();
@@ -190,7 +190,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
             bool is_pointer = assignment->isPointerInitialization();
             int dereference_num = assignment->GetDereference();
 
-            std::string global_name = assignment->GetIdentifier();
+            std::string global_name = assignment->GetId();
             Global global(is_pointer, is_array, array_size, type, dereference_num);
             assignment->InitializeGlobals(stream, context, global);
             context.define_global(global_name, global);
@@ -198,7 +198,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
         else if (identifier != nullptr)
         {
-            std::string global_name = identifier->GetIdentifier();
+            std::string global_name = identifier->GetId();
 
             Global global = Global(false, false, type, 0);
             context.define_global(global_name, global);
@@ -213,14 +213,14 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
                 throw std::runtime_error("Declaration EmitRISC: Array size not specified");
             }
 
-            std::string global_name = array_declaration->GetIdentifier();
+            std::string global_name = array_declaration->GetId();
             int dereference_num = array_declaration->GetDereference();
             Global global(false, true, array_size, type, dereference_num);
             context.define_global(global_name, global);
         }
         else if (pointer_declaration != nullptr)
         {
-            std::string global_name = pointer_declaration->GetIdentifier();
+            std::string global_name = pointer_declaration->GetId();
 
             int dereference_num = pointer_declaration->GetDereference();
             Global global(true, false, type, dereference_num);
@@ -229,7 +229,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
         else if (declarator != nullptr)
         {
             // Get function name
-            std::string function_name = declarator->GetIdentifier();
+            std::string function_name = declarator->GetId();
 
             // Define function return value and parameters
             bool return_is_pointer = declarator->isPointer();

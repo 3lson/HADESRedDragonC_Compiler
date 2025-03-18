@@ -48,6 +48,9 @@
 #include "enums/ast_enum_specifier.hpp"
 #include "enums/ast_enum.hpp"
 
+#include "structs/ast_struct_specifier.hpp"
+#include "structs/ast_struct_declaration.hpp"
+
 #include "pointers/ast_pointer_declaration.hpp"
 #include "pointers/ast_addressof.hpp"
 #include "pointers/ast_dereference.hpp"

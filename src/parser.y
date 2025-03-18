@@ -96,6 +96,46 @@ type_specifier
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
     | VOID      { $$ = new TypeSpecifier(Type::_VOID); }
 	| enum_specifier { $$ = $1; }
+	| struct_specifier { $$ = $1; }
+	;
+
+struct_specifier
+	: STRUCT IDENTIFIER '{' struct_declaration_list '}' { $$ = new StructSpecifier($2, NodePtr($4)); }
+	| STRUCT '{' struct_declaration_list '}' { $$ = new StructSpecifier("", NodePtr($3)); }
+	| STRUCT IDENTIFIER { $$ = new StructSpecifier($2, nullptr); }
+	;
+
+struct_declaration_list
+	: struct_declaration { $$ = new NodeList(NodePtr($1)); }
+	| struct_declaration_list struct_declaration {
+		NodeList *struct_declaration_list = dynamic_cast<NodeList *>($1);
+		struct_declaration_list->PushBack(NodePtr($2));
+		$$ = struct_declaration_list;
+	}
+	;
+
+struct_declaration
+	: specifier_qualifier_list struct_declarator_list ';' { $$ = new StructDeclaration(NodePtr($1), NodePtr($2)); }
+	;
+
+specifier_qualifier_list
+	: type_specifier specifier_qualifier_list
+	| type_specifier { $$ = $1; }
+	;
+
+struct_declarator_list
+	: struct_declarator { $$ = new NodeList(NodePtr($1)); }
+	| struct_declarator_list ',' struct_declarator {
+		NodeList *struct_declarator_list = dynamic_cast<NodeList *>($1);
+		struct_declarator_list->PushBack(NodePtr($3));
+		$$ = struct_declarator_list;
+	}
+	;
+
+struct_declarator
+	: declarator { $$ = $1; }
+	| ':' constant_expression
+	| declarator ':' constant_expression
 	;
 
 enum_specifier

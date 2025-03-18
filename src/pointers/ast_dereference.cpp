@@ -4,7 +4,7 @@ namespace ast {
 
 Type Dereference::GetType(Context& context) const
 {
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
     if (variable.get_dereference_num() == dereferenceCount()){
         return variable.get_type();
     }
@@ -12,7 +12,7 @@ Type Dereference::GetType(Context& context) const
 }
 
 bool Dereference::isPointer(Context &context) const{
-    Variable variable = context.get_variable(GetIdentifier());
+    Variable variable = context.get_variable(GetId());
     if (variable.get_dereference_num() == dereferenceCount()){
         return false;
     }
@@ -41,7 +41,7 @@ void Dereference::Print(std::ostream& stream) const
 }
 
 
-std::string Dereference::GetIdentifier() const
+std::string Dereference::GetId() const
 {
     const Identifier* identifier = dynamic_cast<const Identifier*>(operand_.get());
     const ArrayIndexAccess* array_index_access = dynamic_cast<const ArrayIndexAccess*>(operand_.get());
@@ -49,18 +49,18 @@ std::string Dereference::GetIdentifier() const
 
     if (identifier != nullptr)
     {
-        return identifier->GetIdentifier();
+        return identifier->GetId();
     }
     else if (array_index_access != nullptr)
     {
-        return array_index_access->GetIdentifier();
+        return array_index_access->GetId();
     }
     else if (dereference != nullptr)
     {
-        return dereference->GetIdentifier();
+        return dereference->GetId();
     }
 
-    throw std::runtime_error("Dereference::GetIdentifier: Expected an identifier or array access");
+    throw std::runtime_error("Dereference::GetId: Expected an identifier or array access");
 }
 
 int Dereference::dereferenceCount() const
@@ -79,7 +79,7 @@ int Dereference::dereferenceCount() const
 
 void Dereference::DereferencePath(std::ostream &stream, Context &context, std::string address_reg) const
 {
-    std::string variable_identifier = GetIdentifier();
+    std::string variable_identifier = GetId();
 
     const Dereference *dereference = dynamic_cast<const Dereference *>(operand_.get());
 
@@ -93,7 +93,7 @@ void Dereference::DereferencePath(std::ostream &stream, Context &context, std::s
 
 void Dereference::StartingOffset(std::ostream &stream, Context &context, std::string address_reg) const
 {
-    std::string variable_identifier = GetIdentifier();
+    std::string variable_identifier = GetId();
     Variable variable = context.get_variable(variable_identifier);
     ScopeLevel scope = variable.get_scope();
     Type type = isPointer(context) ? Type::_INT : GetType(context);

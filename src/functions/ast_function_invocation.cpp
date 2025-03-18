@@ -4,7 +4,7 @@ namespace ast{
 
 void FunctionInvocation::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    const std::string func_name = dynamic_cast<const Identifier*>(identifier_.get())->GetIdentifier();
+    const std::string func_name = dynamic_cast<const Identifier*>(identifier_.get())->GetId();
     context.push_registers(stream);
     context.push_function_call(func_name);
 
@@ -43,14 +43,14 @@ void FunctionInvocation::Print(std::ostream &stream) const
 
 Type FunctionInvocation::GetType(Context &context) const
 {
-    const std::string func_name = dynamic_cast<const Identifier*>(identifier_.get())->GetIdentifier();
+    const std::string func_name = dynamic_cast<const Identifier*>(identifier_.get())->GetId();
     Function function = context.get_function(func_name);
     return function.get_return_value().get_type();
 }
 
 bool FunctionInvocation::isPointerOp(Context &context) const
 {
-    Function function = context.get_function(dynamic_cast<const Identifier *>(identifier_.get())->GetIdentifier());
+    Function function = context.get_function(dynamic_cast<const Identifier *>(identifier_.get())->GetId());
     return function.get_return_value().is_pointer();
 }
 

@@ -7,7 +7,7 @@ namespace ast{
 class Declarator : public Node
 {
 public:
-    virtual std::string GetIdentifier() const = 0;
+    virtual std::string GetId() const = 0;
     virtual std::vector<Parameter> GetParameters(Context &context) const = 0;
     virtual int GetOffset() const =0;
     virtual void StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const = 0;
