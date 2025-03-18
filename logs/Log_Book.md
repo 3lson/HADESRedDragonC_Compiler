@@ -216,6 +216,11 @@ Above was our initial sprint start for the intermediate features. However as you
 ### 18/03/2025 (6 hours)
   - Started struct implementation
   - Started some extra feature implementations with extra test cases
+  - [Implemented functions that take more than 8 params](https://github.com/3lson/HADESRedDragonC_Compiler/commit/280006099423fe1d539eb2dd9e8687e0785feb12)
+  - Implemented strings for global scope
+  - Implemented typedef for arrays
+  - Implemented sizeof on typedef
+  - Added extra test cases like nested if, for, while loops
 
 
 
