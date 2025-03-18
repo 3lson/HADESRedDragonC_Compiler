@@ -2,6 +2,7 @@
 
 #include "../ast_node.hpp"
 #include "ast_declaration.hpp"
+#include "../control_flow/ast_switch.hpp"
 
 namespace ast {
     class SwitchStatement;
@@ -25,7 +26,7 @@ class CompoundStatement : public Statement
 public:
     using Statement::Statement;
     int GetOffset(Context &context) const;
-    int GetCases(Context &context) const;
+    void GetCases(std::ostream &stream,Context &context, std::string condition, std::string dest_reg) const;
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
 };
 
@@ -33,6 +34,9 @@ class StatementList : public Statement
 {
 public:
     using Statement::Statement;
+
+    void GetCases(std::ostream &stream,Context &context, std::string dest_reg, std::vector<const CaseStatement*>& casesList) const;
+    void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     int GetOffset(Context &context) const;
 };
 

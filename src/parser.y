@@ -42,7 +42,7 @@
 %type <node> init_declarator type_specifier struct_specifier struct_declaration_list struct_declaration specifier_qualifier_list struct_declarator_list
 %type <node> struct_declarator enum_specifier enumerator_list enumerator declarator direct_declarator pointer parameter_list parameter_declaration
 %type <node> identifier_list type_name abstract_declarator direct_abstract_declarator initializer initializer_list statement labeled_statement
-%type <node> compound_statement declaration_list expression_statement selection_statement iteration_statement jump_statement switch_statement case_statement
+%type <node> compound_statement declaration_list expression_statement selection_statement iteration_statement jump_statement
 
 %type <node_list> statement_list
 
@@ -183,8 +183,7 @@ statement
 	| jump_statement 		{ $$ = $1; }
 	| selection_statement	{ $$ = $1; }
 	| iteration_statement   { $$ = $1; }
-	| switch_statement 		{ $$ = $1; }
-	| case_statement		{ $$ = $1; }
+	| labeled_statement		{ $$ = $1; }
 	;
 
 jump_statement
@@ -194,15 +193,11 @@ jump_statement
 	| BREAK ';'				{ $$ = new BreakStatement(); }
 	;
 
-switch_statement
-	: SWITCH '(' expression ')' compound_statement {
-		$$ = new SwitchStatement(NodePtr($3), NodePtr($5));
-	}
+labeled_statement
+	: CASE constant_expression ':' statement_list { $$ = new CaseStatement(NodePtr($2), NodePtr($4)); }
+    | DEFAULT ':' statement_list { $$ = new CaseStatement(nullptr,NodePtr($3)); }
 	;
 
-case_statement
-	: CASE expression ':' statement_list { $$ = new CaseStatement(NodePtr($2), NodePtr($4)); }
-	;
 selection_statement
     : IF '(' expression ')' compound_statement {
         $$ = new IfStatement(NodePtr($3), NodePtr($5), nullptr, false);
@@ -210,6 +205,9 @@ selection_statement
     | IF '(' expression ')' compound_statement ELSE compound_statement {
         $$ = new IfStatement(NodePtr($3), NodePtr($5), NodePtr($7), false);
     }
+    | SWITCH '(' expression ')' compound_statement {
+		$$ = new SwitchStatement(NodePtr($3), NodePtr($5));
+	}
     ;
 
 iteration_statement
