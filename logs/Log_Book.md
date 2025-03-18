@@ -180,12 +180,44 @@ Above was our initial sprint start for the intermediate features. However as you
   - [Implemented enums](https://github.com/3lson/HADESRedDragonC_Compiler/commit/442c074d168f4c105e2dadc7185bec7c31b8f0ef)
   - Updated logbook
 
+### 18/03/2025 (8 hours)
+  - [Implement switch cases](https://github.com/3lson/HADESRedDragonC_Compiler/commit/81fd4d01bfc0d5269958a753080dc1dbd687a26d)
+
 ---
 <div align = "center" >
 <b>Intermediate Features complete</b>
 </div>
 
 ---
+
+<div align = "center" >
+
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/FinalWeek.png)|
+|:--:|
+|*img: Final Week Sprint*|
+
+</div>
+
+### 13/03/2025 (4 hours)
+  - [Implement sizeof operators](https://github.com/3lson/HADESRedDragonC_Compiler/commit/e945f4885fc978bfb0920eac0ae1bd23c568e764)
+
+### 14/03/2025 (8 hours)
+  - Worked on pointer declarations, addressof, operations, deference
+
+### 15/03/2025 (4 hours)
+  - Worked on TypeDef
+
+### 16/03/2025 (8 hours)
+  - [Implemented pointers and typedef](https://github.com/3lson/HADESRedDragonC_Compiler/commit/903655109843e8be5eb12849528ffe5ecf03380d)
+
+### 17/03/2025 (8 hours)
+  - [Implemented strings and completed typedef issue](https://github.com/3lson/HADESRedDragonC_Compiler/commit/4a2f98e1ce402add3b10a969e59efaa943ef4ea7)
+
+### 18/03/2025 (6 hours)
+  - Started struct implementation
+  - Started some extra feature implementations with extra test cases
+
+
 
 
 
