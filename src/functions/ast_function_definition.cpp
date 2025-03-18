@@ -33,7 +33,9 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
     if (compound_statement_ != nullptr)
     {
         context.create_scope();
-        context.push_operation_type(return_type);
+        if (return_type != Type::_VOID){
+            context.push_operation_type(return_type);
+        }
 
         if (!compound_statement_) {
             throw std::runtime_error("Error: compound_statement_ is null in FunctionDefinition::EmitRISC");
@@ -62,10 +64,12 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         stream << "ret" << std::endl;
 
         context.pop_scope();
-        context.pop_operation_type();
-    }
+        if (return_type != Type::_VOID){
+            context.pop_operation_type();
+        }
     context.exit_function();
     stream << ".size " << function_name << ", .-" << function_name <<std::endl;
+    }
 }
 
 void FunctionDefinition::Print(std::ostream &stream) const
@@ -83,4 +87,4 @@ void FunctionDefinition::Print(std::ostream &stream) const
     stream << "}" << std::endl;
 }
 
-}
+}//namespace ast

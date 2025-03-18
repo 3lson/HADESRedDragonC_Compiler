@@ -10,6 +10,7 @@
 #include "../pointers/ast_pointer_declaration.hpp"
 #include "../pointers/ast_addressof.hpp"
 #include "../pointers/ast_dereference.hpp"
+#include "../strings/ast_string_literal.hpp"
 
 namespace ast {
 

@@ -24,6 +24,8 @@ public:
     void Print(std::ostream& stream) const override;
     bool isPointerOp(Context &context) const override;
     void ShiftPointerOp(std::ostream &stream, Context &context, std::string dest_reg, const NodePtr& node) const;
+    Type NewPointerType(Context &context) const;
+
 
 };
 

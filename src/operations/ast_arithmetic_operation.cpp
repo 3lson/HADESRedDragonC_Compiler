@@ -135,22 +135,24 @@ void ArithExpression::ShiftPointerOp(std::ostream &stream, Context &context, std
 {
     if (isPointerOp(context))
     {
-
-        if (!dynamic_cast<const Operand*>(node.get())->isPointerOp(context))
+        if (!dynamic_cast<const Operand *>(node.get())->isPointerOp(context))
         {
-            const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
-            const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
-
-            Type type;
-            if (left_operand->isPointerOp(context))
-            {
-                type = left_operand->GetType(context);
-            }
-            type = right_operand->GetType(context);
-
+            Type type = NewPointerType(context);
             stream << "slli " << dest_reg << ", " << dest_reg << ", " << types_mem_shift.at(type) << std::endl;
         }
     }
+}
+
+Type ArithExpression::NewPointerType(Context &context) const
+{
+    const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
+    const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
+
+    if (left_operand->isPointerOp(context))
+    {
+        return left_operand->GetType(context);
+    }
+    return right_operand->GetType(context);
 }
 
 

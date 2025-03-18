@@ -73,7 +73,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
             // Add variable to bindings
             int dereference_num = pointer_declaration->GetDereference();
-            Variable variable(true, false, Type::_INT, offset, dereference_num);
+            Variable variable(true, false, type, offset, dereference_num);
             context.define_variable(variable_name, variable);
         }
         else

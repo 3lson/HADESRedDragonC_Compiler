@@ -4,11 +4,11 @@ namespace ast{
 
 void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    Type type = GetType(context);
+    Type type = isPointer() ? Type::_INT : GetType(context);
     int offset = context.get_stack_offset();
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
-    Variable variable(isPointer(), false, type, offset, GetDereference());
+    Variable variable(isPointer(), false, GetType(context), offset, GetDereference());
     context.define_variable(GetIdentifier(), variable);
     context.increase_stack_offset(GetTypeSize(context));
 }
@@ -32,7 +32,9 @@ void ParameterList::EmitRISC(std::ostream &stream, Context &context, std::string
         }
         const ParameterDefinition* parameter = dynamic_cast< const ParameterDefinition*>(node.get());
 
-        switch(parameter->GetType(context)){
+        Type type = parameter->isPointer() ? Type::_INT : parameter->GetType(context);
+
+        switch(type){
             case Type::_CHAR:
             case Type::_SHORT:
             case Type::_INT:

@@ -14,6 +14,7 @@
 #include "ast_context_constant.hpp"
 #include "ast_context_enums.hpp"
 #include "ast_context_typedef.hpp"
+#include "ast_context_strings.hpp"
 
 namespace ast {
 
@@ -62,6 +63,10 @@ private:
 
     // ------ Typedef Management ------
     std::vector<std::unordered_map<std::string, TypedefSpec>> typedefMap;
+
+    // ------ Char and String Management --------
+    std::vector<ContextStrings> strings;
+    int string_counter = 0;
 
 public:
     Context();
@@ -127,6 +132,7 @@ public:
     void push_operation_type(Type type);
     void pop_operation_type();
     Type get_operation_type() const;
+    bool is_type_stack_empty() const;
 
     // --------- Constant Management ---------
     int registerConstant(float value);
@@ -149,6 +155,15 @@ public:
     bool is_typedef(const std::string& name) const;
     int get_typedef_base_pointers(std::string alias);
     Type get_typedef_base_type(std::string alias);
+
+    // ------ Pointer Management ----------
+    char *cancel_complement(const char *sequence);
+
+    // ------ Chars and Strings Management ---------
+    char *process_characters(const char *sequence);
+    std::string escape_sequences(const char *processed_characters);
+    int define_string(std::string string);
+    void print_string(std::ostream &stream) const;
 
 };
 

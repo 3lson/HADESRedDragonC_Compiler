@@ -20,7 +20,7 @@ void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::str
 {
     Variable variable = context.get_variable(GetIdentifier());
 
-    Type type = GetType(context);
+    Type type = isPointerOp(context) ? Type::_INT : GetType(context);
 
     std::string index_register = context.get_register(Type::_INT);
     GetIndex(stream, context, index_register, type);
@@ -90,6 +90,13 @@ Type ArrayIndexAccess::GetType(Context &context) const
 
 bool ArrayIndexAccess::isPointerOp(Context &context) const
 {
-    return context.get_variable(GetIdentifier()).is_pointer();
+    Variable variable = context.get_variable(GetIdentifier());
+
+    if (!variable.is_pointer())
+    {
+        return false;
+    }
+
+    return variable.get_dereference_num() > 1;
 }
 }//namespace ast

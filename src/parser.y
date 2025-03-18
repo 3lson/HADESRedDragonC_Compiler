@@ -24,10 +24,11 @@
 	float       number_float;
 	double 		number_double;
 	std::string* string;
+	char 		character;
 	yytokentype  token;
 }
 
-%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL DOUBLE_CONSTANT
+%token IDENTIFIER INT_CONSTANT FLOAT_CONSTANT STRING_LITERAL DOUBLE_CONSTANT CHAR_LITERAL
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP AND_OP OR_OP
 %token MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN SUB_ASSIGN LEFT_ASSIGN RIGHT_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %token TYPE_NAME TYPEDEF EXTERN STATIC AUTO REGISTER SIZEOF
@@ -48,10 +49,11 @@
 
 %type <string> assignment_operator storage_class_specifier
 
-%type <number_int> INT_CONSTANT STRING_LITERAL
+%type <number_int> INT_CONSTANT
 %type <number_float> FLOAT_CONSTANT
 %type <number_double> DOUBLE_CONSTANT
-%type <string> IDENTIFIER
+%type <string> IDENTIFIER STRING_LITERAL
+%type <character> CHAR_LITERAL
 
 
 %start ROOT
@@ -225,6 +227,8 @@ primary_expression
     | DOUBLE_CONSTANT 	{ $$ = new DoubleConstant($1); }
 	| IDENTIFIER	{ $$ = new Identifier($1); }
 	| '(' expression ')'	{ $$ = $2; }
+	| CHAR_LITERAL { $$ = new CharacterLiteral($1); }
+	| STRING_LITERAL { $$ = new StringLiteral($1); }
 	;
 
 expression_statement
