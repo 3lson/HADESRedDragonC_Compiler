@@ -56,24 +56,38 @@ void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::stri
     std::string right_register = context.get_register(type);
     right_->EmitRISC(stream, context, right_register);
     ShiftPointerOp(stream, context, right_register, right_);
+
+    //for struct access
+    const StructAccess* leftStructAccess = dynamic_cast<const StructAccess*>(left_.get());
+    const StructAccess* rightStructAccess = dynamic_cast<const StructAccess*>(right_.get());
+
+    if (leftStructAccess) {
+        // Load the value of the struct member into left_register
+        leftStructAccess->EmitRISC(stream, context, left_register);
+    }
+
+    if (rightStructAccess) {
+        // Load the value of the struct member into right_register
+        rightStructAccess->EmitRISC(stream, context, right_register);
+    }
+
+    //Not working yet for mixed operations
     const Operand* left_operand = dynamic_cast<const Operand*>(left_.get());
     const Operand* right_operand = dynamic_cast<const Operand*>(right_.get());
 
-    if (!left_operand || !right_operand) {
-        throw std::runtime_error("Invalid operand type in ArithExpression.");
-    }
-    //Not working yet for mixed operations
-    Type left_type = left_operand->GetType(context);
-    Type right_type = right_operand->GetType(context);
+    if (left_operand && right_operand) {
+        Type left_type = left_operand->GetType(context);
+        Type right_type = right_operand->GetType(context);
 
-    if (left_type == Type::_FLOAT && right_type != Type::_FLOAT) {
-        std::string temp_reg = context.get_register(Type::_FLOAT);
-        stream << "fcvt.s.w " << temp_reg << ", " << right_register << std::endl;
-        right_register = temp_reg;
-    } else if (right_type == Type::_FLOAT && left_type != Type::_FLOAT) {
-        std::string temp_reg = context.get_register(Type::_FLOAT);
-        stream << "fcvt.s.w " << temp_reg << ", " << left_register << std::endl;
-        left_register = temp_reg;
+        if (left_type == Type::_FLOAT && right_type != Type::_FLOAT) {
+            std::string temp_reg = context.get_register(Type::_FLOAT);
+            stream << "fcvt.s.w " << temp_reg << ", " << right_register << std::endl;
+            right_register = temp_reg;
+        } else if (right_type == Type::_FLOAT && left_type != Type::_FLOAT) {
+            std::string temp_reg = context.get_register(Type::_FLOAT);
+            stream << "fcvt.s.w " << temp_reg << ", " << left_register << std::endl;
+            left_register = temp_reg;
+        }
     }
 
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
@@ -98,24 +112,38 @@ void ArithExpression::Print(std::ostream &stream) const
     right_->Print(stream);
 }
 
-Type ArithExpression::GetType(Context &context) const
-{
+Type ArithExpression::GetType(Context &context) const {
     if (!left_ || !right_) {
         throw std::runtime_error("Null pointer encountered in ArithExpression operands.");
     }
 
+    // Handle left operand
+    Type leftType;
     const Operand* leftOperand = dynamic_cast<const Operand*>(left_.get());
-    const Operand* rightOperand = dynamic_cast<const Operand*>(right_.get());
+    const StructAccess* leftStructAccess = dynamic_cast<const StructAccess*>(left_.get());
 
-    if (!leftOperand) {
+    if (leftOperand) {
+        leftType = leftOperand->GetType(context);
+    } else if (leftStructAccess) {
+        // Handle StructAccess by determining the type of the struct member
+        leftType = leftStructAccess->GetType(); // Assuming StructAccess has a GetType method
+    } else {
         throw std::runtime_error("Invalid left operand type: " + std::string(typeid(*left_).name()));
     }
-    if (!rightOperand) {
+
+    // Handle right operand
+    Type rightType;
+    const Operand* rightOperand = dynamic_cast<const Operand*>(right_.get());
+    const StructAccess* rightStructAccess = dynamic_cast<const StructAccess*>(right_.get());
+
+    if (rightOperand) {
+        rightType = rightOperand->GetType(context);
+    } else if (rightStructAccess) {
+        // Handle StructAccess by determining the type of the struct member
+        rightType = rightStructAccess->GetType(); // Assuming StructAccess has a GetType method
+    } else {
         throw std::runtime_error("Invalid right operand type: " + std::string(typeid(*right_).name()));
     }
-
-    Type leftType = leftOperand->GetType(context);
-    Type rightType = rightOperand->GetType(context);
 
     return std::max(leftType, rightType);
 }
@@ -127,8 +155,11 @@ bool ArithExpression::isPointerOp(Context &context) const
     const Operand *left_operand = dynamic_cast<const Operand *>(left_.get());
     const Operand *right_operand = dynamic_cast<const Operand *>(right_.get());
 
+    bool left_is_pointer = left_operand ? left_operand->isPointerOp(context) : false;
+    bool right_is_pointer = right_operand ? right_operand->isPointerOp(context) : false;
+
     // Return true if either operand is a pointer
-    return left_operand->isPointerOp(context) || right_operand->isPointerOp(context);
+    return left_is_pointer || right_is_pointer;
 }
 
 void ArithExpression::ShiftPointerOp(std::ostream &stream, Context &context, std::string dest_reg, const NodePtr& node) const

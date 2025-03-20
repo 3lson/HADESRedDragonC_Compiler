@@ -2,5 +2,52 @@
 
 namespace ast{
 
+void StructSpecifier::DefineSpecifier(Context& context) const{
+    std::cout << "Defining struct: " <<*identifier_ <<std::endl;
+    std::unordered_map<std::string, Type> structMembers;
+    std::unordered_map<std::string, int> structOffsets;
+    int offset = 0;
+    for (const auto& node : struct_declaration_list_->get_nodes()){
+        if (!node){
+            continue;
+        }
+        const StructMember* member = dynamic_cast<const StructMember *>(node.get());
+        if (member){
+            std::string memberName = member->GetId();
+            Type memberType = member->GetType();
+            structMembers[memberName] = memberType;
+
+            structOffsets[memberName] = offset;
+            int memberSize = types_size.at(memberType);
+            offset += memberSize;
+            std::cout << "Added Struct Member: " << memberName
+            << " with type: " << static_cast<int>(memberType)
+            <<  " and offset: " <<structOffsets[memberName]  << std::endl;
+        }
+    }
+    context.struct_init(*identifier_, structMembers, structOffsets);
+}
+
+void StructSpecifier::EmitRISC(std::ostream &stream, Context& context, std::string dest_reg) const{
+    (void)stream;
+    (void)dest_reg;
+    DefineSpecifier(context);
+}
+
+
+void StructSpecifier::Print(std::ostream &stream) const{
+    stream << "struct " << *identifier_ << "{ ";
+    struct_declaration_list_->Print(stream);
+    stream << "}";
+
+}
+
+Type StructSpecifier::GetType() const{
+    return Type::_STRUCT;
+}
+
+std::string StructSpecifier::GetId() const{
+    return *identifier_;
+}
 
 }//namespace ast

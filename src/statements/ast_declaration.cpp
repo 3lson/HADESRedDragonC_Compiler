@@ -16,6 +16,11 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
     }
     specifier->DefineSpecifier(context);
 
+    const StructSpecifier *struct_specifier = dynamic_cast<const StructSpecifier *>(type_specifier_.get());
+    if(struct_specifier){
+        struct_specifier->DefineSpecifier(context);
+    }
+
     if (declarator_list_ == nullptr)
     {
         return;
@@ -98,6 +103,13 @@ void Declaration::Print(std::ostream &stream) const
 int Declaration::GetOffset(Context &context) const
 {
     (void)context;
+
+    std::cout << "Entering Declaration::GetOffset()" << std::endl;
+    std::cout << "Declaration::GetOffset: type_specifier_ = " << type_specifier_.get() << std::endl;
+    std::cout << "Declaration::GetOffset: declarator_list_ = " << declarator_list_.get() << std::endl;
+    if (!type_specifier_) {
+        throw std::runtime_error("Declaration::GetOffset: type_specifier_ is null");
+    }
     const Specifier *type_specifier = dynamic_cast<const Specifier*>(type_specifier_.get());
     if (!type_specifier) {
         throw std::runtime_error("Declaration::GetOffset: Invalid type specifier");
@@ -112,6 +124,7 @@ int Declaration::GetOffset(Context &context) const
     if (declarator_list_ != nullptr)
     {
         for (const auto &declarator_ : declarator_list->get_nodes()) {
+            std::cout << "Processing declarator..." << std::endl;
             const Assignment *assignment = dynamic_cast<const Assignment *>(declarator_.get());
             const ArrayDeclaration *array_declaration = dynamic_cast<const ArrayDeclaration *>(declarator_.get());
             const Identifier *identifier = dynamic_cast<const Identifier*>(declarator_.get());
@@ -143,7 +156,7 @@ Type Declaration::GetType() const {
     const Specifier *type_specifier = dynamic_cast<const Specifier *>(type_specifier_.get());
     if (!type_specifier)
     {
-        throw std::runtime_error("Declaration EmitRISC: Invalid type specifier");
+        throw std::runtime_error("Declaration::GetType: Invalid type specifier");
     }
 
     return type_specifier->GetType();

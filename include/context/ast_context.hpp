@@ -68,6 +68,11 @@ private:
     std::vector<ContextStrings> strings;
     int string_counter = 0;
 
+    // ------ Struct Management -------
+    std::unordered_map<std::string, std::unordered_map<std::string, Type>>structMap;
+    std::unordered_map<std::string, std::unordered_map<std::string, int>>structOffsetMap;
+    std::unordered_map<std::string, int>structSizes;
+
 public:
     Context();
     ~Context();
@@ -163,6 +168,13 @@ public:
     int define_string(std::string string);
     void print_string(std::ostream &stream) const;
 
+    // ------ Struct Management ------------
+    void struct_init(std::string identifier, std::unordered_map<std::string, Type>structMembers, std::unordered_map<std::string, int> structOffsets);
+    std::unordered_map<std::string, Type> get_struct_members(std::string identifier) const;
+    bool is_struct(const std::string& identifier);
+    std::unordered_map<std::string, int> get_struct_offsets(std::string identifier) const;
+    void set_struct_size(std::string identifier, int size);
+    int get_struct_size(const std::string& identifier) const;
 };
 
 extern Context context;

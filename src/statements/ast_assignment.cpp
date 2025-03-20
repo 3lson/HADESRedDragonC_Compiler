@@ -3,168 +3,188 @@ namespace ast{
 void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     (void)dest_reg;
-    Variable variable = context.get_variable(GetId());
-    Type type = variable.is_pointer() ? Type::_INT : variable.get_type();
-    int offset = variable.get_offset();
-    context.push_operation_type(type);
+    std::cout << "The type of expression_ is " << typeid(*unary_expression_).name() << std::endl;
+    const StructAccess * struct_access = dynamic_cast<const StructAccess*>(unary_expression_.get());
+    if (struct_access) {
+        std::cout << "Entering Assignment::EmitRISC for struct access" << std::endl;
 
-    std::string reg = context.get_register(type);
-    expression_->EmitRISC(stream, context, reg);
+        // Evaluate right-hand side first
+        std::string value_reg = context.get_register(Type::_INT);  // Assuming int type for struct members
+        expression_->EmitRISC(stream, context, value_reg);
 
-    if (isArrayInitialization())
-    {
-        const ArrayInitialization *array_init = dynamic_cast<const ArrayInitialization *>(expression_.get());
-        if (array_init) {
-            array_init->SaveValue(stream, context, variable, GetId());
-        } else {
-            throw std::runtime_error("Assignment EmitRISC: Expected an array initialization");
-        }
-    }
+        int offset = struct_access->GetOffset(context);
+        // Store the value into the struct member
+        stream << "sw " << value_reg << ", " << offset << "(s0)" << std::endl;
 
-    else
-    {
-        const Identifier *identifier = dynamic_cast<const Identifier *>(unary_expression_.get());
-        const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(unary_expression_.get());
-        const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(unary_expression_.get());
-        const AddressOf *address_of = dynamic_cast<const AddressOf *>(unary_expression_.get());
-        const Dereference *dereference = dynamic_cast<const Dereference *>(unary_expression_.get());
+        context.deallocate_register(value_reg);
+        return;
+    } else {
+        std::cout << "Entering Assignment::EmitRISC for everything else" << std::endl;
+        Variable variable = context.get_variable(GetId());
+        Type type = variable.is_pointer() ? Type::_INT : variable.get_type();
+        int offset = variable.get_offset();
+        context.push_operation_type(type);
 
-        if (identifier != nullptr)
+        std::string reg = context.get_register(type);
+        expression_->EmitRISC(stream, context, reg);
+
+        if (isArrayInitialization())
         {
-            if (variable.get_scope() == ScopeLevel::LOCAL)
-            {
-                stream << context.store_instr(type) << " " << reg << ", " << offset << "(s0)" << std::endl;
+            const ArrayInitialization *array_init = dynamic_cast<const ArrayInitialization *>(expression_.get());
+            if (array_init) {
+                array_init->SaveValue(stream, context, variable, GetId());
+            } else {
+                throw std::runtime_error("Assignment EmitRISC: Expected an array initialization");
             }
-
-            else if (variable.get_scope() == ScopeLevel::GLOBAL)
-            {
-                std::string global_memory_location = "global_" + GetId();
-                std::string global_memory_register = context.get_register(Type::_INT);
-
-                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
-                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
-                context.deallocate_register(global_memory_register);
-            }
-
-            else
-            {
-                throw std::runtime_error("Assignment EmitRISC: Invalid scope in Identifier");
-            }
-        }
-
-        // If array access, load expression into specific element by first evaluating index
-        else if (array_index_access != nullptr)
-        {
-            type = array_index_access->isPointerOp(context) ? Type::_INT : array_index_access->GetType(context);
-            std::string index_register = context.get_register(Type::_INT);
-            array_index_access->GetIndex(stream, context, index_register, type);
-
-            if (variable.get_scope() == ScopeLevel::LOCAL)
-            {
-                if (variable.is_array())
-                {
-                    // Add index to base pointer
-                    stream << "add " << index_register << ", " << index_register << ", s0" << std::endl;
-                    stream << "addi " << index_register << ", " << index_register << ", " << offset << std::endl;
-                }
-                else if (variable.is_pointer())
-                {
-                    std::string pointer_register = context.get_register(Type::_INT);
-                    stream << context.load_instr(Type::_INT) << " " << pointer_register << ", " << offset << "(s0)" << std::endl;
-                    stream << "add " << index_register << ", " << index_register << ", " << pointer_register << std::endl;
-                    context.deallocate_register(pointer_register);
-                }
-                else
-                {
-                    throw std::runtime_error("Assignment EmitRISC: Variable is not a pointer or array in ArrayAccess LOCAL");
-                }
-
-                stream << context.store_instr(type) << " " << reg << ", 0(" << index_register << ")" << std::endl;
-            }
-
-            // If global scope, access global memory by targetting global label
-            else if (variable.get_scope() == ScopeLevel::GLOBAL)
-            {
-                std::string global_memory_location = "global_" + GetId();
-                std::string global_memory_register = context.get_register(Type::_INT);
-
-                // Access global memory by targetting global label
-                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
-                stream << "add " << global_memory_register << ", " << global_memory_register << ", " << index_register << std::endl;
-                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
-
-                context.deallocate_register(global_memory_register);
-            }
-
-            else
-            {
-                throw std::runtime_error("Assignment EmitRISC: Invalid scope in ArrayAccess");
-            }
-
-            context.deallocate_register(index_register);
-        }
-        else if (pointer_declaration != nullptr)
-        {
-            // If local scope, access variable through offset specified in bindings
-            if (variable.get_scope() == ScopeLevel::LOCAL)
-            {
-                stream << context.store_instr(type) << " " << reg << ", " << variable.get_offset() << "(s0)" << std::endl;
-            }
-
-            // If global scope, access global memory by targetting global label
-            else if (variable.get_scope() == ScopeLevel::GLOBAL)
-            {
-                std::string global_memory_location = "global_" + GetId();
-                std::string global_memory_register = context.get_register(Type::_INT);
-
-                // Access global memory by targetting global label
-                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
-                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
-                context.deallocate_register(global_memory_register);
-            }
-        }
-        else if (address_of != nullptr)
-        {
-            if (variable.get_scope() == ScopeLevel::LOCAL)
-            {
-                stream << context.store_instr(type) << " " << reg << ", " << variable.get_offset() << "(s0)" << std::endl;
-            }
-
-            else if (variable.get_scope() == ScopeLevel::GLOBAL)
-            {
-                std::string global_memory_location = "global_" + GetId();
-                std::string global_memory_register = context.get_register(Type::_INT);
-
-                stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
-                stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
-                context.deallocate_register(global_memory_register);
-            }
-
-            else
-            {
-                throw std::runtime_error("Assignment EmitRISC: Invalid scope in AddressOf");
-            }
-        }
-        else if (dereference != nullptr)
-        {
-            std::string address_register = context.get_register(Type::_INT);
-            Type type = dereference->GetType(context);
-
-            dereference->StartingOffset(stream, context, address_register);
-            dereference->DereferencePath(stream, context, address_register);
-            stream << context.store_instr(type) << " " << reg << ", 0(" << address_register << ")" << std::endl;
-
-            context.deallocate_register(address_register);
         }
 
         else
         {
-            throw std::runtime_error("Assignment EmitRISC: Not an identifier or array access or pointer declaration");
-        }
-    }
+            const Identifier *identifier = dynamic_cast<const Identifier *>(unary_expression_.get());
+            const ArrayIndexAccess *array_index_access = dynamic_cast<const ArrayIndexAccess *>(unary_expression_.get());
+            const PointerDeclaration *pointer_declaration = dynamic_cast<const PointerDeclaration *>(unary_expression_.get());
+            const AddressOf *address_of = dynamic_cast<const AddressOf *>(unary_expression_.get());
+            const Dereference *dereference = dynamic_cast<const Dereference *>(unary_expression_.get());
 
-    context.deallocate_register(reg);
-    context.pop_operation_type();
+            if (identifier != nullptr)
+            {
+                if (variable.get_scope() == ScopeLevel::LOCAL)
+                {
+                    stream << context.store_instr(type) << " " << reg << ", " << offset << "(s0)" << std::endl;
+                }
+
+                else if (variable.get_scope() == ScopeLevel::GLOBAL)
+                {
+                    std::string global_memory_location = "global_" + GetId();
+                    std::string global_memory_register = context.get_register(Type::_INT);
+
+                    stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                    stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+                    context.deallocate_register(global_memory_register);
+                }
+
+                else
+                {
+                    throw std::runtime_error("Assignment EmitRISC: Invalid scope in Identifier");
+                }
+            }
+
+            // If array access, load expression into specific element by first evaluating index
+            else if (array_index_access != nullptr)
+            {
+                type = array_index_access->isPointerOp(context) ? Type::_INT : array_index_access->GetType(context);
+                std::string index_register = context.get_register(Type::_INT);
+                array_index_access->GetIndex(stream, context, index_register, type);
+
+                if (variable.get_scope() == ScopeLevel::LOCAL)
+                {
+                    if (variable.is_array())
+                    {
+                        // Add index to base pointer
+                        stream << "add " << index_register << ", " << index_register << ", s0" << std::endl;
+                        stream << "addi " << index_register << ", " << index_register << ", " << offset << std::endl;
+                    }
+                    else if (variable.is_pointer())
+                    {
+                        std::string pointer_register = context.get_register(Type::_INT);
+                        stream << context.load_instr(Type::_INT) << " " << pointer_register << ", " << offset << "(s0)" << std::endl;
+                        stream << "add " << index_register << ", " << index_register << ", " << pointer_register << std::endl;
+                        context.deallocate_register(pointer_register);
+                    }
+                    else
+                    {
+                        throw std::runtime_error("Assignment EmitRISC: Variable is not a pointer or array in ArrayAccess LOCAL");
+                    }
+
+                    stream << context.store_instr(type) << " " << reg << ", 0(" << index_register << ")" << std::endl;
+                }
+
+                // If global scope, access global memory by targetting global label
+                else if (variable.get_scope() == ScopeLevel::GLOBAL)
+                {
+                    std::string global_memory_location = "global_" + GetId();
+                    std::string global_memory_register = context.get_register(Type::_INT);
+
+                    // Access global memory by targetting global label
+                    stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                    stream << "add " << global_memory_register << ", " << global_memory_register << ", " << index_register << std::endl;
+                    stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+
+                    context.deallocate_register(global_memory_register);
+                }
+
+                else
+                {
+                    throw std::runtime_error("Assignment EmitRISC: Invalid scope in ArrayAccess");
+                }
+
+                context.deallocate_register(index_register);
+            }
+            else if (pointer_declaration != nullptr)
+            {
+                // If local scope, access variable through offset specified in bindings
+                if (variable.get_scope() == ScopeLevel::LOCAL)
+                {
+                    stream << context.store_instr(type) << " " << reg << ", " << variable.get_offset() << "(s0)" << std::endl;
+                }
+
+                // If global scope, access global memory by targetting global label
+                else if (variable.get_scope() == ScopeLevel::GLOBAL)
+                {
+                    std::string global_memory_location = "global_" + GetId();
+                    std::string global_memory_register = context.get_register(Type::_INT);
+
+                    // Access global memory by targetting global label
+                    stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                    stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+                    context.deallocate_register(global_memory_register);
+                }
+            }
+            else if (address_of != nullptr)
+            {
+                if (variable.get_scope() == ScopeLevel::LOCAL)
+                {
+                    stream << context.store_instr(type) << " " << reg << ", " << variable.get_offset() << "(s0)" << std::endl;
+                }
+
+                else if (variable.get_scope() == ScopeLevel::GLOBAL)
+                {
+                    std::string global_memory_location = "global_" + GetId();
+                    std::string global_memory_register = context.get_register(Type::_INT);
+
+                    stream << "lui " << global_memory_register << ", " << "%hi(" << global_memory_location << ")" << std::endl;
+                    stream << context.store_instr(type) << " " << reg << ", %lo(" << global_memory_location << ")(" << global_memory_register << ")" << std::endl;
+                    context.deallocate_register(global_memory_register);
+                }
+
+                else
+                {
+                    throw std::runtime_error("Assignment EmitRISC: Invalid scope in AddressOf");
+                }
+            }
+            else if (dereference != nullptr)
+            {
+                std::string address_register = context.get_register(Type::_INT);
+                Type type = dereference->GetType(context);
+
+                dereference->StartingOffset(stream, context, address_register);
+                dereference->DereferencePath(stream, context, address_register);
+                stream << context.store_instr(type) << " " << reg << ", 0(" << address_register << ")" << std::endl;
+
+                context.deallocate_register(address_register);
+            }
+
+            else
+            {
+                throw std::runtime_error("Assignment EmitRISC: Not an identifier or array access or pointer declaration");
+            }
+        }
+
+        context.deallocate_register(reg);
+        context.pop_operation_type();
+        return;
+    }
+    throw std::runtime_error("Assignment::EmitRISC - no identifier found");
 }
 
 void Assignment::Print(std::ostream &stream) const
@@ -182,6 +202,7 @@ std::string Assignment::GetId() const
     const Declarator *declarator = dynamic_cast<const Declarator *>(unary_expression_.get());
     const Dereference *dereference = dynamic_cast<const Dereference *>(unary_expression_.get());
     const AddressOf *address_of = dynamic_cast<const AddressOf *>(unary_expression_.get());
+    const StructAccess *struct_access = dynamic_cast<const StructAccess *>(unary_expression_.get());
     if (identifier != nullptr)
     {
         return identifier->GetId();
@@ -202,7 +223,10 @@ std::string Assignment::GetId() const
     {
         return address_of->GetId();
     }
-    throw std::runtime_error("Assignment GetId: Not an identifier, array access, array declarator, declarator");
+    else if (struct_access){
+        return struct_access->GetId();
+    }
+    throw std::runtime_error("Assignment GetId: Not an identifier, array access, array declarator, declarator, or struct access");
 }
 
 int Assignment::GetArraySize() const

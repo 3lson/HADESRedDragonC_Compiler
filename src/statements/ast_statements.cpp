@@ -114,10 +114,17 @@ int StatementList::GetOffset(Context &context) const
 
 int DeclarationList::GetOffset(Context &context) const
 {
+    std::cout << "Entering DeclarationList::GetOffset" <<std::endl;
     int offset = 0;
     for (const auto& node : get_nodes())
     {
         const Declaration *declaration = dynamic_cast<const Declaration *>(node.get());
+        if (!declaration) {
+            std::cerr << "DeclarationList::GetOffset: Encountered null declaration!" << std::endl;
+            continue; // Skip null entries
+        }
+
+        std::cout << "Processing a declaration..." << std::endl;
         offset += declaration->GetOffset(context);
 
         if (offset % 4 !=0){

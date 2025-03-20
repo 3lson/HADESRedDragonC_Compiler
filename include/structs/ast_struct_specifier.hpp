@@ -3,32 +3,39 @@
 #include "ast_node.hpp"
 #include "../specifiers/ast_specifier.hpp"
 #include "../symbols/ast_identifier.hpp"
-#include "../context/ast_context.hpp"
+#include "ast_struct_declaration.hpp"
+#include "ast_struct_member.hpp"
 
-namespace ast{
+namespace ast {
 
-class StructSpecifier : public Specifier{
+class StructSpecifier : public Specifier
+{
 private:
-    std::string *name_;
-    NodeList* declarations;
+    std::string *identifier_;
+    NodeList *struct_declaration_list_;
 
 public:
-    StructSpecifier(std::string *name, NodeList* declarations) : name_(name), declarations(declarations) {}
-    StructSpecifier(std::string *name) : name_(name), declarations(nullptr) {}
-    StructSpecifier(NodeList* declarations) : name_(nullptr), declarations(declarations) {}
-    ~StructSpecifier() {
-        if (name_){
-            delete name_;
+    StructSpecifier(std::string *identifier, NodeList *struct_declaration_list)
+        : identifier_(identifier), struct_declaration_list_(struct_declaration_list) {}
+
+    ~StructSpecifier()
+    {
+        if (identifier_)
+        {
+            delete identifier_;
         }
-        if (declarations) {
-            delete declarations;
+        if (struct_declaration_list_)
+        {
+            delete struct_declaration_list_;
         }
     }
 
-    void DefineSpecifier(Context& context) const override;
+    void DefineSpecifier(Context &context) const override;
     virtual Type GetType() const override;
-    virtual void Print(std::ostream& stream) const override;
-
-
+    virtual void Print(std::ostream &stream) const override;
+    void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
+    std::string GetId() const;
 };
-}//namespace ast
+
+} // namespace ast
+

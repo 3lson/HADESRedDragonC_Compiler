@@ -54,7 +54,7 @@ void Typedef::DefineTypedef(NodeList *aliases)
         switch (type)
         {
         case Type::_STRUCT:
-            throw std::runtime_error("Typedef::DefineTypedef - alias is not a PRIMITIVE");
+            throw std::runtime_error("Typedef::DefineTypedef");
         case Type::_CHAR:
         case Type::_SHORT:
         case Type::_UNSIGNED_INT:
@@ -65,7 +65,7 @@ void Typedef::DefineTypedef(NodeList *aliases)
             typedef_spec = TypedefSpec(type, pointer, array_size);
             break;
         default:
-            throw std::runtime_error("Typedef::DefineTypedef - alias is not a PRIMITIVE nor a STRUCT");
+            throw std::runtime_error("Typedef::DefineTypedef");
         }
 
         // Call define_typedef on the context object

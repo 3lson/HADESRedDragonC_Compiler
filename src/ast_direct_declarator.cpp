@@ -21,6 +21,7 @@ void DirectDeclarator::Print(std::ostream &stream) const
 
 std::string DirectDeclarator::GetId() const
 {
+    std::cout << "Passing inside DirectDeclarator::GetId()" << std::endl;
     const Identifier *id = dynamic_cast<const Identifier *>(identifier_.get());
     const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (id != nullptr) {

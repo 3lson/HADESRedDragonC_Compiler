@@ -3,6 +3,9 @@
 #include "../ast_node.hpp"
 #include "../specifiers/ast_type_specifier.hpp"
 #include "../symbols/ast_constant.hpp"
+#include "../symbols/ast_identifier.hpp"
+#include "../structs/ast_struct_declaration.hpp"
+#include "../structs/ast_struct_access.hpp"
 #include "ast_operand.hpp"
 
 namespace ast{

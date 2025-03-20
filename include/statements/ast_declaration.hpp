@@ -7,6 +7,8 @@
 #include "../arrays/ast_array_declaration.hpp"
 #include "ast_assignment.hpp"
 #include "../typedef/ast_typedef.hpp"
+#include "../structs/ast_struct_declaration.hpp"
+#include "../structs/ast_struct_specifier.hpp"
 
 namespace ast{
 

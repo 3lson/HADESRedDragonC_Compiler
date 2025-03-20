@@ -11,6 +11,7 @@
 #include "../pointers/ast_addressof.hpp"
 #include "../pointers/ast_dereference.hpp"
 #include "../strings/ast_string_literal.hpp"
+#include "../structs/ast_struct_access.hpp"
 
 namespace ast {
 

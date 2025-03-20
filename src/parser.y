@@ -96,21 +96,20 @@ type_specifier
 	| SHORT 	{ $$ = new TypeSpecifier(Type::_SHORT); }
     | VOID      { $$ = new TypeSpecifier(Type::_VOID); }
 	| enum_specifier { $$ = $1; }
-	//| struct_specifier { $$ = $1; }
+	| struct_specifier { $$ = $1; }
 	;
-
-/*
 
 struct_specifier
 	: STRUCT IDENTIFIER '{' struct_declaration_list '}' {
-		NodeList* struct_declaration_list = dynamic_cast<NodeList*>($4);
-		$$ = new StructSpecifier($2,  struct_declaration_list);
+		NodeList* node_list = dynamic_cast<NodeList*>($4);
+		if(!node_list){
+			throw std::runtime_error("Expected NodeList in struct_specifier");
 		}
-	| STRUCT '{' struct_declaration_list '}' {
-		NodeList* struct_declaration_list = dynamic_cast<NodeList*>($3);
-		$$ = new StructSpecifier(struct_declaration_list);
+		$$ = new StructSpecifier($2, node_list);
 		}
-	| STRUCT IDENTIFIER { $$ = new StructSpecifier($2); }
+	| STRUCT IDENTIFIER {
+		//Forward declaration of struct (e.g. "struct x;")
+		$$ = new StructSpecifier($2, new NodeList()); }
 	;
 
 struct_declaration_list
@@ -123,7 +122,9 @@ struct_declaration_list
 	;
 
 struct_declaration
-	: specifier_qualifier_list struct_declarator_list ';' { $$ = new StructDeclaration(NodePtr($1), NodePtr($2)); }
+	: specifier_qualifier_list struct_declarator_list ';' {
+		$$ = new StructMember(NodePtr($1), NodePtr($2));
+		}
 	;
 
 specifier_qualifier_list
@@ -134,19 +135,15 @@ specifier_qualifier_list
 struct_declarator_list
 	: struct_declarator { $$ = new NodeList(NodePtr($1)); }
 	| struct_declarator_list ',' struct_declarator {
-		NodeList *struct_declarator_list = dynamic_cast<NodeList *>($1);
-		struct_declarator_list->PushBack(NodePtr($3));
-		$$ = struct_declarator_list;
+		NodeList *node_list = dynamic_cast<NodeList *>($1);
+		node_list->PushBack(NodePtr($3));
+		$$ = node_list;
 	}
 	;
 
 struct_declarator
 	: declarator { $$ = $1; }
-	| ':' constant_expression
-	| declarator ':' constant_expression
 	;
-
-*/
 
 enum_specifier
 	: ENUM '{' enumerator_list '}' {
@@ -291,6 +288,7 @@ postfix_expression
 	| postfix_expression '(' ')' { $$ = new FunctionInvocation(NodePtr($1)); }
 	| postfix_expression '(' argument_expression_list ')' { $$ = new FunctionInvocation(NodePtr($1), NodePtr($3)); }
 	| postfix_expression '[' expression ']' { $$ = new ArrayIndexAccess{NodePtr($1), NodePtr($3)}; }
+	| postfix_expression '.' IDENTIFIER { $$ = new StructAccess(NodePtr($1), $3); }
 	;
 
 argument_expression_list
@@ -429,7 +427,22 @@ declaration
         		const_cast<Typedef *>(typedef_definition)->DefineTypedef(alias_list);
     		}
 		}
-		$$ = new Declaration(NodePtr($1), NodePtr($2));
+		const StructSpecifier *struct_specifier = dynamic_cast<const StructSpecifier *>($1);
+		if(struct_specifier != nullptr){
+			// Handle struct variable declaration (e.g., "struct x y;")
+            const NodeList *declarator_list = dynamic_cast<const NodeList *>($2);
+            if (declarator_list) {
+                for (const auto& declarator : declarator_list->get_nodes()) {
+                    const Identifier *identifier = dynamic_cast<const Identifier *>(declarator.get());
+                    if (identifier) {
+                        $$ = new StructDeclaration(new std::string(struct_specifier->GetId()), new std::string(identifier->GetId()));
+                    }
+                }
+            }
+		} else{
+			//Handle non-struct declarations
+			$$ = new Declaration(NodePtr($1), NodePtr($2));
+		}
 		}
 	| declaration_specifiers ';' { $$ = new Declaration(NodePtr($1)); }
 	;
