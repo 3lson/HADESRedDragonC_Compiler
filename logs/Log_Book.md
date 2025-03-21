@@ -233,6 +233,7 @@ Above was our initial sprint start for the intermediate features. However as you
 
 ### 21/03/2025 (12 hours)
   - Final clean up for submission
+  - Added plenty of extra test cases to TRY and break the compiler :)
 
 
 <div align = "center" >
@@ -250,7 +251,7 @@ Above was our initial sprint start for the intermediate features. However as you
 
 ---
 
-All the seen test case are passed! However, I have added plenty of extra test cases on some features on tested and extra implemented features. Over the summer, this codebase will be augmented to add the unassessed extra features.
+All the seen test case are passed! However, I have added plenty of extra test cases on some features on tested and extra implemented features. Over the summer, this codebase will be augmented to add the unassessed extra features. 
 
 
 
