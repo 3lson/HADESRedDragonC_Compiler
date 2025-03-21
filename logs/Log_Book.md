@@ -222,7 +222,35 @@ Above was our initial sprint start for the intermediate features. However as you
   - Implemented sizeof on typedef
   - Added extra test cases like nested if, for, while loops
 
+### 19/03/2025 (8 hours)
+  - Worked on trying to implement structs
 
+### 20/03/2025 (24 hours)
+  - [Implemented structs, but with issue in sizeof](https://github.com/3lson/HADESRedDragonC_Compiler/commit/d168d8e6214e2b2f109479a5698b51637767f5de)
+  - [Fixed the sizeof and all seen test cases passed!](https://github.com/3lson/HADESRedDragonC_Compiler/commit/f0d4097c157588a1ef2843630bc670d235df2d54)
+  - Add padding for structs when sizeof is called
+  - Members of different data types on structs implemented
+
+### 21/03/2025 (12 hours)
+  - Final clean up for submission
+
+
+<div align = "center" >
+
+|![alt text](https://github.com/3lson/HADESRedDragonC_Compiler/blob/restructure/logs/images/AdvancedComplete.png)|
+|:--:|
+|*img: Completed Final Week Sprint*|
+
+</div>
+
+---
+<div align = "center" >
+<b>Advanced Features complete</b>
+</div>
+
+---
+
+All the seen test case are passed! However, I have added plenty of extra test cases on some features on tested and extra implemented features. Over the summer, this codebase will be augmented to add the unassessed extra features.
 
 
 
