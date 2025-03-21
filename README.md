@@ -1,5 +1,7 @@
 # HADESRedDragonC_Compiler
 
+**Please Note:** Full implementation is available on the **restructure** branch
+
 The source language is pre-processed C90, and the target language is RISC-V assembly. The target environment is Ubuntu 22.04
 
 ## Getting Started
