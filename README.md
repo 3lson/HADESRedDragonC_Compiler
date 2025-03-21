@@ -21,5 +21,5 @@ So to compile an example program we can:
 bin/c_compiler -S "./compiler_tests/_example/example.c" -o "./example.s"
 ```
 ## Credits 
-- [Elson Tho]
+- [Elson Tho](https://github.com/3lson/3lson)
 - [Ahmed Hamid]
