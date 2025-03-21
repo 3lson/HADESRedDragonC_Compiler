@@ -44,7 +44,7 @@ Type TypeSpecifier::GetType() const
     return type_;
 }
 
-void TypeSpecifier::DefineSpecifier(Context &context) const{
+void TypeSpecifier::define_spec(Context &context) const{
     (void)context;
 }
 }//namespace ast

@@ -36,7 +36,7 @@ int Context::registerConstant(double value) {
     return constantIndex++;
 }
 
-void Context::outputConstantDeclaration(std::ostream &stream) const {
+void Context::constDecl(std::ostream &stream) const {
     int i = 0;
     stream << "\t.section .rodata" << std::endl;
     for (const auto &constant : constants) {

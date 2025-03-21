@@ -14,7 +14,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
         std::string value_reg = context.get_register(type);
         expression_->EmitRISC(stream, context, value_reg);
 
-        int offset = struct_access->GetOffset(context);
+        int offset = struct_access->get_offset(context);
         // Store the value into the struct member
         stream << context.store_instr(type) << " " << value_reg << ", " << offset << "(s0)" << std::endl;
 
@@ -76,7 +76,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
             {
                 type = array_index_access->isPointerOp(context) ? Type::_INT : array_index_access->GetType(context);
                 std::string index_register = context.get_register(Type::_INT);
-                array_index_access->GetIndex(stream, context, index_register, type);
+                array_index_access->get_position(stream, context, index_register, type);
 
                 if (variable.get_scope() == ScopeLevel::LOCAL)
                 {
@@ -170,7 +170,7 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
                 Type type = dereference->GetType(context);
 
                 dereference->StartingOffset(stream, context, address_register);
-                dereference->DereferencePath(stream, context, address_register);
+                dereference->deref_route(stream, context, address_register);
                 stream << context.store_instr(type) << " " << reg << ", 0(" << address_register << ")" << std::endl;
 
                 context.deallocate_register(address_register);
@@ -253,7 +253,7 @@ bool Assignment::isArrayInitialization() const
     return dynamic_cast<const ArrayDeclaration *>(unary_expression_.get()) != nullptr;
 }
 
-void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
+void Assignment::global_init(std::ostream &stream, Context &context, Global &global) const
 {
     const Constant *constant = dynamic_cast<const Constant *>(expression_.get());
     const StringLiteral *string_literal = dynamic_cast<const StringLiteral *>(expression_.get());
@@ -271,13 +271,13 @@ void Assignment::InitializeGlobals(std::ostream &stream, Context &context, Globa
 
     else if (array_initialization != nullptr)
     {
-        array_initialization->InitializeGlobals(stream, context, global);
+        array_initialization->global_init(stream, context, global);
     }
 
     else
     {
-        std::cout << "Assignment InitializeGlobals: type is " << typeid(expression_).name() << std::endl;
-        throw std::runtime_error("Assignment InitializeGlobals: Not a constant or string literal");
+        std::cout << "Assignment global_init: type is " << typeid(expression_).name() << std::endl;
+        throw std::runtime_error("Assignment global_init: Not a constant or string literal");
     }
 }
 
@@ -290,7 +290,7 @@ bool Assignment::isPointerInitialization() const
     return false;
 }
 
-void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, Context &context) const
+void Assignment::local_init(Type type, int offset, std::ostream &stream, Context &context) const
 {
     int array_size = GetArraySize();
 
@@ -304,7 +304,7 @@ void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, 
 
     std::string variable_name = GetId();
 
-    int dereference_num = GetDereference();
+    int dereference_num = get_deref();
     Variable variable(is_pointer, is_array, array_size, type, offset, dereference_num);
     context.define_variable(variable_name, variable);
 
@@ -312,12 +312,12 @@ void Assignment::DeclareLocalScope(Type type, int offset, std::ostream &stream, 
     EmitRISC(stream, context, "unused");
 }
 
-int Assignment::GetDereference() const
+int Assignment::get_deref() const
 {
     const Declarator *declarator = dynamic_cast<const Declarator *>(unary_expression_.get());
     if (declarator != nullptr)
     {
-        return declarator->GetDereference();
+        return declarator->get_deref();
     }
 
     return 0;

@@ -53,7 +53,14 @@ void UnaryExpression::EmitRISC(std::ostream& stream, Context& context, std::stri
 
     std::string operand_register = context.get_register(type);
 
-    operand_->EmitRISC(stream, context, operand_register);
+
+    // Handle struct access (as per your existing logic)
+    const StructAccess* structAccess = dynamic_cast<const StructAccess*>(operand_.get());
+    if (structAccess) {
+        structAccess->EmitRISC(stream, context, operand_register);
+    }else{
+        operand_->EmitRISC(stream, context, operand_register);
+    }
 
     std::string operation = GetOperation(type);
 
@@ -107,8 +114,15 @@ Type UnaryExpression::GetType(Context& context) const {
         throw std::runtime_error("Null pointer encountered in UnaryExpression operand.");
     }
 
-    const Operand* operandObj = dynamic_cast<const Operand*>(operand_.get());
+    // Check if the operand is a struct access
+    const StructAccess* structAccess = dynamic_cast<const StructAccess*>(operand_.get());
+    if (structAccess) {
+        // If it's a struct access, get the type of the struct field
+        return structAccess->GetType(context);
+    }
 
+    // Otherwise, treat it as a regular operand and get the type of the operand
+    const Operand* operandObj = dynamic_cast<const Operand*>(operand_.get());
     if (!operandObj) {
         throw std::runtime_error("Invalid operand type: " + std::string(typeid(*operand_).name()));
     }

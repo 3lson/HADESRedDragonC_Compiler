@@ -18,11 +18,11 @@ public:
     std::string GetId() const override;
     Type GetType() const;
 
-    virtual std::vector<Parameter>GetParameters(Context &context) const override;
-    virtual int GetOffset() const override;
-    virtual void StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const override;
+    virtual std::vector<Parameter>get_param(Context &context) const override;
+    virtual int get_offset() const override;
+    virtual void store_param(std::ostream &stream, Context &context, std::string dest_reg) const override;
     virtual bool isPointer() const override;
-    int GetDereference() const override;
+    int get_deref() const override;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
     void Print(std::ostream &stream) const override;

@@ -69,7 +69,7 @@ void ArrayInitialization::SaveValue(std::ostream &stream, Context &context, Vari
     context.deallocate_register(dest_reg);
 }
 
-void ArrayInitialization::InitializeGlobals(std::ostream &stream, Context &context, Global &global) const
+void ArrayInitialization::global_init(std::ostream &stream, Context &context, Global &global) const
 {
     (void)context;
     (void)stream;

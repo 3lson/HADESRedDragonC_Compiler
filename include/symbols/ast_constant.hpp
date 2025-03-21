@@ -25,7 +25,7 @@ public:
     IntConstant(int value) : value_(value) {}
 
     Type GetType(Context &context) const override;
-    int GetValue() const;
+    int get_val() const;
     void SaveValue(Global &global) const override;
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;

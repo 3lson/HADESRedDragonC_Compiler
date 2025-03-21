@@ -175,7 +175,7 @@ declarator
 	: direct_declarator { $$ = $1; }
 	| pointer direct_declarator {
 		PointerDeclaration* _ptr = new PointerDeclaration(NodePtr($2));
-		for (int i = 1; i< dynamic_cast<const IntConstant*>($1)->GetValue(); i++){
+		for (int i = 1; i< dynamic_cast<const IntConstant*>($1)->get_val(); i++){
 			_ptr = new PointerDeclaration(NodePtr(_ptr));
 		}
 		$$ = _ptr;
@@ -185,7 +185,7 @@ declarator
 
 pointer
 	: '*' { $$ = new IntConstant(1); }
-	| '*' pointer { $$ = new IntConstant(dynamic_cast<const IntConstant *>($2)->GetValue() +1); delete $2; }
+	| '*' pointer { $$ = new IntConstant(dynamic_cast<const IntConstant *>($2)->get_val() +1); delete $2; }
 
 direct_declarator
 	: IDENTIFIER                { $$ = new Identifier($1); }
@@ -314,12 +314,12 @@ unary_expression
 	| SIZEOF '(' type_specifier ')' { $$ = new SizeOf(NodePtr($3)); }
 	| SIZEOF '(' type_specifier pointer ')'						{
 		const IntConstant *pointer_node = dynamic_cast<const IntConstant *>($4);
-		$$ = new SizeOf(NodePtr($3), pointer_node->GetValue());
+		$$ = new SizeOf(NodePtr($3), pointer_node->get_val());
 		}
 	| SIZEOF '(' type_specifier '[' constant_expression ']' ')'		{ $$ = new SizeOf(NodePtr($3), NodePtr($5)); }
 	| SIZEOF '(' type_specifier pointer '[' constant_expression ']' ')' {
 		const IntConstant *pointer_node = dynamic_cast<const IntConstant *>($4);
-		$$ = new SizeOf(NodePtr($3), pointer_node->GetValue(), NodePtr($6));
+		$$ = new SizeOf(NodePtr($3), pointer_node->get_val(), NodePtr($6));
 		}
 	;
 

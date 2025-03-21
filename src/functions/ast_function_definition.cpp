@@ -24,9 +24,9 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
     stream << ".type " << function_name << ", @function" << std::endl;
     stream << function_name << ":" << std::endl;
 
-    ReturnValue return_value(return_is_pointer, false, return_type, direct_declarator_->GetDereference());
+    ReturnValue return_value(return_is_pointer, false, return_type, direct_declarator_->get_deref());
     //vector for my arguments to pull the arguments out then processing then in "pameter_definition"
-    std::vector<Parameter> parameters = direct_declarator_->GetParameters(context);
+    std::vector<Parameter> parameters = direct_declarator_->get_param(context);
     Function function(return_value, parameters);
     context.define_function(function_name, function);
 
@@ -43,9 +43,9 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
 
         const CompoundStatement *compound_statement = dynamic_cast<const CompoundStatement*>(compound_statement_.get());
         context.increase_stack_offset(8);
-        int initial_offset = 8 + direct_declarator_->GetOffset();
+        int initial_offset = 8 + direct_declarator_->get_offset();
 
-        int stack_allocated_space = compound_statement->GetOffset(context) + initial_offset + 128;
+        int stack_allocated_space = compound_statement->get_offset(context) + initial_offset + 128;
         stack_allocated_space = stack_allocated_space + (4 - stack_allocated_space % 4);
 
         //Added for more than 8 params
@@ -60,7 +60,7 @@ void FunctionDefinition::EmitRISC(std::ostream &stream, Context &context, std::s
         stream << "sw ra, " << stack_allocated_space - 4 << "(sp)" <<std::endl;
         stream << "sw s0, " << stack_allocated_space - 8 << "(sp)" <<std::endl;
         stream << "addi s0, sp, " << stack_allocated_space <<std::endl;
-        direct_declarator_->StoreParameters(stream, context, dest_reg);
+        direct_declarator_->store_param(stream, context, dest_reg);
 
         compound_statement_->EmitRISC(stream, context, dest_reg);
 

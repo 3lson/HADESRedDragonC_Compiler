@@ -2,7 +2,7 @@
 
 namespace ast{
 
-void StructSpecifier::DefineSpecifier(Context& context) const{
+void StructSpecifier::define_spec(Context& context) const{
     std::cout << "Defining struct: " <<*identifier_ <<std::endl;
     std::unordered_map<std::string, Type> structMembers;
     int total_size = 0;
@@ -33,7 +33,7 @@ void StructSpecifier::DefineSpecifier(Context& context) const{
 void StructSpecifier::EmitRISC(std::ostream &stream, Context& context, std::string dest_reg) const{
     (void)stream;
     (void)dest_reg;
-    DefineSpecifier(context);
+    define_spec(context);
 }
 
 

@@ -19,7 +19,7 @@ void AddressOf::EmitRISC(std::ostream& stream, Context& context, std::string des
 
     if (array_index_access){
         std::string index_register = context.get_register(Type::_INT);
-        array_index_access->GetIndex(stream, context, index_register, type);
+        array_index_access->get_position(stream, context, index_register, type);
 
         if (variable.get_scope() == ScopeLevel::LOCAL)
         {

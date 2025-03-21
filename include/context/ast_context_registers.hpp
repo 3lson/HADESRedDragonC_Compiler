@@ -4,7 +4,7 @@
 #include <stack>
 #include <set>
 #include <iostream>
-#include "ast_context_types.hpp"  // Ensure Type enum is available
+#include "ast_context_types.hpp"
 
 namespace ast {
 

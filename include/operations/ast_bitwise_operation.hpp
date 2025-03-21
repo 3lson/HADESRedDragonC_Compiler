@@ -2,6 +2,7 @@
 
 #include "ast_node.hpp"
 #include "ast_operand.hpp"
+#include "../structs/ast_struct_access.hpp"
 
 namespace ast{
 

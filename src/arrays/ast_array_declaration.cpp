@@ -26,11 +26,11 @@ int ArrayDeclaration::GetArraySize() const
     const Identifier *enumerator = dynamic_cast<const Identifier *>(constant_expression_.get());
     if (int_const != nullptr)
     {
-        return int_const->GetValue();
+        return int_const->get_val();
     }
     if (enumerator != nullptr)
     {
-        return enumerator->GetValue(context);
+        return enumerator->get_val(context);
     }
     throw std::runtime_error("ArrayDeclaration::GetArraySize - array is null and neither is a enumerator");
 }
@@ -58,27 +58,27 @@ bool ArrayDeclaration::isPointer() const
     return dynamic_cast<const PointerDeclaration *>(identifier_.get()) != nullptr;
 }
 
-std::vector<Parameter> ArrayDeclaration::GetParameters(Context &context) const
+std::vector<Parameter> ArrayDeclaration::get_param(Context &context) const
 {
-    return dynamic_cast<const Declarator *>(identifier_.get())->GetParameters(context);
+    return dynamic_cast<const Declarator *>(identifier_.get())->get_param(context);
 }
 
-int ArrayDeclaration::GetOffset() const
+int ArrayDeclaration::get_offset() const
 {
-    return dynamic_cast<const Declarator *>(identifier_.get())->GetOffset();
+    return dynamic_cast<const Declarator *>(identifier_.get())->get_offset();
 }
 
-void ArrayDeclaration::StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const
+void ArrayDeclaration::store_param(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    return dynamic_cast<const Declarator *>(identifier_.get())->StoreParameters(stream, context, dest_reg);
+    return dynamic_cast<const Declarator *>(identifier_.get())->store_param(stream, context, dest_reg);
 }
 
-int ArrayDeclaration::GetDereference() const
+int ArrayDeclaration::get_deref() const
 {
     const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (declarator)
     {
-        return declarator->GetDereference();
+        return declarator->get_deref();
     }
 
     return 0;

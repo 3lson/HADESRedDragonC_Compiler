@@ -18,14 +18,14 @@ public:
     using NodeList::NodeList; //inherits all constructors from nodelist
     virtual ~Statement() override = default;
 
-    virtual int GetOffset(Context &context) const = 0;
+    virtual int get_offset(Context &context) const = 0;
 };
 
 class CompoundStatement : public Statement
 {
 public:
     using Statement::Statement;
-    int GetOffset(Context &context) const;
+    int get_offset(Context &context) const;
     void GetCases(std::ostream &stream,Context &context, std::string condition, std::string dest_reg) const;
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
 };
@@ -37,7 +37,7 @@ public:
 
     void GetCases(std::ostream &stream,Context &context, std::string dest_reg, std::vector<const CaseStatement*>& casesList) const;
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
-    int GetOffset(Context &context) const;
+    int get_offset(Context &context) const;
 };
 
 class DeclarationList : public Statement
@@ -45,7 +45,7 @@ class DeclarationList : public Statement
 public:
     using Statement::Statement;
 
-    int GetOffset(Context &context) const;
+    int get_offset(Context &context) const;
 };
 
 }

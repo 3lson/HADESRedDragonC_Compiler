@@ -74,7 +74,7 @@ void Compile(const NodePtr& root, const std::string& compile_output_path)
     std::ofstream output(compile_output_path, std::ios::trunc);
     root->EmitRISC(output, ctx, "zero");
     output << std::endl;
-    ctx.outputConstantDeclaration(output);
+    ctx.constDecl(output);
     ctx.print_string(output);
     output << std::endl;
     ctx.print_global(output);

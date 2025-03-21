@@ -33,7 +33,7 @@ std::string DirectDeclarator::GetId() const
 
 }
 
-std::vector<Parameter> DirectDeclarator::GetParameters(Context &context) const
+std::vector<Parameter> DirectDeclarator::get_param(Context &context) const
 {
     if (parameter_list_ == nullptr)
     {
@@ -42,11 +42,11 @@ std::vector<Parameter> DirectDeclarator::GetParameters(Context &context) const
     else
     {
         const ParameterList* parameter_list = dynamic_cast<const ParameterList*>(parameter_list_.get());
-        return parameter_list->GetParameters(context);
+        return parameter_list->get_param(context);
     }
 }
 
-int DirectDeclarator::GetOffset() const
+int DirectDeclarator::get_offset() const
 {
     if (parameter_list_ == nullptr)
     {
@@ -55,12 +55,12 @@ int DirectDeclarator::GetOffset() const
     else
     {
         const ParameterList* parameter_list = dynamic_cast<const ParameterList*>(parameter_list_.get());
-        return parameter_list->GetOffset();
+        return parameter_list->get_offset();
     }
 }
 
 
-void DirectDeclarator::StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const
+void DirectDeclarator::store_param(std::ostream &stream, Context &context, std::string dest_reg) const
 {
     if (parameter_list_ != nullptr)
     {
@@ -74,12 +74,12 @@ bool DirectDeclarator::isPointer() const
     return false;
 }
 
-int DirectDeclarator::GetDereference() const
+int DirectDeclarator::get_deref() const
 {
     const Declarator *declarator = dynamic_cast<const Declarator *>(identifier_.get());
     if (declarator != nullptr)
     {
-        return declarator->GetDereference();
+        return declarator->get_deref();
     }
 
     return 0;

@@ -23,7 +23,7 @@ public:
     std::string GetId() const;
     std::string GetStructName() const;
     Type GetType(Context &context) const;
-    int GetOffset(Context &context) const;
+    int get_offset(Context &context) const;
 
 
 };

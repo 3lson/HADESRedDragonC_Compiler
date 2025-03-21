@@ -22,7 +22,7 @@ public:
     bool isPointer(Context &context) const;
     bool isPointerOp(Context &context) const override;
     void StartingOffset(std::ostream &stream, Context &context, std::string address_reg) const;
-    void DereferencePath(std::ostream &stream, Context &context, std::string address_reg) const;
+    void deref_route(std::ostream &stream, Context &context, std::string address_reg) const;
 };
 
 } // namespace ast

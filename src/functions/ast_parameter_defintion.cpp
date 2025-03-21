@@ -8,7 +8,7 @@ void ParameterDefinition::EmitRISC(std::ostream &stream, Context &context, std::
     int offset = context.get_stack_offset();
     stream << context.store_instr(type) << " " << dest_reg << ", " << offset << "(s0)" << std::endl;
 
-    Variable variable(isPointer(), false, GetType(), offset, GetDereference());
+    Variable variable(isPointer(), false, GetType(), offset, get_deref());
     context.define_variable(GetId(), variable);
     context.increase_stack_offset(GetTypeSize());
 }
@@ -80,19 +80,19 @@ void ParameterList::EmitRISC(std::ostream &stream, Context &context, std::string
 
 }
 
-std::vector<Parameter> ParameterList::GetParameters(Context &context) const {
+std::vector<Parameter> ParameterList::get_param(Context &context) const {
     int start_offset = context.get_stack_offset();
     std::vector<Parameter> parameters;
 
     for (const auto& node : get_nodes()) {
         const ParameterDefinition* parameter = dynamic_cast<const ParameterDefinition*>(node.get());
-        Parameter Parameter = parameter->GetParameter(context, start_offset - GetOffset());
+        Parameter Parameter = parameter->GetParameter(context, start_offset - get_offset());
         parameters.push_back(Parameter);
     }
     return parameters;
 }
 
-int ParameterList::GetOffset() const {
+int ParameterList::get_offset() const {
     int size = 0;
 
     for (Parameter Parameter : parameters)
@@ -134,7 +134,7 @@ Parameter ParameterDefinition::GetParameter(Context &context, int offset) const
     (void)context;
     if (isPointer())
     {
-        return Parameter(GetId(), true, false, GetType(), offset, GetDereference());
+        return Parameter(GetId(), true, false, GetType(), offset, get_deref());
     }
     return Parameter(GetId(), false, false, GetType(), offset, 0);
 }
@@ -159,14 +159,14 @@ bool ParameterDefinition::isPointer() const
     return false;
 }
 
-int ParameterDefinition::GetDereference() const
+int ParameterDefinition::get_deref() const
 {
     // Get dereference number for parameter
     const Declarator *declarator = dynamic_cast<const Declarator *>(declarator_.get());
 
     if (declarator)
     {
-        return declarator->GetDereference();
+        return declarator->get_deref();
     }
 
     return 0;

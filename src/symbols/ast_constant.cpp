@@ -19,7 +19,7 @@ Type IntConstant::GetType(Context &context) const
     return Type::_INT;
 }
 
-int IntConstant::GetValue() const
+int IntConstant::get_val() const
 {
     return value_;
 }

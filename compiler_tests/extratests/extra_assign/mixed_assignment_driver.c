@@ -1,4 +1,4 @@
-int f();
+double f();
 
 int main()
 {

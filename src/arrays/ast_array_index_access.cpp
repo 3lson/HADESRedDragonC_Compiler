@@ -23,7 +23,7 @@ void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::str
     Type type = isPointerOp(context) ? Type::_INT : GetType(context);
 
     std::string index_register = context.get_register(Type::_INT);
-    GetIndex(stream, context, index_register, type);
+    get_position(stream, context, index_register, type);
 
     if (variable.get_scope() ==ScopeLevel::LOCAL){
         if (variable.is_pointer())
@@ -61,7 +61,7 @@ void ArrayIndexAccess::EmitRISC(std::ostream &stream, Context &context, std::str
     context.deallocate_register(index_register);
 }
 
-void ArrayIndexAccess::GetIndex(std::ostream &stream, Context &context, std::string dest_reg, Type type) const
+void ArrayIndexAccess::get_position(std::ostream &stream, Context &context, std::string dest_reg, Type type) const
 {
     // Set operation type as dealing with pointers
     context.push_operation_type(Type::_INT);

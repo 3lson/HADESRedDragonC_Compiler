@@ -20,7 +20,7 @@ public:
     void Print(std::ostream &stream) const override;
     Type GetType() const;
     bool isPointer() const;
-    int GetDereference() const;
+    int get_deref() const;
     std::string GetId() const;
     int GetTypeSize() const;
     Parameter GetParameter(Context &context, int offset) const;
@@ -36,8 +36,8 @@ public:
     ~ParameterList() {}
 
     void EmitRISC(std::ostream &stream, Context &context, std::string dest_reg) const override;
-    int GetOffset() const;
-    std::vector<Parameter> GetParameters(Context &context) const;
+    int get_offset() const;
+    std::vector<Parameter> get_param(Context &context) const;
 
 
 };

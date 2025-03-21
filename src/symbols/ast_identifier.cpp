@@ -66,10 +66,10 @@ Type Identifier::GetType(Context &context) const
     return type;
 }
 
-int Identifier::GetValue(Context &context) const{
+int Identifier::get_val(Context &context) const{
     if(!context.is_enum(identifier_))
     {
-        throw std::runtime_error("Identifier::GetValue - identifier is not an enum");
+        throw std::runtime_error("Identifier::get_val - identifier is not an enum");
     }
     return context.get_enum_label(identifier_);
 }

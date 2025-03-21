@@ -18,7 +18,7 @@ void StructAccess::EmitRISC(std::ostream &stream, Context &context, std::string 
         throw std::runtime_error("StructAccess::EmitRISC - Struct variable '" + struct_var_name + "' not found.");
     }
 
-    int total_offset = GetOffset(context);
+    int total_offset = get_offset(context);
     std::cout << "Total offset: " << total_offset << std::endl;
     Type type = GetType(context);
 
@@ -39,12 +39,12 @@ Type StructAccess::GetType(Context &context) const{
         try {
             struct_var = context.get_variable(struct_var_name);
         } catch (const std::runtime_error& e) {
-            throw std::runtime_error("StructAccess::GetOffset - Struct variable '" + struct_var_name + "' not found.");
+            throw std::runtime_error("StructAccess::get_offset - Struct variable '" + struct_var_name + "' not found.");
         }
 
         std::unordered_map<std::string, Type> members = context.get_struct_members(struct_var.get_type_name());
         if (members.find(*member_name_) == members.end()) {
-            throw std::runtime_error("StructAccess::GetOffset - Member '" + *member_name_ + "' not found in struct.");
+            throw std::runtime_error("StructAccess::get_offset - Member '" + *member_name_ + "' not found in struct.");
         }
 
         Type member_type = members[*member_name_];
@@ -67,10 +67,10 @@ std::string StructAccess::GetStructName() const {
     return id->GetId();
 }
 
-int StructAccess::GetOffset(Context &context) const{
+int StructAccess::get_offset(Context &context) const{
     const Identifier* struct_identifier = dynamic_cast<const Identifier *>(struct_name_.get());
     if (!struct_identifier) {
-        throw std::runtime_error("StructAccess::GetOffset - struct_name_ is not an Identifier");
+        throw std::runtime_error("StructAccess::get_offset - struct_name_ is not an Identifier");
     }
 
     std::string struct_var_name = struct_identifier->GetId();
@@ -79,12 +79,12 @@ int StructAccess::GetOffset(Context &context) const{
     try {
         struct_var = context.get_variable(struct_var_name);
     } catch (const std::runtime_error& e) {
-        throw std::runtime_error("StructAccess::GetOffset - Struct variable '" + struct_var_name + "' not found.");
+        throw std::runtime_error("StructAccess::get_offset - Struct variable '" + struct_var_name + "' not found.");
     }
 
     std::unordered_map<std::string, int> offsets = context.get_struct_offsets(struct_var.get_type_name());
     if (offsets.find(*member_name_) == offsets.end()) {
-        throw std::runtime_error("StructAccess::GetOffset - Member '" + *member_name_ + "' not found in struct.");
+        throw std::runtime_error("StructAccess::get_offset - Member '" + *member_name_ + "' not found in struct.");
     }
 
     int member_offset = offsets[*member_name_];

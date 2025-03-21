@@ -38,30 +38,30 @@ Type PointerDeclaration::GetType() const
     return Type::_INT;
 }
 
-int PointerDeclaration::GetDereference() const
+int PointerDeclaration::get_deref() const
 {
     const PointerDeclaration *ptr = dynamic_cast<const PointerDeclaration *>(direct_declarator_.get());
 
     if (ptr != nullptr)
     {
-        return 1 + ptr->GetDereference();
+        return 1 + ptr->get_deref();
     }
     return 1;
 }
 
-std::vector<Parameter> PointerDeclaration::GetParameters(Context &context) const
+std::vector<Parameter> PointerDeclaration::get_param(Context &context) const
 {
-    return dynamic_cast<const Declarator *>(direct_declarator_.get())->GetParameters(context);
+    return dynamic_cast<const Declarator *>(direct_declarator_.get())->get_param(context);
 }
 
-void PointerDeclaration::StoreParameters(std::ostream &stream, Context &context, std::string dest_reg) const
+void PointerDeclaration::store_param(std::ostream &stream, Context &context, std::string dest_reg) const
 {
-    return dynamic_cast<const Declarator *>(direct_declarator_.get())->StoreParameters(stream, context, dest_reg);
+    return dynamic_cast<const Declarator *>(direct_declarator_.get())->store_param(stream, context, dest_reg);
 }
 
-int PointerDeclaration::GetOffset() const
+int PointerDeclaration::get_offset() const
 {
-    int offset = dynamic_cast<const Declarator *>(direct_declarator_.get())->GetOffset();
+    int offset = dynamic_cast<const Declarator *>(direct_declarator_.get())->get_offset();
     if(offset %4 !=0){
         offset += 4 - (offset % 4);
     }

@@ -103,7 +103,7 @@ std::string ContextRegister::get_register(Type type){
     }
     for (int i = start_register_file; i<=end_register_file; i++){
         if (register_file[i].isAvailable()){
-            //std::cout << "Allocating register: " << register_file[i].getName() << std::endl;
+            std::cout << "Allocating register: " << register_file[i].getName() << std::endl;
             allocate_register(register_file[i].getName(), type);
             return get_register_name(i);
         }
@@ -115,7 +115,7 @@ std::string ContextRegister::get_register(Type type){
 void ContextRegister::deallocate_register(const std::string &reg_name){
     if(register_name_to_int.find(reg_name) != register_name_to_int.end()){
         int reg_num = register_name_to_int[reg_name];
-        //std::cout << "Deallocating register: " << reg_name << std::endl;
+        std::cout << "Deallocating register: " << reg_name << std::endl;
         register_file[reg_num].setAvailable(true);
     }
 }
@@ -152,12 +152,12 @@ void ContextRegister::allocate_register(std::string reg_name, Type type)
     register_file[reg].setType(type);
 }
 
-void Context::add_register_to_set(std::string reg_name){
+void Context::add_reg_to_set(std::string reg_name){
     int reg = reg_manager.get_register_id(reg_name);
     allocated_registers.top().insert(reg);
 }
 
-void Context::remove_register_from_set(std::string reg_name){
+void Context::remove_reg_from_set(std::string reg_name){
     int reg = reg_manager.get_register_id(reg_name);
     allocated_registers.top().erase(reg);
 }

@@ -14,11 +14,11 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
     if (!specifier) {
         throw std::runtime_error("Declaration::EmitRISC: Invalid type specifier");
     }
-    specifier->DefineSpecifier(context);
+    specifier->define_spec(context);
 
     const StructSpecifier *struct_specifier = dynamic_cast<const StructSpecifier *>(type_specifier_.get());
     if(struct_specifier){
-        struct_specifier->DefineSpecifier(context);
+        struct_specifier->define_spec(context);
     }
 
     if (declarator_list_ == nullptr)
@@ -44,7 +44,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
 
         if (assignment != nullptr)
         {
-            assignment->DeclareLocalScope(type, offset, stream, context);
+            assignment->local_init(type, offset, stream, context);
         }
         else if (identifier != nullptr)
         {
@@ -77,7 +77,7 @@ void Declaration::EmitRISC(std::ostream &stream, Context &context, std::string d
             std::string variable_name = pointer_declaration->GetId();
 
             // Add variable to bindings
-            int dereference_num = pointer_declaration->GetDereference();
+            int dereference_num = pointer_declaration->get_deref();
             Variable variable(true, false, type, offset, dereference_num);
             context.define_variable(variable_name, variable);
         }
@@ -100,19 +100,19 @@ void Declaration::Print(std::ostream &stream) const
     stream << ";" << std::endl;
 }
 
-int Declaration::GetOffset(Context &context) const
+int Declaration::get_offset(Context &context) const
 {
     (void)context;
 
-    std::cout << "Entering Declaration::GetOffset()" << std::endl;
-    std::cout << "Declaration::GetOffset: type_specifier_ = " << type_specifier_.get() << std::endl;
-    std::cout << "Declaration::GetOffset: declarator_list_ = " << declarator_list_.get() << std::endl;
+    std::cout << "Entering Declaration::get_offset()" << std::endl;
+    std::cout << "Declaration::get_offset: type_specifier_ = " << type_specifier_.get() << std::endl;
+    std::cout << "Declaration::get_offset: declarator_list_ = " << declarator_list_.get() << std::endl;
     if (!type_specifier_) {
-        throw std::runtime_error("Declaration::GetOffset: type_specifier_ is null");
+        throw std::runtime_error("Declaration::get_offset: type_specifier_ is null");
     }
     const Specifier *type_specifier = dynamic_cast<const Specifier*>(type_specifier_.get());
     if (!type_specifier) {
-        throw std::runtime_error("Declaration::GetOffset: Invalid type specifier");
+        throw std::runtime_error("Declaration::get_offset: Invalid type specifier");
     }
     Type type = type_specifier->GetType();
     int type_size = types_size.at(type);
@@ -175,7 +175,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
     if (!specifier) {
         throw std::runtime_error("Declaration::DeclareGlobal: Invalid type specifier");
     }
-    specifier->DefineSpecifier(context);
+    specifier->define_spec(context);
 
     if (declarator_list_ == nullptr)
     {
@@ -201,11 +201,11 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
             bool is_array = assignment->isArrayInitialization();
             bool is_pointer = assignment->isPointerInitialization();
-            int dereference_num = assignment->GetDereference();
+            int dereference_num = assignment->get_deref();
 
             std::string global_name = assignment->GetId();
             Global global(is_pointer, is_array, array_size, type, dereference_num);
-            assignment->InitializeGlobals(stream, context, global);
+            assignment->global_init(stream, context, global);
             context.define_global(global_name, global);
         }
 
@@ -227,7 +227,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
             }
 
             std::string global_name = array_declaration->GetId();
-            int dereference_num = array_declaration->GetDereference();
+            int dereference_num = array_declaration->get_deref();
             Global global(false, true, array_size, type, dereference_num);
             context.define_global(global_name, global);
         }
@@ -235,7 +235,7 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
         {
             std::string global_name = pointer_declaration->GetId();
 
-            int dereference_num = pointer_declaration->GetDereference();
+            int dereference_num = pointer_declaration->get_deref();
             Global global(true, false, type, dereference_num);
             context.define_global(global_name, global);
         }
@@ -246,9 +246,9 @@ void Declaration::DeclareGlobal(std::ostream &stream, Context &context, std::str
 
             // Define function return value and parameters
             bool return_is_pointer = declarator->isPointer();
-            int dereference_num = declarator->GetDereference();
+            int dereference_num = declarator->get_deref();
             ReturnValue return_value = ReturnValue(return_is_pointer, false, type, dereference_num);
-            std::vector<Parameter> arguments = declarator->GetParameters(context);
+            std::vector<Parameter> arguments = declarator->get_param(context);
 
             Function function = Function(return_value, arguments);
             context.define_function(function_name, function);

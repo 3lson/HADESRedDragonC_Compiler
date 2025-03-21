@@ -39,7 +39,7 @@ void SizeOf::EmitRISC(std::ostream &stream, Context &context, std::string dest_r
 
     if (constant_expression_)
     {
-        size *= dynamic_cast<const IntConstant *>(constant_expression_.get())->GetValue();
+        size *= dynamic_cast<const IntConstant *>(constant_expression_.get())->get_val();
     }
 
     stream << "li " <<dest_reg << ", " << size << std::endl;

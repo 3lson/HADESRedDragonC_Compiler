@@ -14,7 +14,7 @@ void CompoundStatement::EmitRISC(std::ostream &stream, Context &context, std::st
     context.pop_scope();
 }
 
-int CompoundStatement::GetOffset(Context &context) const
+int CompoundStatement::get_offset(Context &context) const
 {
     int offset = 0;
     for (const auto& node : get_nodes())
@@ -24,7 +24,7 @@ int CompoundStatement::GetOffset(Context &context) const
         }
         const Statement *statement = dynamic_cast<const Statement *>(node.get());
         if (statement){
-            offset += statement->GetOffset(context);
+            offset += statement->get_offset(context);
         }
         else {
 
@@ -106,15 +106,15 @@ void StatementList::EmitRISC(std::ostream &stream, Context &context, std::string
 
 }
 
-int StatementList::GetOffset(Context &context) const
+int StatementList::get_offset(Context &context) const
 {
     (void)context;
     return 0;
 }
 
-int DeclarationList::GetOffset(Context &context) const
+int DeclarationList::get_offset(Context &context) const
 {
-    std::cout << "Entering DeclarationList::GetOffset" <<std::endl;
+    std::cout << "Entering DeclarationList::get_offset" <<std::endl;
     int offset = 0;
     for (const auto& node : get_nodes())
     {
@@ -124,7 +124,7 @@ int DeclarationList::GetOffset(Context &context) const
         }
 
         std::cout << "Processing a declaration..." << std::endl;
-        offset += declaration->GetOffset(context);
+        offset += declaration->get_offset(context);
 
         if (offset % 4 !=0){
             offset += 4 - (offset % 4);

@@ -33,7 +33,7 @@ void Typedef::DefineTypedef(NodeList *aliases)
         if (array_declaration != nullptr)
         {
             alias_name = array_declaration->GetId();
-            pointer += array_declaration->GetDereference();
+            pointer += array_declaration->get_deref();
             array_size = array_declaration->GetArraySize();
         }
         else if (identifier != nullptr)
@@ -41,7 +41,7 @@ void Typedef::DefineTypedef(NodeList *aliases)
             alias_name = identifier->GetId();
         }
         else if( pointer_declaration != nullptr){
-            pointer += pointer_declaration->GetDereference();
+            pointer += pointer_declaration->get_deref();
             alias_name = pointer_declaration->GetId();
         }
         else if (address_of != nullptr){

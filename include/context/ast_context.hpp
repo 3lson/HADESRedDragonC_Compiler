@@ -88,8 +88,8 @@ public:
     void allocate_register(std::string reg_name, Type type) { reg_manager.allocate_register(reg_name, type); }
     void deallocate_register(const std::string &reg_name) { reg_manager.deallocate_register(reg_name); }
 
-    void add_register_to_set(std::string reg_name);
-    void remove_register_from_set(std::string reg_name);
+    void add_reg_to_set(std::string reg_name);
+    void remove_reg_from_set(std::string reg_name);
 
     void push_registers(std::ostream &stream);
     void pop_registers(std::ostream &stream);
@@ -144,7 +144,7 @@ public:
     // --------- Constant Management ---------
     int registerConstant(float value);
     int registerConstant(double value);
-    void outputConstantDeclaration(std::ostream &stream) const;
+    void constDecl(std::ostream &stream) const;
 
     // -------- Global Management -------
     void define_global(std::string name, Global &global);

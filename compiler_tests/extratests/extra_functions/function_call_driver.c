@@ -3,5 +3,5 @@ int g();
 int main()
 {
 
-    return !(g() == 10);
+    return !(g() == 11);
 }

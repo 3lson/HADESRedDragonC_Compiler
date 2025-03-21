@@ -22,10 +22,10 @@ public:
     void Print(std::ostream &stream) const override;
 
     std::string GetId() const override;
-    std::vector<Parameter>GetParameters(Context &context) const override;
-    int GetDereference() const override;
-    int GetOffset() const override;
-    void StoreParameters (std::ostream &stream, Context &context, std::string dest_reg) const override;
+    std::vector<Parameter>get_param(Context &context) const override;
+    int get_deref() const override;
+    int get_offset() const override;
+    void store_param (std::ostream &stream, Context &context, std::string dest_reg) const override;
     bool isPointer() const override;
 };
 

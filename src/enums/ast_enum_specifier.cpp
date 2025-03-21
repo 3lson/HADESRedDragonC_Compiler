@@ -6,7 +6,7 @@ Type EnumeratorSpecifier::GetType() const
     return Type::_INT;
 }
 
-void EnumeratorSpecifier::DefineSpecifier(Context &context) const
+void EnumeratorSpecifier::define_spec(Context &context) const
 {
     if (enumerator_list_ != nullptr)
     {
@@ -19,7 +19,7 @@ void EnumeratorSpecifier::DefineSpecifier(Context &context) const
             if (!enumerator_){
                 throw std::runtime_error("Node in enumerator_list_ is not an Enumerator");
             }
-            enum_value = enumerator_->DefineEnumerator(context, enum_value);
+            enum_value = enumerator_->define_enumerator(context, enum_value);
             labels.push_back(enumerator_->GetLabel());
         }
 

@@ -5,5 +5,5 @@ int f()
 
 int g()
 {
-    return 5 + f();
+    return 6 + f();
 }

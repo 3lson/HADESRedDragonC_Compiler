@@ -27,7 +27,7 @@ void Dereference::EmitRISC(std::ostream& stream, Context& context, std::string d
     std::string address_register = context.get_register(Type::_INT);
     StartingOffset(stream, context, address_register);
 
-    DereferencePath(stream, context, address_register);
+    deref_route(stream, context, address_register);
     stream << context.load_instr(type) << " " << dest_reg << ", 0(" << address_register << ")" << std::endl;
 
     context.deallocate_register(address_register);
@@ -77,7 +77,7 @@ int Dereference::dereferenceCount() const
 }
 
 
-void Dereference::DereferencePath(std::ostream &stream, Context &context, std::string address_reg) const
+void Dereference::deref_route(std::ostream &stream, Context &context, std::string address_reg) const
 {
     std::string variable_identifier = GetId();
 
@@ -85,7 +85,7 @@ void Dereference::DereferencePath(std::ostream &stream, Context &context, std::s
 
     if (dereference != nullptr)
     {
-        dereference->DereferencePath(stream, context, address_reg);
+        dereference->deref_route(stream, context, address_reg);
     }
 
     stream << context.load_instr(Type::_INT) << " " << address_reg << ", 0(" << address_reg << ")" << std::endl;
@@ -113,7 +113,7 @@ void Dereference::StartingOffset(std::ostream &stream, Context &context, std::st
     if (array_index_access != nullptr)
     {
         std::string index_reg = context.get_register(Type::_INT);
-        array_index_access->GetIndex(stream, context, address_reg, type);
+        array_index_access->get_position(stream, context, address_reg, type);
         stream << "add " << address_reg << ", " << address_reg << ", " << index_reg << std::endl;
         context.deallocate_register(index_reg);
     }

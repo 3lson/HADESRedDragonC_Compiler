@@ -17,6 +17,7 @@ public:
 };
 
 const std::unordered_map<char, char> escape_sequences_map = {
+    //Can add more if have time
     {'n', '\n'},   // Newline
     {'t', '\t'},   // Horizontal tab
     {'\\', '\\'},  // Backslash
