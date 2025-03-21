@@ -22,7 +22,7 @@ public:
     void Print(std::ostream &stream) const override;
     std::string GetId() const;
     std::string GetStructName() const;
-    Type GetType() const;
+    Type GetType(Context &context) const;
     int GetOffset(Context &context) const;
 
 

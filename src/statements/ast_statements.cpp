@@ -120,7 +120,6 @@ int DeclarationList::GetOffset(Context &context) const
     {
         const Declaration *declaration = dynamic_cast<const Declaration *>(node.get());
         if (!declaration) {
-            std::cerr << "DeclarationList::GetOffset: Encountered null declaration!" << std::endl;
             continue; // Skip null entries
         }
 

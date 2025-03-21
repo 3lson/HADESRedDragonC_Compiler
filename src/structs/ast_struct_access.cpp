@@ -20,9 +20,10 @@ void StructAccess::EmitRISC(std::ostream &stream, Context &context, std::string 
 
     int total_offset = GetOffset(context);
     std::cout << "Total offset: " << total_offset << std::endl;
+    Type type = GetType(context);
 
     // Load the member value
-    stream << "lw " << dest_reg << ", " << total_offset << "(s0)" << std::endl;
+    stream << context.load_instr(type) << " " << dest_reg << ", " << total_offset << "(s0)" << std::endl;
 }
 
 void StructAccess::Print(std::ostream &stream) const{
@@ -30,8 +31,27 @@ void StructAccess::Print(std::ostream &stream) const{
     stream << "." << *member_name_;
 }
 
-Type StructAccess::GetType() const{
-    return Type::_INT; //Assuming member is of type int for now
+Type StructAccess::GetType(Context &context) const{
+    const Identifier* struct_identifier = dynamic_cast<const Identifier *>(struct_name_.get());
+    if (struct_identifier){
+        std::string struct_var_name = struct_identifier->GetId();
+        Variable struct_var;
+        try {
+            struct_var = context.get_variable(struct_var_name);
+        } catch (const std::runtime_error& e) {
+            throw std::runtime_error("StructAccess::GetOffset - Struct variable '" + struct_var_name + "' not found.");
+        }
+
+        std::unordered_map<std::string, Type> members = context.get_struct_members(struct_var.get_type_name());
+        if (members.find(*member_name_) == members.end()) {
+            throw std::runtime_error("StructAccess::GetOffset - Member '" + *member_name_ + "' not found in struct.");
+        }
+
+        Type member_type = members[*member_name_];
+        return member_type;
+    }else {
+        return Type::_INT; //Default
+    }
 }
 
 std::string StructAccess::GetId() const{

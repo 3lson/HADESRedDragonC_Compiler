@@ -57,21 +57,19 @@ void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::stri
     right_->EmitRISC(stream, context, right_register);
     ShiftPointerOp(stream, context, right_register, right_);
 
-    //for struct access
+    // Handle struct access (as per your existing logic)
     const StructAccess* leftStructAccess = dynamic_cast<const StructAccess*>(left_.get());
     const StructAccess* rightStructAccess = dynamic_cast<const StructAccess*>(right_.get());
 
     if (leftStructAccess) {
-        // Load the value of the struct member into left_register
         leftStructAccess->EmitRISC(stream, context, left_register);
     }
 
     if (rightStructAccess) {
-        // Load the value of the struct member into right_register
         rightStructAccess->EmitRISC(stream, context, right_register);
     }
 
-    //Not working yet for mixed operations
+    // Handle integer to floating-point conversion
     const Operand* left_operand = dynamic_cast<const Operand*>(left_.get());
     const Operand* right_operand = dynamic_cast<const Operand*>(right_.get());
 
@@ -79,19 +77,24 @@ void ArithExpression::EmitRISC(std::ostream &stream, Context &context, std::stri
         Type left_type = left_operand->GetType(context);
         Type right_type = right_operand->GetType(context);
 
-        if (left_type == Type::_FLOAT && right_type != Type::_FLOAT) {
+        // If left operand is an integer and right operand is a double, we convert the left operand (int) to a double
+        if (left_type == Type::_INT && right_type == Type::_DOUBLE) {
             std::string temp_reg = context.get_register(Type::_FLOAT);
-            stream << "fcvt.s.w " << temp_reg << ", " << right_register << std::endl;
-            right_register = temp_reg;
-        } else if (right_type == Type::_FLOAT && left_type != Type::_FLOAT) {
-            std::string temp_reg = context.get_register(Type::_FLOAT);
-            stream << "fcvt.s.w " << temp_reg << ", " << left_register << std::endl;
+            stream << "fcvt.d.w " << temp_reg << ", " << left_register << std::endl;
             left_register = temp_reg;
+        }
+        // If right operand is an integer and left operand is a double, we convert the right operand (int) to a double
+        else if (right_type == Type::_INT && left_type == Type::_DOUBLE) {
+            std::string temp_reg = context.get_register(Type::_FLOAT);
+            stream << "fcvt.d.w " << temp_reg << ", " << right_register << std::endl;
+            right_register = temp_reg;
         }
     }
 
+    // Emit the final operation, adding the two operands
     stream << GetOperation(type) << " " << dest_reg << ", " << left_register << ", " << right_register << std::endl;
 
+    // Clean up the registers
     context.deallocate_register(right_register);
     context.deallocate_register(left_register);
     context.remove_register_from_set(left_register);
@@ -126,7 +129,7 @@ Type ArithExpression::GetType(Context &context) const {
         leftType = leftOperand->GetType(context);
     } else if (leftStructAccess) {
         // Handle StructAccess by determining the type of the struct member
-        leftType = leftStructAccess->GetType(); // Assuming StructAccess has a GetType method
+        leftType = leftStructAccess->GetType(context); // Assuming StructAccess has a GetType method
     } else {
         throw std::runtime_error("Invalid left operand type: " + std::string(typeid(*left_).name()));
     }
@@ -140,7 +143,7 @@ Type ArithExpression::GetType(Context &context) const {
         rightType = rightOperand->GetType(context);
     } else if (rightStructAccess) {
         // Handle StructAccess by determining the type of the struct member
-        rightType = rightStructAccess->GetType(); // Assuming StructAccess has a GetType method
+        rightType = rightStructAccess->GetType(context); // Assuming StructAccess has a GetType method
     } else {
         throw std::runtime_error("Invalid right operand type: " + std::string(typeid(*right_).name()));
     }

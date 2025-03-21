@@ -52,7 +52,6 @@
 #include "structs/ast_struct_declaration.hpp"
 #include "structs/ast_struct_access.hpp"
 #include "structs/ast_struct_member.hpp"
-#include "structs/ast_struct_declarator_list.hpp"
 
 #include "pointers/ast_pointer_declaration.hpp"
 #include "pointers/ast_addressof.hpp"

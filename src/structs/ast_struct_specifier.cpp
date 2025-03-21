@@ -5,8 +5,9 @@ namespace ast{
 void StructSpecifier::DefineSpecifier(Context& context) const{
     std::cout << "Defining struct: " <<*identifier_ <<std::endl;
     std::unordered_map<std::string, Type> structMembers;
-    std::unordered_map<std::string, int> structOffsets;
-    int offset = 0;
+    int total_size = 0;
+    Type struct_type = context.get_or_create_struct_type(*identifier_);
+    std::cout << "The CUSTOM_STRUCT type "<<static_cast<int>(struct_type) << std::endl;
     for (const auto& node : struct_declaration_list_->get_nodes()){
         if (!node){
             continue;
@@ -17,15 +18,16 @@ void StructSpecifier::DefineSpecifier(Context& context) const{
             Type memberType = member->GetType();
             structMembers[memberName] = memberType;
 
-            structOffsets[memberName] = offset;
             int memberSize = types_size.at(memberType);
-            offset += memberSize;
+            total_size += memberSize;
+
             std::cout << "Added Struct Member: " << memberName
             << " with type: " << static_cast<int>(memberType)
-            <<  " and offset: " <<structOffsets[memberName]  << std::endl;
+            << " size: " << memberSize << std::endl;
         }
     }
-    context.struct_init(*identifier_, structMembers, structOffsets);
+    context.struct_init(*identifier_, structMembers);
+    std::cout << "For this type the size: " <<context.get_struct_size(struct_type) << std::endl;
 }
 
 void StructSpecifier::EmitRISC(std::ostream &stream, Context& context, std::string dest_reg) const{

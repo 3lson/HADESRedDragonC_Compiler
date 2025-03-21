@@ -12,6 +12,7 @@ enum class Type
     _FLOAT,
     _DOUBLE,
     _STRUCT,
+    _CUSTOM_STRUCT,
 };
 
 //Defined in context.cpp now for universal use

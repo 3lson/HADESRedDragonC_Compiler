@@ -7,14 +7,16 @@ void Assignment::EmitRISC(std::ostream &stream, Context &context, std::string de
     const StructAccess * struct_access = dynamic_cast<const StructAccess*>(unary_expression_.get());
     if (struct_access) {
         std::cout << "Entering Assignment::EmitRISC for struct access" << std::endl;
+        Type type = struct_access->GetType(context);
+        std::cout << "The struct_access type: " << static_cast<int>(type) << std::endl;
 
         // Evaluate right-hand side first
-        std::string value_reg = context.get_register(Type::_INT);  // Assuming int type for struct members
+        std::string value_reg = context.get_register(type);
         expression_->EmitRISC(stream, context, value_reg);
 
         int offset = struct_access->GetOffset(context);
         // Store the value into the struct member
-        stream << "sw " << value_reg << ", " << offset << "(s0)" << std::endl;
+        stream << context.store_instr(type) << " " << value_reg << ", " << offset << "(s0)" << std::endl;
 
         context.deallocate_register(value_reg);
         return;

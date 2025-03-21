@@ -7,22 +7,16 @@ void StructDeclaration::EmitRISC(std::ostream& stream, Context& context, std::st
     (void)dest_reg;
     std::cout << "Declaring struct variable: " << *variable_name_ << std::endl;
     std::cout << "Passing in struct type: " << *struct_type_ << std::endl;
-    std::unordered_map<std::string, Type> members = context.get_struct_members(*struct_type_);
-    int size =0;
-    for (const auto& member: members){
-        if (member.first.find("_offset") == std::string::npos){
-            size += types_size.at(member.second);
-        }
-    }
 
+    Type structType = context.get_or_create_struct_type(*struct_type_);
+    int size = context.get_struct_size(structType);
     int offset = context.get_stack_offset();
     context.increase_stack_offset(size);
 
     Variable variable(false, false, size, Type::_STRUCT, offset, 0, *struct_type_);
     context.define_variable(*variable_name_, variable);
-    std::cout << "Allocated " << size << " bytes on the stack for struct variable " << *variable_name_ << std::endl;
-    context.set_struct_size(*variable_name_, size);
 
+    std::cout << "Allocated " << size << " bytes on the stack for struct variable " << *variable_name_ << std::endl;
 }
 
 void StructDeclaration::Print(std::ostream& stream) const {

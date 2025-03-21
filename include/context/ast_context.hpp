@@ -71,7 +71,9 @@ private:
     // ------ Struct Management -------
     std::unordered_map<std::string, std::unordered_map<std::string, Type>>structMap;
     std::unordered_map<std::string, std::unordered_map<std::string, int>>structOffsetMap;
-    std::unordered_map<std::string, int>structSizes;
+    std::unordered_map<std::string, Type> struct_type_map_;
+    std::unordered_map<Type, int> struct_size_map_;
+    std::unordered_map<std::string, int> structSizes;
 
 public:
     Context();
@@ -169,12 +171,13 @@ public:
     void print_string(std::ostream &stream) const;
 
     // ------ Struct Management ------------
-    void struct_init(std::string identifier, std::unordered_map<std::string, Type>structMembers, std::unordered_map<std::string, int> structOffsets);
-    std::unordered_map<std::string, Type> get_struct_members(std::string identifier) const;
+    void struct_init(const std::string& identifier, const std::unordered_map<std::string, Type>& structMembers);
+    std::unordered_map<std::string, Type> get_struct_members(const std::string& identifier) const;
     bool is_struct(const std::string& identifier);
-    std::unordered_map<std::string, int> get_struct_offsets(std::string identifier) const;
-    void set_struct_size(std::string identifier, int size);
-    int get_struct_size(const std::string& identifier) const;
+    std::unordered_map<std::string, int> get_struct_offsets(const std::string& identifier) const;
+    Type get_or_create_struct_type(const std::string& struct_name);
+    void set_struct_size(Type struct_type, int size);
+    int get_struct_size(Type struct_type) const;
 };
 
 extern Context context;

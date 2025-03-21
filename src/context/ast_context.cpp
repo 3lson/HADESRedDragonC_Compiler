@@ -13,6 +13,7 @@ const std::unordered_map<Type, int> types_size = {
     {Type::_LONG, 8},
     {Type::_FLOAT, 4},
     {Type::_DOUBLE, 8},
+    {Type::_CUSTOM_STRUCT, 8},
 };
 
 const std::unordered_map<Type, std::string> assembler_directives = {

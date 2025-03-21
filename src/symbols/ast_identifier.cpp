@@ -43,10 +43,27 @@ std::string Identifier::GetId() const
 
 Type Identifier::GetType(Context &context) const
 {
+    std::cout << "In Identifier::GetType()" << std::endl;
     if (context.is_enum(identifier_)){
         return Type::_INT;
     }
-    return context.get_variable(identifier_).get_type();
+    if (context.is_struct(identifier_)){
+        std::cout << "Taken the struct route at the type " << std::endl;
+        Type type =  context.get_or_create_struct_type(identifier_);
+        std::cout << "This is the type returned " << static_cast<int>(type) << std::endl;
+        return type;
+    }
+    // Fetch variable type instead of checking structMap
+    const Variable& variable = context.get_variable(identifier_);
+    Type type = variable.get_type();
+
+    // If the variable is a struct, return its struct type from the type map
+    if (type == Type::_STRUCT) {
+        std::cout << "Variable " << identifier_ << " is a struct of type: " << variable.get_type_name() << std::endl;
+        return context.get_or_create_struct_type(variable.get_type_name());
+    }
+
+    return type;
 }
 
 int Identifier::GetValue(Context &context) const{
