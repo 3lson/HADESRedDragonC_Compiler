@@ -1,8 +1,6 @@
 # HADESRedDragonC_Compiler
 
-**Please Note:** Full implementation is available on the **restructure** branch
-
-The source language is pre-processed C90, and the target language is RISC-V assembly. The target environment is Ubuntu 22.04
+HADESRedDragonC_Compiler is a **C90-to-RISC-V compiler** developed as part of the Instruction Architecture and Compilers coursework at Imperial College London. It compiles pre-processed C90 source code into RISC-V assembly targeting Ubuntu 22.04, focusing on correctness, portability, and alignment with the RISC-V calling conventions and ABI. 
 
 ## Getting Started
 
